@@ -1,151 +1,398 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
-    <title>Остров Маласа 3D</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Остров Маласа 3D Mobile</title>
     <style>
-        body { margin: 0; padding: 0; background: #000; overflow: hidden; }
-        canvas { display: block; margin: 0 auto; background: #111; }
-        #info {
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Arial', sans-serif;
+            touch-action: none;
+        }
+
+        .game-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            max-height: 800px;
+            background: #111;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 0 30px #0f0;
+        }
+
+        canvas {
+            width: 100%;
+            height: 70%;
+            display: block;
+            background: #222;
+            touch-action: none;
+        }
+
+        .controls {
+            height: 30%;
+            background: #1a2f3f;
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            gap: 10px;
+            border-top: 3px solid #0f0;
+        }
+
+        .move-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 60%;
+        }
+
+        .move-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            width: 60%;
+        }
+
+        .move-btn {
+            aspect-ratio: 1;
+            background: #2d5a3e;
+            border: 2px solid #c49a6c;
+            border-radius: 15px;
+            color: white;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 0 #1a2f1a;
+            transition: 0.05s;
+        }
+
+        .move-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 35%;
+        }
+
+        .action-btn {
+            background: #8b5a2b;
+            border: 2px solid #c49a6c;
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 15px 0;
+            text-align: center;
+            box-shadow: 0 5px 0 #4a2e1e;
+        }
+
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .rotate-panel {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            height: 30%;
+        }
+
+        .rotate-btn {
+            width: 80px;
+            background: #2d5a3e;
+            border: 2px solid #c49a6c;
+            border-radius: 30px;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 0 #1a2f1a;
+        }
+
+        .rotate-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .hud {
             position: absolute;
             top: 10px;
             left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
             color: white;
-            font-family: monospace;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
+            text-shadow: 2px 2px 0 #000;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.5);
+            padding: 8px;
+            border-radius: 20px;
+            backdrop-filter: blur(5px);
             z-index: 100;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
     </style>
 </head>
 <body>
-    <div id="info">
-        🫎 Бульдозеры: <span id="enemyCount">3</span> | 
-        🛡️ Щит: <span id="shieldStatus">Нет</span> | 
-        🏃 Драго должен: ∞
+    <div class="game-wrapper">
+        <canvas id="gameCanvas"></canvas>
+        
+        <div class="hud">
+            <div class="hud-item">❤️ <span id="healthValue">100</span></div>
+            <div class="hud-item">🛡️ <span id="shieldValue">Нет</span></div>
+            <div class="hud-item">🫎 <span id="enemyValue">0</span></div>
+            <div class="hud-item">💰 ∞</div>
+        </div>
+
+        <div class="controls">
+            <div class="move-panel">
+                <div class="move-buttons">
+                    <div></div>
+                    <div class="move-btn" id="moveUp">⬆️</div>
+                    <div></div>
+                    <div class="move-btn" id="moveLeft">⬅️</div>
+                    <div class="move-btn" id="moveDown">⬇️</div>
+                    <div class="move-btn" id="moveRight">➡️</div>
+                </div>
+                <div class="action-buttons">
+                    <div class="action-btn" id="actionShield">🛡️ ЩИТ</div>
+                    <div class="action-btn" id="actionGossip">🗣️ СПЛЕТНИ</div>
+                </div>
+            </div>
+            <div class="rotate-panel">
+                <div class="rotate-btn" id="rotateLeft">◀️</div>
+                <div class="rotate-btn" id="rotateRight">▶️</div>
+            </div>
+        </div>
     </div>
-    <canvas id="canvas" width="800" height="600"></canvas>
 
     <script>
-        const canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
+        
+        // Адаптивный размер
+        function resizeCanvas() {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
 
-        // Карта мира (1 = стена, 2 = бульдозер, 3 = клокер, 4 = медведь, 5 = щит)
+        // ===== КАРТА =====
         const map = [
-            [1,1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,0,0,0,0,0,1],
-            [1,0,2,0,0,3,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,4,0,1],
-            [1,0,0,0,5,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1,1]
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,2,0,0,0,3,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,5,0,0,0,0,0,0,2,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,3,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
-        // Игрок
+        // ===== ИГРОК =====
         let player = {
-            x: 1.5,
-            y: 1.5,
+            x: 2,
+            y: 2,
             angle: 0,
             health: 100,
-            shield: false
+            shield: false,
+            gossipTimer: 0
         };
 
-        // Враги (бульдозеры, клокеры)
-        let enemies = [
-            { x: 3, y: 2, type: '🫎', health: 50, active: true },
-            { x: 5, y: 3, type: '⚡', health: 30, active: true },
-            { x: 7, y: 4, type: '🫎', health: 50, active: true },
-            { x: 4, y: 5, type: '🐻', health: 100, active: true, friendly: true }
+        // ===== ВРАГИ И ПРЕДМЕТЫ =====
+        let entities = [
+            { x: 4, y: 2, type: 'bulldozer', health: 50, active: true },
+            { x: 7, y: 2, type: 'cloaker', health: 30, active: true },
+            { x: 12, y: 4, type: 'bulldozer', health: 50, active: true },
+            { x: 4, y: 6, type: 'cloaker', health: 30, active: true },
+            { x: 13, y: 7, type: 'bear', health: 100, active: true, friendly: true },
+            { x: 5, y: 4, type: 'shield', collected: false }
         ];
 
-        // Предметы
-        let items = [
-            { x: 5, y: 5, type: '🛡️', collected: false }
-        ];
-
-        // Настройки 3D
+        // ===== НАСТРОЙКИ =====
         const fov = 60 * Math.PI / 180;
-        const screenWidth = 800;
-        const screenHeight = 600;
-        const rayCount = 120;
+        const rayCount = 60;
 
-        // Управление
-        const keys = { w: false, a: false, s: false, d: false };
+        // ===== УПРАВЛЕНИЕ =====
+        let moveForward = false;
+        let moveBack = false;
+        let moveLeft = false;
+        let moveRight = false;
+        let rotateLeft = false;
+        let rotateRight = false;
 
-        document.addEventListener('keydown', (e) => {
-            const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-                keys[k] = true;
-                e.preventDefault();
+        // Кнопки
+        document.getElementById('moveUp').addEventListener('touchstart', (e) => { e.preventDefault(); moveForward = true; });
+        document.getElementById('moveUp').addEventListener('touchend', (e) => { e.preventDefault(); moveForward = false; });
+        document.getElementById('moveDown').addEventListener('touchstart', (e) => { e.preventDefault(); moveBack = true; });
+        document.getElementById('moveDown').addEventListener('touchend', (e) => { e.preventDefault(); moveBack = false; });
+        document.getElementById('moveLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft = true; });
+        document.getElementById('moveLeft').addEventListener('touchend', (e) => { e.preventDefault(); moveLeft = false; });
+        document.getElementById('moveRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight = true; });
+        document.getElementById('moveRight').addEventListener('touchend', (e) => { e.preventDefault(); moveRight = false; });
+        document.getElementById('rotateLeft').addEventListener('touchstart', (e) => { e.preventDefault(); rotateLeft = true; });
+        document.getElementById('rotateLeft').addEventListener('touchend', (e) => { e.preventDefault(); rotateLeft = false; });
+        document.getElementById('rotateRight').addEventListener('touchstart', (e) => { e.preventDefault(); rotateRight = true; });
+        document.getElementById('rotateRight').addEventListener('touchend', (e) => { e.preventDefault(); rotateRight = false; });
+
+        document.getElementById('actionShield').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (player.shield) {
+                player.shield = false;
+            } else {
+                // Проверяем, есть ли щит в инвентаре
+                entities.forEach(e => {
+                    if (e.type === 'shield' && e.collected) {
+                        player.shield = true;
+                    }
+                });
             }
+            updateHUD();
         });
 
-        document.addEventListener('keyup', (e) => {
-            const k = e.key.toLowerCase();
-            if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-                keys[k] = false;
-                e.preventDefault();
-            }
+        document.getElementById('actionGossip').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            player.gossipTimer = 100; // 2 секунды
+            entities.forEach(e => {
+                if (e.type === 'bulldozer' || e.type === 'cloaker') {
+                    e.distracted = true;
+                    e.targetX = Math.random() * 15;
+                    e.targetY = Math.random() * 8;
+                }
+            });
         });
 
-        // Движение
+        // ===== ДВИЖЕНИЕ =====
         function movePlayer() {
             let moveSpeed = 0.1;
             let rotSpeed = 0.05;
 
-            if (keys.w) {
-                let nx = player.x + Math.cos(player.angle) * moveSpeed;
-                let ny = player.y + Math.sin(player.angle) * moveSpeed;
-                if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
-                    player.x = nx;
-                    player.y = ny;
-                }
-            }
-            if (keys.s) {
-                let nx = player.x - Math.cos(player.angle) * moveSpeed;
-                let ny = player.y - Math.sin(player.angle) * moveSpeed;
-                if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
-                    player.x = nx;
-                    player.y = ny;
-                }
-            }
-            if (keys.a) player.angle -= rotSpeed;
-            if (keys.d) player.angle += rotSpeed;
+            if (rotateLeft) player.angle -= rotSpeed;
+            if (rotateRight) player.angle += rotSpeed;
 
-            // Проверка предметов
-            items.forEach(item => {
-                if (!item.collected) {
-                    let dist = Math.hypot(player.x - item.x, player.y - item.y);
+            if (moveForward) {
+                let newX = player.x + Math.cos(player.angle) * moveSpeed;
+                let newY = player.y + Math.sin(player.angle) * moveSpeed;
+                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
+                    player.x = newX;
+                    player.y = newY;
+                }
+            }
+            if (moveBack) {
+                let newX = player.x - Math.cos(player.angle) * moveSpeed;
+                let newY = player.y - Math.sin(player.angle) * moveSpeed;
+                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
+                    player.x = newX;
+                    player.y = newY;
+                }
+            }
+            if (moveLeft) {
+                let newX = player.x - Math.sin(player.angle) * moveSpeed;
+                let newY = player.y + Math.cos(player.angle) * moveSpeed;
+                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
+                    player.x = newX;
+                    player.y = newY;
+                }
+            }
+            if (moveRight) {
+                let newX = player.x + Math.sin(player.angle) * moveSpeed;
+                let newY = player.y - Math.cos(player.angle) * moveSpeed;
+                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
+                    player.x = newX;
+                    player.y = newY;
+                }
+            }
+
+            // Сплетни
+            if (player.gossipTimer > 0) {
+                player.gossipTimer--;
+            } else {
+                entities.forEach(e => { e.distracted = false; });
+            }
+
+            // Подбор щита
+            entities.forEach(e => {
+                if (e.type === 'shield' && !e.collected) {
+                    let dist = Math.hypot(player.x - e.x, player.y - e.y);
                     if (dist < 0.5) {
-                        if (item.type === '🛡️') {
-                            player.shield = true;
-                            document.getElementById('shieldStatus').innerText = 'Есть';
-                        }
-                        item.collected = true;
+                        e.collected = true;
+                        player.shield = true;
+                        updateHUD();
+                    }
+                }
+            });
+
+            // Атака врагов
+            entities.forEach(e => {
+                if (!e.active || e.friendly) return;
+                if (e.distracted) return;
+
+                let dist = Math.hypot(player.x - e.x, player.y - e.y);
+                if (dist < 0.5) {
+                    if (player.shield) {
+                        player.shield = false;
+                        e.active = false;
+                        updateHUD();
+                    } else {
+                        player.health -= 20;
+                        if (player.health < 0) player.health = 0;
+                        updateHUD();
                     }
                 }
             });
         }
 
-        // Рейкастинг
+        // ===== РЕЙКАСТИНГ =====
         function render3D() {
+            ctx.fillStyle = '#111';
+            ctx.fillRect(0, 0, canvas.width, canvas.height/2);
             ctx.fillStyle = '#333';
-            ctx.fillRect(0, 0, screenWidth, screenHeight);
+            ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+
+            let rayWidth = canvas.width / rayCount;
 
             for (let ray = 0; ray < rayCount; ray++) {
                 let rayAngle = player.angle - fov/2 + (ray / rayCount) * fov;
                 let distance = 0;
                 let hitWall = false;
-                let wallType = 0;
 
                 let rayX = player.x;
                 let rayY = player.y;
-                let stepX = Math.cos(rayAngle) * 0.1;
-                let stepY = Math.sin(rayAngle) * 0.1;
+                let stepX = Math.cos(rayAngle) * 0.05;
+                let stepY = Math.sin(rayAngle) * 0.05;
 
-                while (!hitWall && distance < 20) {
-                    distance += 0.1;
+                while (!hitWall && distance < 15) {
+                    distance += 0.05;
                     rayX += stepX;
                     rayY += stepY;
 
@@ -154,90 +401,78 @@
 
                     if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) {
                         hitWall = true;
-                        distance = 20;
+                        distance = 15;
                     } else if (map[mapY][mapX] === 1) {
                         hitWall = true;
-                        wallType = 1;
                     }
                 }
 
-                // Коррекция расстояния
                 let correctedDist = distance * Math.cos(rayAngle - player.angle);
-                let wallHeight = Math.min(screenHeight, screenHeight / correctedDist * 2);
+                let wallHeight = Math.min(canvas.height, canvas.height / correctedDist * 2);
 
-                let brightness = 255 / (1 + correctedDist * 0.5);
-                brightness = Math.min(255, brightness);
+                let brightness = Math.min(255, 255 / (1 + correctedDist * 0.3));
+                let x = ray * rayWidth;
 
-                let x = ray * (screenWidth / rayCount);
-                ctx.fillStyle = `rgb(${brightness}, ${brightness * 0.5}, ${brightness * 0.2})`;
-                ctx.fillRect(x, (screenHeight - wallHeight) / 2, screenWidth / rayCount + 1, wallHeight);
+                ctx.fillStyle = `rgb(${brightness}, ${brightness * 0.6}, 0)`;
+                ctx.fillRect(x, (canvas.height - wallHeight) / 2, rayWidth + 1, wallHeight);
             }
 
-            // Рисуем врагов (простые спрайты)
-            ctx.font = '40px Arial';
-            enemies.forEach(e => {
-                if (!e.active) return;
+            // Рисуем сущности
+            entities.forEach(e => {
+                if (!e.active && e.type !== 'shield') return;
+                if (e.type === 'shield' && e.collected) return;
 
                 let dx = e.x - player.x;
                 let dy = e.y - player.y;
                 let dist = Math.hypot(dx, dy);
-                let angleToEnemy = Math.atan2(dy, dx) - player.angle;
+                if (dist > 10) return;
 
-                while (angleToEnemy > Math.PI) angleToEnemy -= 2 * Math.PI;
-                while (angleToEnemy < -Math.PI) angleToEnemy += 2 * Math.PI;
+                let angleToEntity = Math.atan2(dy, dx) - player.angle;
+                while (angleToEntity > Math.PI) angleToEntity -= 2 * Math.PI;
+                while (angleToEntity < -Math.PI) angleToEntity += 2 * Math.PI;
 
-                if (Math.abs(angleToEnemy) < fov/2 && dist < 10) {
-                    let screenX = (0.5 + angleToEnemy / fov) * screenWidth;
-                    let size = Math.min(100, screenHeight / dist * 30);
+                if (Math.abs(angleToEntity) < fov/2) {
+                    let screenX = (0.5 + angleToEntity / fov) * canvas.width;
+                    let size = Math.min(150, canvas.height / dist * 30);
                     
-                    ctx.fillStyle = e.friendly ? '#0f0' : '#f00';
                     ctx.font = `${size}px Arial`;
-                    ctx.fillText(e.type, screenX - size/2, screenHeight/2 - size/2);
-                    
-                    // Здоровье врага
-                    ctx.font = '20px Arial';
-                    ctx.fillStyle = '#fff';
-                    ctx.fillText(e.health, screenX - 20, screenHeight/2 - size/2 - 20);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    if (e.type === 'bulldozer') {
+                        ctx.fillStyle = e.distracted ? '#ff0' : '#f00';
+                        ctx.fillText('🫎', screenX, canvas.height/2);
+                    } else if (e.type === 'cloaker') {
+                        ctx.fillStyle = e.distracted ? '#ff0' : '#0ff';
+                        ctx.fillText('⚡', screenX, canvas.height/2);
+                    } else if (e.type === 'bear') {
+                        ctx.fillStyle = '#0f0';
+                        ctx.fillText('🐻', screenX, canvas.height/2);
+                    } else if (e.type === 'shield') {
+                        ctx.fillStyle = '#ff0';
+                        ctx.fillText('🛡️', screenX, canvas.height/2);
+                    }
                 }
             });
-
-            // Рисуем предметы
-            items.forEach(item => {
-                if (item.collected) return;
-
-                let dx = item.x - player.x;
-                let dy = item.y - player.y;
-                let dist = Math.hypot(dx, dy);
-                let angleToItem = Math.atan2(dy, dx) - player.angle;
-
-                while (angleToItem > Math.PI) angleToItem -= 2 * Math.PI;
-                while (angleToItem < -Math.PI) angleToItem += 2 * Math.PI;
-
-                if (Math.abs(angleToItem) < fov/2 && dist < 5) {
-                    let screenX = (0.5 + angleToItem / fov) * screenWidth;
-                    let size = 40;
-                    ctx.font = `${size}px Arial`;
-                    ctx.fillStyle = '#ff0';
-                    ctx.fillText(item.type, screenX - size/2, screenHeight/2 - 50);
-                }
-            });
-
-            // HUD
-            ctx.font = '20px monospace';
-            ctx.fillStyle = '#fff';
-            ctx.fillText(`Здоровье: ${player.health}`, 10, 30);
-            ctx.fillText(`Угол: ${Math.floor(player.angle * 180 / Math.PI)}°`, 10, 60);
         }
 
-        // Обновление
-        function update() {
+        // ===== HUD =====
+        function updateHUD() {
+            document.getElementById('healthValue').innerText = player.health;
+            document.getElementById('shieldValue').innerText = player.shield ? 'Есть' : 'Нет';
+            let enemyCount = entities.filter(e => e.active && (e.type === 'bulldozer' || e.type === 'cloaker')).length;
+            document.getElementById('enemyValue').innerText = enemyCount;
+        }
+
+        // ===== ИГРОВОЙ ЦИКЛ =====
+        function gameLoop() {
             movePlayer();
             render3D();
-            document.getElementById('enemyCount').innerText = enemies.filter(e => e.active && e.type !== '🐻').length;
-            requestAnimationFrame(update);
+            updateHUD();
+            requestAnimationFrame(gameLoop);
         }
 
-        update();
+        gameLoop();
     </script>
 </body>
 </html>
