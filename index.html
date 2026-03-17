@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ПОБЕГ ИЗ РАБСТВА — Демо</title>
+    <title>ПОБЕГ ИЗ РАБСТВА — Рабочая версия</title>
     <style>
         * {
             margin: 0;
@@ -14,7 +14,7 @@
         }
 
         body {
-            background: #000;
+            background: #0a0f1a;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,17 +30,17 @@
             max-width: 1000px;
             height: 100vh;
             max-height: 800px;
-            background: #111;
+            background: #1a2f3f;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 0 30px #ffd70033;
+            box-shadow: 0 0 40px #ffaa0033;
         }
 
         canvas {
             width: 100%;
             height: 70%;
             display: block;
-            background: #222;
+            background: #2a3f4f;
             touch-action: none;
         }
 
@@ -52,21 +52,21 @@
             display: flex;
             justify-content: space-between;
             color: white;
-            text-shadow: 2px 2px 0 #000;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
-            background: rgba(0,0,0,0.6);
-            padding: 8px 15px;
-            border-radius: 40px;
+            background: rgba(0,0,0,0.7);
+            padding: 12px 20px;
+            border-radius: 50px;
             backdrop-filter: blur(5px);
             border: 2px solid #c49a6c;
             z-index: 100;
+            text-shadow: 2px 2px 0 #000;
         }
 
         .hud-item {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
         .controls {
@@ -74,22 +74,21 @@
             background: #1a2f3f;
             display: flex;
             flex-direction: column;
-            padding: 10px;
-            gap: 10px;
+            padding: 15px;
+            gap: 15px;
             border-top: 4px solid #c49a6c;
         }
 
         .move-panel {
             display: flex;
             justify-content: space-between;
-            align-items: center;
             height: 60%;
         }
 
         .move-buttons {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 10px;
             width: 60%;
         }
 
@@ -99,7 +98,7 @@
             border: 3px solid #c49a6c;
             border-radius: 20px;
             color: white;
-            font-size: 28px;
+            font-size: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -115,7 +114,7 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
             width: 35%;
         }
 
@@ -124,7 +123,7 @@
             border: 3px solid #c49a6c;
             border-radius: 30px;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             padding: 15px 0;
             text-align: center;
@@ -149,7 +148,7 @@
             border: 3px solid #c49a6c;
             border-radius: 40px;
             color: white;
-            font-size: 24px;
+            font-size: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -173,16 +172,14 @@
             justify-content: center;
             align-items: center;
             z-index: 1000;
-            backdrop-filter: blur(10px);
         }
 
         .menu-title {
             font-size: 64px;
             font-weight: bold;
             color: #ffd700;
-            text-shadow: 0 0 30px #ffaa00, 0 0 60px #ff5500;
+            text-shadow: 0 0 30px #ffaa00;
             margin-bottom: 20px;
-            animation: pulse 2s infinite;
             text-align: center;
         }
 
@@ -190,8 +187,6 @@
             font-size: 24px;
             color: #c49a6c;
             margin-bottom: 50px;
-            text-transform: uppercase;
-            letter-spacing: 5px;
         }
 
         .menu-buttons {
@@ -209,9 +204,8 @@
             border: 4px solid #c49a6c;
             border-radius: 60px;
             cursor: pointer;
-            font-weight: bold;
-            transition: 0.3s;
             text-align: center;
+            transition: 0.3s;
         }
 
         .menu-btn:hover {
@@ -259,7 +253,7 @@
         .enemy-icons {
             display: flex;
             justify-content: center;
-            gap: 30px;
+            gap: 40px;
             margin-bottom: 30px;
             font-size: 40px;
         }
@@ -318,12 +312,6 @@
             margin-bottom: 40px;
         }
 
-        .pause-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
         .pause-btn {
             padding: 15px;
             font-size: 20px;
@@ -331,28 +319,23 @@
             border-radius: 40px;
             cursor: pointer;
             color: white;
+            margin: 10px 0;
         }
 
         .hidden {
             display: none;
         }
 
-        @keyframes pulse {
-            0% { text-shadow: 0 0 30px #ffaa00; }
-            50% { text-shadow: 0 0 60px #ff5500; }
-            100% { text-shadow: 0 0 30px #ffaa00; }
-        }
-
         #subtitles {
             position: absolute;
-            bottom: 30%;
+            bottom: 32%;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0,0,0,0.8);
             color: white;
-            padding: 12px 24px;
-            border-radius: 40px;
-            font-size: 16px;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 18px;
             border: 2px solid #c49a6c;
             text-align: center;
             max-width: 90%;
@@ -364,22 +347,16 @@
 </head>
 <body>
     <div class="game-container">
-        <!-- Холст для 3D-игры -->
         <canvas id="gameCanvas"></canvas>
 
-        <!-- HUD (интерфейс) -->
         <div class="hud">
             <div class="hud-item">❤️ <span id="healthValue">100</span></div>
             <div class="hud-item">🛡️ <span id="shieldValue">Нет</span></div>
-            <div class="hud-item">🫎 <span id="enemyValue">0</span></div>
-            <div class="hud-item">💰 ∞</div>
-            <div class="hud-item">🔊 <span id="noiseValue">0%</span></div>
+            <div class="hud-item">🎯 <span id="objectiveValue">Найди выход</span></div>
         </div>
 
-        <!-- Субтитры -->
         <div id="subtitles"></div>
 
-        <!-- Мобильное управление -->
         <div class="controls">
             <div class="move-panel">
                 <div class="move-buttons">
@@ -392,7 +369,7 @@
                 </div>
                 <div class="action-buttons">
                     <div class="action-btn" id="actionCrouch">🦵 ПРИСЕСТЬ</div>
-                    <div class="action-btn" id="actionGossip">🗣️ СПЛЕТНИ</div>
+                    <div class="action-btn" id="actionShield">🛡️ ЩИТ</div>
                 </div>
             </div>
             <div class="rotate-panel">
@@ -401,32 +378,29 @@
             </div>
         </div>
 
-        <!-- Главное меню -->
         <div id="mainMenu" class="menu-overlay">
             <div class="menu-title">🏝️ ПОБЕГ<br>ИЗ РАБСТВА</div>
-            <div class="menu-subtitle">ДЕМО-ВЕРСИЯ</div>
+            <div class="menu-subtitle">РАБОЧАЯ ВЕРСИЯ</div>
             <div class="menu-buttons">
                 <div class="menu-btn" onclick="startGame()">▶️ НАЧАТЬ</div>
                 <div class="menu-btn" onclick="showBriefing()">📜 БРИФИНГ</div>
-                <div class="menu-btn" onclick="window.open('https://t.me/MOTYA_VONEL565', '_blank')">📢 ПОМОЩЬ</div>
             </div>
-            <div style="position: absolute; bottom: 20px; color: #666;">Драго должен ∞ | v.1.0</div>
+            <div style="position: absolute; bottom: 20px; color: #666;">Драго должен ∞</div>
         </div>
 
-        <!-- Брифинг -->
         <div id="briefing" class="briefing-overlay">
             <div class="briefing-box">
                 <div class="briefing-title">УРОВЕНЬ 1: ТЮРЬМА</div>
-                <div class="briefing-text">🎯 Сбежать из тюремного блока</div>
+                <div class="briefing-text">🎯 Найди выход и сбеги</div>
                 <div class="enemy-icons">
-                    <span>🫎 x2</span>
-                    <span>⚡ x1</span>
-                    <span>🐻 x1</span>
+                    <span>🫎 2</span>
+                    <span>⚡ 1</span>
+                    <span>🐻 1</span>
                 </div>
                 <div class="briefing-hint">
-                    💡 Найди щит — он защитит от клокеров.<br>
-                    💡 Приседай, чтобы не шуметь.<br>
-                    💡 Сплетни про Драго отвлекают врагов.
+                    💡 Иди на жёлтый свет — это выход<br>
+                    💡 Приседай, чтобы не шуметь<br>
+                    💡 Найди щит для защиты
                 </div>
                 <div class="briefing-buttons">
                     <div class="brief-btn" style="background: #2d5a3e;" onclick="startLevel()">🚀 СТАРТ</div>
@@ -435,247 +409,146 @@
             </div>
         </div>
 
-        <!-- Меню паузы -->
         <div id="pauseMenu" class="pause-overlay">
             <div class="pause-box">
                 <div class="pause-title">⏸️ ПАУЗА</div>
-                <div class="pause-buttons">
-                    <div class="pause-btn" style="background: #2d5a3e;" onclick="resumeGame()">▶️ ПРОДОЛЖИТЬ</div>
-                    <div class="pause-btn" style="background: #4a2e1e;" onclick="restartLevel()">🔄 ЗАНОВО</div>
-                    <div class="pause-btn" style="background: #8b5a2b;" onclick="backToMenu()">🏠 ГЛАВНОЕ МЕНЮ</div>
-                </div>
+                <div class="pause-btn" style="background: #2d5a3e;" onclick="resumeGame()">▶️ ПРОДОЛЖИТЬ</div>
+                <div class="pause-btn" style="background: #4a2e1e;" onclick="restartLevel()">🔄 ЗАНОВО</div>
+                <div class="pause-btn" style="background: #8b5a2b;" onclick="backToMenu()">🏠 МЕНЮ</div>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== НАСТРОЙКИ =====
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        function resizeCanvas() {
-            canvas.width = canvas.clientWidth;
-            canvas.height = canvas.clientHeight;
-        }
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
+        canvas.width = 800;
+        canvas.height = 500;
 
-        // ===== КАРТА УРОВНЯ 1 =====
+        // ===== КАРТА =====
         const map = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,3,1],
+            [1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,2,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,4,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,2,0,0,0,3,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,2,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
         ];
 
         // ===== ИГРОК =====
         let player = {
-            x: 2,
-            y: 2,
+            x: 2.2,
+            y: 2.2,
             angle: 0,
             health: 100,
             shield: false,
-            shieldTimer: 0,
             isCrouching: false,
-            hasShield: false,
-            gossipTimer: 0,
-            noiseLevel: 0
+            hasShield: false
         };
 
         // ===== ВРАГИ =====
         let enemies = [
-            { x: 4, y: 2, type: 'bulldozer', health: 100, active: true, angle: 0, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
-            { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, angle: Math.PI, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
-            { x: 12, y: 2, type: 'cloaker', health: 50, active: true, angle: 0, alertLevel: 0, viewAngle: 90 * Math.PI/180, viewDistance: 8, memoryTimer: 0, lastKnown: null },
-            { x: 13, y: 7, type: 'bear', health: 200, active: true, friendly: true, angle: 0 }
+            { x: 12, y: 4, type: 'bulldozer', health: 100, active: true, speed: 0.02, 
+              viewDistance: 5, alert: false, lastSeen: null },
+            { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, speed: 0.02, 
+              viewDistance: 5, alert: false, lastSeen: null },
+            { x: 14, y: 6, type: 'cloaker', health: 50, active: true, speed: 0.03, 
+              viewDistance: 6, alert: false, lastSeen: null },
+            { x: 5, y: 7, type: 'bear', health: 200, active: true, friendly: true }
         ];
 
         // ===== ПРЕДМЕТЫ =====
         let items = [
-            { x: 5, y: 4, type: 'shield', collected: false }
+            { x: 6, y: 4, type: 'shield', collected: false }
         ];
 
-        // ===== ОБЪЕКТЫ ДЛЯ ПРЯТОК =====
-        let hidingSpots = [
-            { x: 3, y: 3, type: 'box', width: 1 },
-            { x: 7, y: 5, type: 'table', width: 1.2 },
-            { x: 10, y: 6, type: 'barrel', width: 0.8 }
-        ];
+        // ===== ВЫХОД =====
+        let exit = { x: 14.5, y: 1.5 };
 
-        // ===== НАСТРОЙКИ 3D =====
-        const fov = 60 * Math.PI / 180;
-        const rayCount = 80;
         let gameRunning = false;
         let gamePaused = false;
-        let currentLevel = 1;
 
         // ===== УПРАВЛЕНИЕ =====
         let moveForward = false, moveBack = false, moveLeft = false, moveRight = false;
         let rotateLeft = false, rotateRight = false;
-        let crouchPressed = false;
 
         // ===== ЗВУКИ =====
-        function speak(text, pitch = 1, rate = 1) {
-            if (!window.speechSynthesis) return;
-            let utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ru-RU';
-            utterance.pitch = pitch;
-            utterance.rate = rate;
-            speechSynthesis.speak(utterance);
+        function playSound(type) {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            
+            if (type === 'step') {
+                oscillator.frequency.value = 100;
+                gainNode.gain.value = 0.1;
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'hit') {
+                oscillator.frequency.value = 200;
+                gainNode.gain.value = 0.3;
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            } else if (type === 'shield') {
+                oscillator.frequency.value = 300;
+                gainNode.gain.value = 0.2;
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.2);
+            }
         }
 
         function showSubtitle(text, duration = 2) {
-            let sub = document.getElementById('subtitles');
+            const sub = document.getElementById('subtitles');
             sub.style.display = 'block';
             sub.innerHTML = '🎬 ' + text;
             setTimeout(() => { sub.style.display = 'none'; }, duration * 1000);
         }
 
-        // ===== ФУНКЦИИ ВРАГОВ =====
-        function isWallBetween(x1, y1, x2, y2) {
-            let steps = 10;
-            for (let i = 1; i <= steps; i++) {
-                let t = i / steps;
-                let checkX = x1 + (x2 - x1) * t;
-                let checkY = y1 + (y2 - y1) * t;
-                let mapX = Math.floor(checkX);
-                let mapY = Math.floor(checkY);
-                if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) return true;
-                if (map[mapY][mapX] === 1) return true;
-            }
-            return false;
-        }
-
-        function isPlayerHidden(px, py, ex, ey) {
-            for (let spot of hidingSpots) {
-                let dx = px - spot.x;
-                let dy = py - spot.y;
-                let distToSpot = Math.hypot(dx, dy);
-                if (distToSpot < spot.width) {
-                    let enemyToPlayer = Math.atan2(py - ey, px - ex);
-                    let enemyToSpot = Math.atan2(spot.y - ey, spot.x - ex);
-                    if (Math.abs(enemyToPlayer - enemyToSpot) < 0.5) return true;
-                }
-            }
-            return false;
-        }
-
-        function updateEnemies() {
-            enemies.forEach(e => {
-                if (!e.active || e.friendly) return;
-
-                let dx = player.x - e.x;
-                let dy = player.y - e.y;
-                let dist = Math.hypot(dx, dy);
-                let angleToPlayer = Math.atan2(dy, dx);
-                let angleDiff = Math.abs(angleToPlayer - e.angle);
-                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
-                angleDiff = Math.abs(angleDiff);
-
-                let seesPlayer = false;
-                if (dist < e.viewDistance && angleDiff < e.viewAngle/2 && !isWallBetween(e.x, e.y, player.x, player.y)) {
-                    if (player.isCrouching) {
-                        seesPlayer = Math.random() < 0.3;
-                    } else {
-                        seesPlayer = true;
-                    }
-                    if (seesPlayer && isPlayerHidden(player.x, player.y, e.x, e.y)) {
-                        seesPlayer = false;
-                    }
-                }
-
-                if (seesPlayer) {
-                    e.alertLevel = 2;
-                    e.lastKnown = { x: player.x, y: player.y };
-                    e.memoryTimer = 100;
-                    if (dist > 0.5) {
-                        e.x += (dx / dist) * 0.03;
-                        e.y += (dy / dist) * 0.03;
-                    } else {
-                        player.health -= 0.5;
-                        if (player.health < 0) player.health = 0;
-                        showSubtitle('🫎 Бульдозер атакует!', 1);
-                    }
-                } else if (e.memoryTimer > 0 && e.lastKnown) {
-                    e.alertLevel = 1;
-                    e.memoryTimer--;
-                    let ldx = e.lastKnown.x - e.x;
-                    let ldy = e.lastKnown.y - e.y;
-                    let ldist = Math.hypot(ldx, ldy);
-                    if (ldist > 0.5) {
-                        e.x += (ldx / ldist) * 0.02;
-                        e.y += (ldy / ldist) * 0.02;
-                    }
-                } else {
-                    e.alertLevel = 0;
-                    e.angle += 0.01;
-                }
-
-                // Обновление здоровья игрока
-                document.getElementById('healthValue').innerText = Math.floor(player.health);
-            });
-        }
-
-        // ===== ДВИЖЕНИЕ ИГРОКА =====
+        // ===== ДВИЖЕНИЕ =====
         function movePlayer() {
-            let moveSpeed = player.isCrouching ? 0.03 : 0.05;
+            let moveSpeed = player.isCrouching ? 0.02 : 0.05;
             let rotSpeed = 0.03;
-            let noiseIncrease = player.isCrouching ? 0.1 : 1;
 
             if (rotateLeft) player.angle -= rotSpeed;
             if (rotateRight) player.angle += rotSpeed;
 
+            let newX = player.x;
+            let newY = player.y;
+
             if (moveForward) {
-                let newX = player.x + Math.cos(player.angle) * moveSpeed;
-                let newY = player.y + Math.sin(player.angle) * moveSpeed;
-                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
-                    player.x = newX;
-                    player.y = newY;
-                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
-                }
+                newX += Math.cos(player.angle) * moveSpeed;
+                newY += Math.sin(player.angle) * moveSpeed;
+                playSound('step');
             }
             if (moveBack) {
-                let newX = player.x - Math.cos(player.angle) * moveSpeed;
-                let newY = player.y - Math.sin(player.angle) * moveSpeed;
-                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
-                    player.x = newX;
-                    player.y = newY;
-                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
-                }
+                newX -= Math.cos(player.angle) * moveSpeed;
+                newY -= Math.sin(player.angle) * moveSpeed;
+                playSound('step');
             }
             if (moveLeft) {
-                let newX = player.x - Math.sin(player.angle) * moveSpeed;
-                let newY = player.y + Math.cos(player.angle) * moveSpeed;
-                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
-                    player.x = newX;
-                    player.y = newY;
-                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
-                }
+                newX -= Math.sin(player.angle) * moveSpeed;
+                newY += Math.cos(player.angle) * moveSpeed;
+                playSound('step');
             }
             if (moveRight) {
-                let newX = player.x + Math.sin(player.angle) * moveSpeed;
-                let newY = player.y - Math.cos(player.angle) * moveSpeed;
-                if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
-                    player.x = newX;
-                    player.y = newY;
-                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
-                }
+                newX += Math.sin(player.angle) * moveSpeed;
+                newY -= Math.cos(player.angle) * moveSpeed;
+                playSound('step');
             }
 
-            player.noiseLevel = Math.max(0, player.noiseLevel - 0.5);
-            document.getElementById('noiseValue').innerText = Math.floor(player.noiseLevel) + '%';
-
-            if (player.gossipTimer > 0) {
-                player.gossipTimer--;
-                player.noiseLevel = 100;
+            if (map[Math.floor(newY)][Math.floor(newX)] !== 1) {
+                player.x = newX;
+                player.y = newY;
             }
 
+            // Подбор щита
             items.forEach(item => {
                 if (item.type === 'shield' && !item.collected) {
                     let dist = Math.hypot(player.x - item.x, player.y - item.y);
@@ -683,69 +556,101 @@
                         item.collected = true;
                         player.hasShield = true;
                         player.shield = true;
-                        player.shieldTimer = 300;
-                        showSubtitle('🛡️ Щит Драго! Теперь ты защищён!', 2);
-                        speak('Щит активирован', 1.2, 1.2);
+                        showSubtitle('🛡️ Щит Драго!', 2);
+                        playSound('shield');
                         document.getElementById('shieldValue').innerText = 'Есть';
                     }
                 }
             });
 
-            if (player.shieldTimer > 0) {
-                player.shieldTimer--;
-                if (player.shieldTimer === 0) {
-                    player.shield = false;
-                    document.getElementById('shieldValue').innerText = 'Нет';
-                }
+            // Проверка выхода
+            let exitDist = Math.hypot(player.x - exit.x, player.y - exit.y);
+            if (exitDist < 0.5) {
+                showSubtitle('🎉 ТЫ СВОБОДЕН!', 3);
+                gameRunning = false;
+                setTimeout(() => backToMenu(), 3000);
             }
         }
 
-        // ===== РЕЙКАСТИНГ (3D) =====
-        function render3D() {
-            ctx.fillStyle = '#111';
+        // ===== ДВИЖЕНИЕ ВРАГОВ =====
+        function moveEnemies() {
+            enemies.forEach(e => {
+                if (!e.active || e.friendly) return;
+
+                let dx = player.x - e.x;
+                let dy = player.y - e.y;
+                let dist = Math.hypot(dx, dy);
+
+                if (dist < e.viewDistance) {
+                    e.alert = true;
+                    if (dist > 0.5) {
+                        e.x += (dx / dist) * e.speed;
+                        e.y += (dy / dist) * e.speed;
+                    } else {
+                        if (player.shield) {
+                            player.shield = false;
+                            e.active = false;
+                            showSubtitle('🛡️ Щит разбит, враг уничтожен', 2);
+                            playSound('hit');
+                        } else {
+                            player.health -= 20;
+                            showSubtitle('🫎 Бульдозер ударил!', 1);
+                            playSound('hit');
+                            if (player.health <= 0) {
+                                player.health = 0;
+                                showSubtitle('💀 Ты пойман...', 3);
+                                gameRunning = false;
+                                setTimeout(() => backToMenu(), 3000);
+                            }
+                        }
+                    }
+                } else {
+                    e.alert = false;
+                }
+            });
+        }
+
+        // ===== РЕНДЕР 3D =====
+        function render() {
+            ctx.fillStyle = '#222';
             ctx.fillRect(0, 0, canvas.width, canvas.height/2);
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#444';
             ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
 
-            let rayWidth = canvas.width / rayCount;
+            const fov = 60 * Math.PI / 180;
+            const rays = 60;
+            const rayWidth = canvas.width / rays;
 
-            for (let ray = 0; ray < rayCount; ray++) {
-                let rayAngle = player.angle - fov/2 + (ray / rayCount) * fov;
+            for (let i = 0; i < rays; i++) {
+                let rayAngle = player.angle - fov/2 + (i / rays) * fov;
                 let distance = 0;
-                let hitWall = false;
+                let hit = false;
 
                 let rayX = player.x;
                 let rayY = player.y;
                 let stepX = Math.cos(rayAngle) * 0.05;
                 let stepY = Math.sin(rayAngle) * 0.05;
 
-                while (!hitWall && distance < 15) {
+                while (!hit && distance < 20) {
                     distance += 0.05;
                     rayX += stepX;
                     rayY += stepY;
-
-                    let mapX = Math.floor(rayX);
-                    let mapY = Math.floor(rayY);
-
-                    if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) {
-                        hitWall = true;
-                        distance = 15;
-                    } else if (map[mapY][mapX] === 1) {
-                        hitWall = true;
+                    
+                    if (map[Math.floor(rayY)][Math.floor(rayX)] === 1) {
+                        hit = true;
                     }
                 }
 
-                let correctedDist = distance * Math.cos(rayAngle - player.angle);
-                let wallHeight = Math.min(canvas.height, canvas.height / correctedDist * 2);
-                let brightness = Math.min(255, 255 / (1 + correctedDist * 0.3));
-                let x = ray * rayWidth;
+                let wallHeight = Math.min(500, 500 / distance * 2);
+                let brightness = 255 - distance * 10;
+                if (brightness < 50) brightness = 50;
 
                 ctx.fillStyle = `rgb(${brightness}, ${brightness * 0.6}, 0)`;
-                ctx.fillRect(x, (canvas.height - wallHeight) / 2, rayWidth + 1, wallHeight);
+                ctx.fillRect(i * rayWidth, (canvas.height - wallHeight) / 2, rayWidth + 1, wallHeight);
             }
 
-            // Рисуем врагов
-            ctx.font = `${Math.min(100, canvas.height/5)}px Arial`;
+            // Рендер врагов
+            ctx.font = '40px Arial';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
@@ -757,17 +662,15 @@
                 let dist = Math.hypot(dx, dy);
                 if (dist > 10) return;
 
-                let angleToEntity = Math.atan2(dy, dx) - player.angle;
-                while (angleToEntity > Math.PI) angleToEntity -= 2 * Math.PI;
-                while (angleToEntity < -Math.PI) angleToEntity += 2 * Math.PI;
-
-                if (Math.abs(angleToEntity) < fov/2) {
-                    let screenX = (0.5 + angleToEntity / fov) * canvas.width;
-                    let size = Math.min(150, canvas.height / dist * 30);
+                let angleTo = Math.atan2(dy, dx) - player.angle;
+                if (Math.abs(angleTo) < fov/2) {
+                    let screenX = (0.5 + angleTo / fov) * canvas.width;
+                    let size = 200 / dist;
+                    if (size > 100) size = 100;
                     
                     ctx.font = `${size}px Arial`;
                     if (e.type === 'bulldozer') {
-                        ctx.fillStyle = e.alertLevel === 2 ? '#f00' : e.alertLevel === 1 ? '#ff0' : '#4a5d23';
+                        ctx.fillStyle = e.alert ? '#f00' : '#4a5d23';
                         ctx.fillText('🫎', screenX, canvas.height/2);
                     } else if (e.type === 'cloaker') {
                         ctx.fillStyle = '#0ff';
@@ -779,7 +682,7 @@
                 }
             });
 
-            // Рисуем предметы
+            // Рендер предметов
             items.forEach(item => {
                 if (item.collected) return;
 
@@ -788,67 +691,40 @@
                 let dist = Math.hypot(dx, dy);
                 if (dist > 5) return;
 
-                let angleToItem = Math.atan2(dy, dx) - player.angle;
-                while (angleToItem > Math.PI) angleToItem -= 2 * Math.PI;
-                while (angleToItem < -Math.PI) angleToItem += 2 * Math.PI;
-
-                if (Math.abs(angleToItem) < fov/2) {
-                    let screenX = (0.5 + angleToItem / fov) * canvas.width;
-                    let size = 40;
-                    ctx.font = `${size}px Arial`;
+                let angleTo = Math.atan2(dy, dx) - player.angle;
+                if (Math.abs(angleTo) < fov/2) {
+                    let screenX = (0.5 + angleTo / fov) * canvas.width;
+                    ctx.font = '30px Arial';
                     ctx.fillStyle = '#ff0';
                     ctx.fillText('🛡️', screenX, canvas.height/2 - 50);
                 }
             });
 
-            // Прицел
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(canvas.width/2, canvas.height/2, 5, 0, 2*Math.PI);
-            ctx.fill();
-        }
-
-        // ===== ИГРОВОЙ ЦИКЛ =====
-        function gameLoop() {
-            if (!gameRunning || gamePaused) {
-                requestAnimationFrame(gameLoop);
-                return;
+            // Рендер выхода
+            let exitAngle = Math.atan2(exit.y - player.y, exit.x - player.x) - player.angle;
+            if (Math.abs(exitAngle) < fov/2) {
+                let screenX = (0.5 + exitAngle / fov) * canvas.width;
+                ctx.font = '40px Arial';
+                ctx.fillStyle = '#ff0';
+                ctx.fillText('🚪', screenX, canvas.height/2 - 80);
             }
 
-            movePlayer();
-            updateEnemies();
-            render3D();
-
-            let enemyCount = enemies.filter(e => e.active && e.type !== 'bear').length;
-            document.getElementById('enemyValue').innerText = enemyCount;
-
-            if (player.health <= 0) {
-                showSubtitle('💀 Ты пойман... Игра окончена', 3);
-                gameRunning = false;
-                setTimeout(() => { backToMenu(); }, 3000);
-            }
-
-            if (enemyCount === 0) {
-                showSubtitle('🎉 Уровень пройден!', 3);
-                gameRunning = false;
-                setTimeout(() => { backToMenu(); }, 3000);
-            }
-
-            requestAnimationFrame(gameLoop);
+            // HUD
+            document.getElementById('healthValue').innerText = Math.floor(player.health);
         }
 
         // ===== УПРАВЛЕНИЕ =====
         function setupControls() {
             const btnW = document.getElementById('moveUp');
-            const btnA = document.getElementById('moveLeft');
             const btnS = document.getElementById('moveDown');
+            const btnA = document.getElementById('moveLeft');
             const btnD = document.getElementById('moveRight');
+            const btnL = document.getElementById('rotateLeft');
+            const btnR = document.getElementById('rotateRight');
             const btnCrouch = document.getElementById('actionCrouch');
-            const btnGossip = document.getElementById('actionGossip');
-            const btnRotL = document.getElementById('rotateLeft');
-            const btnRotR = document.getElementById('rotateRight');
+            const btnShield = document.getElementById('actionShield');
 
-            function bindTouch(btn, onStart, onEnd) {
+            function bind(btn, onStart, onEnd) {
                 btn.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
                 btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
                 btn.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(); });
@@ -856,32 +732,25 @@
                 btn.addEventListener('mouseleave', onEnd);
             }
 
-            bindTouch(btnW, () => moveForward = true, () => moveForward = false);
-            bindTouch(btnS, () => moveBack = true, () => moveBack = false);
-            bindTouch(btnA, () => moveLeft = true, () => moveLeft = false);
-            bindTouch(btnD, () => moveRight = true, () => moveRight = false);
-            bindTouch(btnRotL, () => rotateLeft = true, () => rotateLeft = false);
-            bindTouch(btnRotR, () => rotateRight = true, () => rotateRight = false);
+            bind(btnW, () => moveForward = true, () => moveForward = false);
+            bind(btnS, () => moveBack = true, () => moveBack = false);
+            bind(btnA, () => moveLeft = true, () => moveLeft = false);
+            bind(btnD, () => moveRight = true, () => moveRight = false);
+            bind(btnL, () => rotateLeft = true, () => rotateLeft = false);
+            bind(btnR, () => rotateRight = true, () => rotateRight = false);
 
-            bindTouch(btnCrouch, () => {
-                player.isCrouching = true;
-                showSubtitle('🦵 Режим скрытности', 1);
-            }, () => {
-                player.isCrouching = false;
-            });
+            bind(btnCrouch, () => {
+                player.isCrouching = !player.isCrouching;
+                showSubtitle(player.isCrouching ? '🦵 Присел' : '🦵 Встал', 1);
+            }, () => {});
 
-            bindTouch(btnGossip, () => {
-                if (player.gossipTimer <= 0) {
-                    player.gossipTimer = 100;
-                    showSubtitle('🗣️ Драго должен! Враги отвлеклись!', 2);
-                    enemies.forEach(e => {
-                        if (e.type !== 'bear') {
-                            e.lastKnown = { x: Math.random() * 10, y: Math.random() * 8 };
-                            e.memoryTimer = 100;
-                        }
-                    });
+            bind(btnShield, () => {
+                if (player.hasShield && !player.shield) {
+                    player.shield = true;
+                    showSubtitle('🛡️ Щит активирован', 1);
+                    playSound('shield');
                 }
-            });
+            }, () => {});
 
             document.addEventListener('keydown', (e) => {
                 let k = e.key.toLowerCase();
@@ -895,27 +764,15 @@
                     player.isCrouching = !player.isCrouching;
                     showSubtitle(player.isCrouching ? '🦵 Присел' : '🦵 Встал', 1);
                 }
-                if (k === 'e' && player.hasShield && player.shieldTimer <= 0) {
+                if (k === 'e' && player.hasShield && !player.shield) {
                     player.shield = true;
-                    player.shieldTimer = 300;
                     showSubtitle('🛡️ Щит активирован', 1);
-                    speak('Щит активирован', 1.2, 1.2);
-                }
-                if (k === 'g' && player.gossipTimer <= 0) {
-                    player.gossipTimer = 100;
-                    showSubtitle('🗣️ Драго должен!', 2);
-                    enemies.forEach(e => {
-                        if (e.type !== 'bear') {
-                            e.lastKnown = { x: Math.random() * 10, y: Math.random() * 8 };
-                            e.memoryTimer = 100;
-                        }
-                    });
+                    playSound('shield');
                 }
                 if (k === 'escape') {
                     if (gameRunning && !gamePaused) pauseGame();
                     else if (gamePaused) resumeGame();
                 }
-                e.preventDefault();
             });
 
             document.addEventListener('keyup', (e) => {
@@ -926,76 +783,77 @@
                 if (k === 'd') moveRight = false;
                 if (k === 'arrowleft') rotateLeft = false;
                 if (k === 'arrowright') rotateRight = false;
-                e.preventDefault();
             });
         }
 
         // ===== ФУНКЦИИ МЕНЮ =====
-        window.startGame = function() {
+        window.startGame = () => {
             document.getElementById('mainMenu').style.display = 'none';
             showBriefing();
         };
 
-        window.showBriefing = function() {
+        window.showBriefing = () => {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('briefing').style.display = 'flex';
         };
 
-        window.startLevel = function() {
+        window.startLevel = () => {
             document.getElementById('briefing').style.display = 'none';
+            resetGame();
             gameRunning = true;
             gamePaused = false;
-            showSubtitle('🏃 Беги! Свобода близко!', 3);
-            speak('Начинаем побег', 1, 1);
-            gameLoop();
+            showSubtitle('🏃 Беги к выходу!', 2);
         };
 
-        window.backToMenu = function() {
+        window.backToMenu = () => {
             document.getElementById('briefing').style.display = 'none';
             document.getElementById('pauseMenu').style.display = 'none';
             document.getElementById('mainMenu').style.display = 'flex';
             gameRunning = false;
-            resetGame();
         };
 
-        window.pauseGame = function() {
+        window.pauseGame = () => {
             gamePaused = true;
             document.getElementById('pauseMenu').style.display = 'flex';
         };
 
-        window.resumeGame = function() {
+        window.resumeGame = () => {
             gamePaused = false;
             document.getElementById('pauseMenu').style.display = 'none';
         };
 
-        window.restartLevel = function() {
+        window.restartLevel = () => {
             document.getElementById('pauseMenu').style.display = 'none';
             resetGame();
             gameRunning = true;
-            gamePaused = false;
-            showSubtitle('🔄 Новая попытка!', 2);
+            showSubtitle('🔄 Новая попытка', 1);
         };
 
         function resetGame() {
-            player = {
-                x: 2, y: 2, angle: 0, health: 100, shield: false,
-                shieldTimer: 0, isCrouching: false, hasShield: false,
-                gossipTimer: 0, noiseLevel: 0
-            };
+            player = { x: 2.2, y: 2.2, angle: 0, health: 100, shield: false, isCrouching: false, hasShield: false };
             enemies = [
-                { x: 4, y: 2, type: 'bulldozer', health: 100, active: true, angle: 0, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
-                { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, angle: Math.PI, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
-                { x: 12, y: 2, type: 'cloaker', health: 50, active: true, angle: 0, alertLevel: 0, viewAngle: 90 * Math.PI/180, viewDistance: 8, memoryTimer: 0, lastKnown: null },
-                { x: 13, y: 7, type: 'bear', health: 200, active: true, friendly: true, angle: 0 }
+                { x: 12, y: 4, type: 'bulldozer', health: 100, active: true, speed: 0.02, viewDistance: 5, alert: false, lastSeen: null },
+                { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, speed: 0.02, viewDistance: 5, alert: false, lastSeen: null },
+                { x: 14, y: 6, type: 'cloaker', health: 50, active: true, speed: 0.03, viewDistance: 6, alert: false, lastSeen: null },
+                { x: 5, y: 7, type: 'bear', health: 200, active: true, friendly: true }
             ];
-            items = [ { x: 5, y: 4, type: 'shield', collected: false } ];
+            items = [ { x: 6, y: 4, type: 'shield', collected: false } ];
             document.getElementById('healthValue').innerText = '100';
             document.getElementById('shieldValue').innerText = 'Нет';
         }
 
-        // ===== СТАРТ =====
+        // ===== ИГРОВОЙ ЦИКЛ =====
+        function gameLoop() {
+            if (gameRunning && !gamePaused) {
+                movePlayer();
+                moveEnemies();
+                render();
+            }
+            requestAnimationFrame(gameLoop);
+        }
+
         setupControls();
-        resetGame();
+        gameLoop();
     </script>
 </body>
 </html>
