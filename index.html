@@ -1,795 +1,243 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Остров Маласа — DOOM Edition</title>
+    <title>Остров Маласа 3D</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0a1420;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+        body { margin: 0; padding: 0; background: #000; overflow: hidden; }
+        canvas { display: block; margin: 0 auto; background: #111; }
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-family: monospace;
+            background: rgba(0,0,0,0.7);
             padding: 10px;
-            background: #1a2f3f;
-        }
-
-        .game-container {
-            background: #2d5a3e;
-            border: 4px solid #8b5a2b;
-            border-radius: 20px;
-            padding: 15px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-            max-width: 100%;
-        }
-
-        canvas {
-            display: block;
-            margin: 0 auto;
-            background: #3b6e4b;
-            border: 3px solid #c49a6c;
-            border-radius: 10px;
-            width: 100%;
-            height: auto;
-            max-width: 800px;
-            aspect-ratio: 16/10;
-            cursor: none;
-        }
-
-        .info-panel {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 15px;
-            color: #f0e6d2;
-            font-size: 16px;
-            font-weight: bold;
-            text-shadow: 2px 2px 0 #2d3e1f;
-            gap: 10px;
-        }
-
-        .health-bar {
-            width: 150px;
-            height: 25px;
-            background: #4a2e1e;
-            border: 2px solid #c49a6c;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .health-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #f55, #d00);
-            width: 100%;
-            transition: width 0.2s;
-        }
-
-        .shield-active {
-            color: #ffd700;
-            filter: drop-shadow(0 0 10px gold);
-        }
-
-        .button {
-            background: #8b5a2b;
-            color: white;
-            border: none;
-            padding: 8px 20px;
-            border-radius: 30px;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            border: 2px solid #c49a6c;
-        }
-
-        .button:hover {
-            background: #a8753a;
-        }
-
-        .mobile-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-            width: 100%;
-        }
-
-        .mobile-row {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .mobile-btn {
-            width: 70px;
-            height: 70px;
-            background: #8b5a2b;
-            color: white;
-            border: 3px solid #c49a6c;
-            border-radius: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            box-shadow: 0 5px 0 #4a2e1e;
-            transition: 0.05s;
-        }
-
-        .mobile-btn:active {
-            transform: translateY(5px);
-            box-shadow: none;
-        }
-
-        .action-btn {
-            width: 120px;
-            height: 60px;
-            font-size: 16px;
-            border-radius: 30px;
-        }
-
-        .win-message, .lose-message {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            border: 4px solid gold;
-            z-index: 2000;
-            max-width: 90%;
-        }
-
-        .win-message h1 {
-            color: gold;
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        .lose-message h1 {
-            color: #f55;
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #subtitles {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 12px 24px;
-            border-radius: 40px;
-            font-size: 16px;
-            border: 2px solid #c49a6c;
-            text-align: center;
-            max-width: 90%;
-            z-index: 1500;
-            display: none;
-            backdrop-filter: blur(5px);
+            border-radius: 5px;
+            z-index: 100;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <canvas id="gameCanvas" width="800" height="500"></canvas>
-        
-        <div class="info-panel">
-            <div class="health-bar">
-                <div class="health-fill" id="healthFill" style="width: 100%"></div>
-            </div>
-            <div id="shieldStatus">🛡️ Щит: НЕТ</div>
-            <div id="dragoDebt">💰 Драго должен: ∞</div>
-            <div id="stealthStatus">🦵 Режим: обычный</div>
-            <button class="button" onclick="resetGame()">🔄 Заново</button>
-        </div>
-
-        <!-- МОБИЛЬНОЕ УПРАВЛЕНИЕ -->
-        <div class="mobile-controls">
-            <div class="mobile-row">
-                <button class="mobile-btn" id="btnW">⬆️</button>
-            </div>
-            <div class="mobile-row">
-                <button class="mobile-btn" id="btnA">⬅️</button>
-                <button class="mobile-btn" id="btnS">⬇️</button>
-                <button class="mobile-btn" id="btnD">➡️</button>
-            </div>
-            <div class="mobile-row">
-                <button class="mobile-btn action-btn" id="btnCrouch">🦵 ПРИСЕСТЬ</button>
-                <button class="mobile-btn action-btn" id="btnGossip">🗣️ СПЛЕТНИ</button>
-            </div>
-            <div class="mobile-row">
-                <button class="mobile-btn action-btn" id="btnShield">🛡️ ЩИТ</button>
-            </div>
-        </div>
+    <div id="info">
+        🫎 Бульдозеры: <span id="enemyCount">3</span> | 
+        🛡️ Щит: <span id="shieldStatus">Нет</span> | 
+        🏃 Драго должен: ∞
     </div>
-
-    <div id="winMessage" class="win-message hidden">
-        <h1>🎉 СВОБОДА! 🎉</h1>
-        <p>Медведи спасли тебя!</p>
-        <p>Драго всё ещё должен ∞$</p>
-        <button class="button" onclick="resetGame()">🔄 Ещё раз</button>
-    </div>
-
-    <div id="loseMessage" class="lose-message hidden">
-        <h1>💀 ТЫ ПОЙМАН 💀</h1>
-        <p>Бульдозер добрался...</p>
-        <button class="button" onclick="resetGame()">🔄 Попробовать снова</button>
-    </div>
-
-    <div id="subtitles">🎬</div>
+    <canvas id="canvas" width="800" height="600"></canvas>
 
     <script>
-        // ===== КОНСТАНТЫ =====
-        const canvas = document.getElementById('gameCanvas');
+        const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
-        const healthFill = document.getElementById('healthFill');
-        const shieldStatus = document.getElementById('shieldStatus');
-        const stealthStatus = document.getElementById('stealthStatus');
-        const dragoDebt = document.getElementById('dragoDebt');
-        const winMessage = document.getElementById('winMessage');
-        const loseMessage = document.getElementById('loseMessage');
-        const subtitlesDiv = document.getElementById('subtitles');
 
-        // ===== ИГРОК =====
+        // Карта мира (1 = стена, 2 = бульдозер, 3 = клокер, 4 = медведь, 5 = щит)
+        const map = [
+            [1,1,1,1,1,1,1,1,1,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,2,0,0,3,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,4,0,1],
+            [1,0,0,0,5,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1,1,1]
+        ];
+
+        // Игрок
         let player = {
-            x: 100,
-            y: 250,
-            radius: 12,
-            speed: 3,
+            x: 1.5,
+            y: 1.5,
+            angle: 0,
             health: 100,
-            maxHealth: 100,
-            shield: false,
-            isCrouching: false,
-            hasShield: false
+            shield: false
         };
 
-        // ===== ВРАГИ =====
-        let bulldozers = [];
-        let cloakers = [];
-        let bears = [];
+        // Враги (бульдозеры, клокеры)
+        let enemies = [
+            { x: 3, y: 2, type: '🫎', health: 50, active: true },
+            { x: 5, y: 3, type: '⚡', health: 30, active: true },
+            { x: 7, y: 4, type: '🫎', health: 50, active: true },
+            { x: 4, y: 5, type: '🐻', health: 100, active: true, friendly: true }
+        ];
 
-        // ===== ПРЕДМЕТЫ =====
-        let shieldItem = {
-            x: 400,
-            y: 200,
-            active: true,
-            radius: 15
-        };
+        // Предметы
+        let items = [
+            { x: 5, y: 5, type: '🛡️', collected: false }
+        ];
 
-        let boat = {
-            x: 750,
-            y: 400,
-            width: 40,
-            height: 60,
-            active: true
-        };
+        // Настройки 3D
+        const fov = 60 * Math.PI / 180;
+        const screenWidth = 800;
+        const screenHeight = 600;
+        const rayCount = 120;
 
-        // ===== УПРАВЛЕНИЕ =====
-        let keys = { w: false, a: false, s: false, d: false };
-        let isCrouching = false;
-        let gossipActive = false;
-        let gossipTimer = 0;
+        // Управление
+        const keys = { w: false, a: false, s: false, d: false };
 
-        // ===== СУБТИТРЫ =====
-        let subtitleTimer = 0;
-
-        // ===== ИНИЦИАЛИЗАЦИЯ =====
-        function initGame() {
-            player = {
-                x: 100,
-                y: 250,
-                radius: 12,
-                speed: 3,
-                health: 100,
-                maxHealth: 100,
-                shield: false,
-                isCrouching: false,
-                hasShield: false
-            };
-
-            bulldozers = [];
-            cloakers = [];
-            bears = [];
-
-            // Злые бульдозеры
-            for (let i = 0; i < 4; i++) {
-                bulldozers.push({
-                    x: 400 + Math.random() * 300,
-                    y: 100 + Math.random() * 300,
-                    radius: 20,
-                    type: 'evil',
-                    speed: 1.2,
-                    alert: false,
-                    distracted: false,
-                    targetX: 0,
-                    targetY: 0
-                });
-            }
-
-            // Добрые бульдозеры
-            for (let i = 0; i < 3; i++) {
-                bulldozers.push({
-                    x: 200 + Math.random() * 200,
-                    y: 150 + Math.random() * 200,
-                    radius: 20,
-                    type: 'good',
-                    speed: 0.8,
-                    alert: false,
-                    distracted: false,
-                    targetX: 0,
-                    targetY: 0
-                });
-            }
-
-            // Клокеры
-            for (let i = 0; i < 3; i++) {
-                cloakers.push({
-                    x: 500 + Math.random() * 200,
-                    y: 300 + Math.random() * 150,
-                    radius: 15,
-                    speed: 2.0,
-                    active: true,
-                    attackTimer: 0
-                });
-            }
-
-            shieldItem.active = true;
-            boat.active = true;
-
-            showSubtitle('🫎 Остров Маласа. Ты — раб. Беги!', 4);
-            
-            winMessage.classList.add('hidden');
-            loseMessage.classList.add('hidden');
-        }
-
-        // ===== ПОКАЗ СУБТИТРОВ =====
-        function showSubtitle(text, duration = 2) {
-            subtitlesDiv.style.display = 'block';
-            subtitlesDiv.innerHTML = '🎬 ' + text;
-            subtitleTimer = duration * 60;
-        }
-
-        // ===== УПРАВЛЕНИЕ =====
-        function setupControls() {
-            const btnW = document.getElementById('btnW');
-            const btnA = document.getElementById('btnA');
-            const btnS = document.getElementById('btnS');
-            const btnD = document.getElementById('btnD');
-            const btnCrouch = document.getElementById('btnCrouch');
-            const btnGossip = document.getElementById('btnGossip');
-            const btnShield = document.getElementById('btnShield');
-
-            function bindButton(btn, key) {
-                btn.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    keys[key] = true;
-                });
-                btn.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    keys[key] = false;
-                });
-                btn.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    keys[key] = true;
-                });
-                btn.addEventListener('mouseup', (e) => {
-                    e.preventDefault();
-                    keys[key] = false;
-                });
-                btn.addEventListener('mouseleave', () => { keys[key] = false; });
-            }
-
-            bindButton(btnW, 'w');
-            bindButton(btnA, 'a');
-            bindButton(btnS, 's');
-            bindButton(btnD, 'd');
-
-            btnCrouch.addEventListener('touchstart', (e) => {
+        document.addEventListener('keydown', (e) => {
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
+                keys[k] = true;
                 e.preventDefault();
-                player.isCrouching = true;
-                player.speed = 1;
-                stealthStatus.innerHTML = '🦵 Режим: скрытный';
-                showSubtitle('🤫 Крадёмся...', 1);
-            });
-            btnCrouch.addEventListener('touchend', (e) => {
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const k = e.key.toLowerCase();
+            if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
+                keys[k] = false;
                 e.preventDefault();
-                player.isCrouching = false;
-                player.speed = 3;
-                stealthStatus.innerHTML = '🦵 Режим: обычный';
-            });
+            }
+        });
 
-            btnGossip.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                gossipActive = true;
-                gossipTimer = 180;
-                showSubtitle('🗣️ Драго должен! Сплетни разносятся...', 2);
-                
-                bulldozers.forEach(b => {
-                    if (b.type === 'evil') {
-                        b.distracted = true;
-                        b.targetX = Math.random() * canvas.width;
-                        b.targetY = Math.random() * canvas.height;
-                    }
-                });
-            });
-
-            btnShield.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (player.hasShield) {
-                    player.shield = !player.shield;
-                    shieldStatus.innerHTML = player.shield ? '🛡️ Щит: АКТИВЕН' : '🛡️ Щит: ЕСТЬ';
-                    showSubtitle(player.shield ? '✨ Щит активирован!' : '💤 Щит отключён', 1);
-                } else {
-                    showSubtitle('❌ Сначала найди щит!', 1);
-                }
-            });
-
-            // Клавиатура
-            document.addEventListener('keydown', (e) => {
-                const k = e.key.toLowerCase();
-                if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-                    keys[k] = true;
-                    e.preventDefault();
-                }
-                if (k === 'c') {
-                    player.isCrouching = !player.isCrouching;
-                    player.speed = player.isCrouching ? 1 : 3;
-                    stealthStatus.innerHTML = player.isCrouching ? '🦵 Режим: скрытный' : '🦵 Режим: обычный';
-                }
-                if (k === 'e' && player.hasShield) {
-                    player.shield = !player.shield;
-                    shieldStatus.innerHTML = player.shield ? '🛡️ Щит: АКТИВЕН' : '🛡️ Щит: ЕСТЬ';
-                }
-            });
-
-            document.addEventListener('keyup', (e) => {
-                const k = e.key.toLowerCase();
-                if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
-                    keys[k] = false;
-                    e.preventDefault();
-                }
-            });
-        }
-
-        // ===== ДВИЖЕНИЕ =====
+        // Движение
         function movePlayer() {
-            let dx = 0, dy = 0;
-            if (keys.w) dy -= player.speed;
-            if (keys.s) dy += player.speed;
-            if (keys.a) dx -= player.speed;
-            if (keys.d) dx += player.speed;
+            let moveSpeed = 0.1;
+            let rotSpeed = 0.05;
 
-            if (dx !== 0 && dy !== 0) {
-                dx *= 0.7;
-                dy *= 0.7;
-            }
-
-            player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + dx));
-            player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + dy));
-        }
-
-        // ===== ПОДБОР ЩИТА =====
-        function checkShieldPickup() {
-            if (!shieldItem.active) return;
-            
-            const dist = Math.hypot(player.x - shieldItem.x, player.y - shieldItem.y);
-            if (dist < player.radius + shieldItem.radius) {
-                player.hasShield = true;
-                player.shield = true;
-                shieldItem.active = false;
-                shieldStatus.innerHTML = '🛡️ Щит: АКТИВЕН';
-                showSubtitle('🛡️ Щит Драго! Теперь ты защищён!', 3);
-            }
-        }
-
-        // ===== ОБНОВЛЕНИЕ ВРАГОВ =====
-        function updateEnemies() {
-            // Клокеры
-            cloakers = cloakers.filter(c => {
-                if (!c.active) return false;
-
-                const dx = player.x - c.x;
-                const dy = player.y - c.y;
-                const dist = Math.hypot(dx, dy);
-                
-                if (dist > 0 && !player.isCrouching) {
-                    c.x += (dx / dist) * c.speed;
-                    c.y += (dy / dist) * c.speed;
-                }
-
-                if (dist < player.radius + c.radius) {
-                    if (player.shield) {
-                        player.shield = false;
-                        shieldStatus.innerHTML = '🛡️ Щит: НЕТ';
-                        showSubtitle('🛡️ Щит разбит!', 1);
-                        return false;
-                    } else {
-                        player.health = Math.max(0, player.health - 25);
-                        healthFill.style.width = (player.health / player.maxHealth * 100) + '%';
-                        showSubtitle('⚡ Клокер ударил с ноги!', 1);
-                        return false;
-                    }
-                }
-                return true;
-            });
-
-            // Бульдозеры
-            bulldozers.forEach(b => {
-                if (b.type !== 'evil') return;
-
-                if (b.distracted) {
-                    const dx = b.targetX - b.x;
-                    const dy = b.targetY - b.y;
-                    const dist = Math.hypot(dx, dy);
-                    if (dist > 5) {
-                        b.x += (dx / dist) * b.speed * 1.5;
-                        b.y += (dy / dist) * b.speed * 1.5;
-                    } else {
-                        b.distracted = false;
-                    }
-                    return;
-                }
-
-                const dx = player.x - b.x;
-                const dy = player.y - b.y;
-                const dist = Math.hypot(dx, dy);
-                
-                if (dist > 0 && !player.isCrouching) {
-                    b.x += (dx / dist) * b.speed;
-                    b.y += (dy / dist) * b.speed;
-                }
-
-                if (dist < player.radius + b.radius) {
-                    player.health = 0;
-                    healthFill.style.width = '0%';
-                    showSubtitle('🫎 Бульдозер догнал...', 2);
-                }
-            });
-
-            // Сплетни
-            if (gossipActive) {
-                gossipTimer--;
-                if (gossipTimer <= 0) {
-                    gossipActive = false;
-                    bulldozers.forEach(b => b.distracted = false);
+            if (keys.w) {
+                let nx = player.x + Math.cos(player.angle) * moveSpeed;
+                let ny = player.y + Math.sin(player.angle) * moveSpeed;
+                if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
+                    player.x = nx;
+                    player.y = ny;
                 }
             }
-        }
-
-        // ===== МЕДВЕДИ =====
-        function updateBears() {
-            if (bears.length === 0 && boat.active) {
-                if (Math.hypot(player.x - boat.x, player.y - boat.y) < 200) {
-                    for (let i = 0; i < 4; i++) {
-                        bears.push({
-                            x: boat.x - 40 - i * 30,
-                            y: boat.y + 20,
-                            radius: 15,
-                            active: true
-                        });
-                    }
-                    showSubtitle('🐻 Медведи приплыли! С чаем!', 3);
+            if (keys.s) {
+                let nx = player.x - Math.cos(player.angle) * moveSpeed;
+                let ny = player.y - Math.sin(player.angle) * moveSpeed;
+                if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
+                    player.x = nx;
+                    player.y = ny;
                 }
             }
+            if (keys.a) player.angle -= rotSpeed;
+            if (keys.d) player.angle += rotSpeed;
 
-            bears.forEach(bear => {
-                let closestEvil = null;
-                let minDist = Infinity;
-                
-                bulldozers.forEach(b => {
-                    if (b.type === 'evil') {
-                        const dist = Math.hypot(bear.x - b.x, bear.y - b.y);
-                        if (dist < minDist) {
-                            minDist = dist;
-                            closestEvil = b;
+            // Проверка предметов
+            items.forEach(item => {
+                if (!item.collected) {
+                    let dist = Math.hypot(player.x - item.x, player.y - item.y);
+                    if (dist < 0.5) {
+                        if (item.type === '🛡️') {
+                            player.shield = true;
+                            document.getElementById('shieldStatus').innerText = 'Есть';
                         }
+                        item.collected = true;
                     }
-                });
+                }
+            });
+        }
 
-                if (closestEvil) {
-                    const dx = closestEvil.x - bear.x;
-                    const dy = closestEvil.y - bear.y;
-                    const dist = Math.hypot(dx, dy);
+        // Рейкастинг
+        function render3D() {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 0, screenWidth, screenHeight);
+
+            for (let ray = 0; ray < rayCount; ray++) {
+                let rayAngle = player.angle - fov/2 + (ray / rayCount) * fov;
+                let distance = 0;
+                let hitWall = false;
+                let wallType = 0;
+
+                let rayX = player.x;
+                let rayY = player.y;
+                let stepX = Math.cos(rayAngle) * 0.1;
+                let stepY = Math.sin(rayAngle) * 0.1;
+
+                while (!hitWall && distance < 20) {
+                    distance += 0.1;
+                    rayX += stepX;
+                    rayY += stepY;
+
+                    let mapX = Math.floor(rayX);
+                    let mapY = Math.floor(rayY);
+
+                    if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) {
+                        hitWall = true;
+                        distance = 20;
+                    } else if (map[mapY][mapX] === 1) {
+                        hitWall = true;
+                        wallType = 1;
+                    }
+                }
+
+                // Коррекция расстояния
+                let correctedDist = distance * Math.cos(rayAngle - player.angle);
+                let wallHeight = Math.min(screenHeight, screenHeight / correctedDist * 2);
+
+                let brightness = 255 / (1 + correctedDist * 0.5);
+                brightness = Math.min(255, brightness);
+
+                let x = ray * (screenWidth / rayCount);
+                ctx.fillStyle = `rgb(${brightness}, ${brightness * 0.5}, ${brightness * 0.2})`;
+                ctx.fillRect(x, (screenHeight - wallHeight) / 2, screenWidth / rayCount + 1, wallHeight);
+            }
+
+            // Рисуем врагов (простые спрайты)
+            ctx.font = '40px Arial';
+            enemies.forEach(e => {
+                if (!e.active) return;
+
+                let dx = e.x - player.x;
+                let dy = e.y - player.y;
+                let dist = Math.hypot(dx, dy);
+                let angleToEnemy = Math.atan2(dy, dx) - player.angle;
+
+                while (angleToEnemy > Math.PI) angleToEnemy -= 2 * Math.PI;
+                while (angleToEnemy < -Math.PI) angleToEnemy += 2 * Math.PI;
+
+                if (Math.abs(angleToEnemy) < fov/2 && dist < 10) {
+                    let screenX = (0.5 + angleToEnemy / fov) * screenWidth;
+                    let size = Math.min(100, screenHeight / dist * 30);
                     
-                    if (dist > 0) {
-                        bear.x += (dx / dist) * 2;
-                        bear.y += (dy / dist) * 2;
-                    }
-
-         if (dist < bear.radius + closestEvil.radius) {
-                        const index = bulldozers.indexOf(closestEvil);
-                        if (index !== -1) bulldozers.splice(index, 1);
-                        showSubtitle('🐻 Медведь заломал бульдозера!', 2);
-                    }
+                    ctx.fillStyle = e.friendly ? '#0f0' : '#f00';
+                    ctx.font = `${size}px Arial`;
+                    ctx.fillText(e.type, screenX - size/2, screenHeight/2 - size/2);
+                    
+                    // Здоровье врага
+                    ctx.font = '20px Arial';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(e.health, screenX - 20, screenHeight/2 - size/2 - 20);
                 }
             });
-        }
 
-        // ===== ПРОВЕРКА ПОБЕДЫ =====
-        function checkWin() {
-            if (!boat.active) return false;
-            
-            const dist = Math.hypot(player.x - boat.x, player.y - boat.y);
-            const evilExists = bulldozers.some(b => b.type === 'evil');
-            
-            if (dist < player.radius + 20 && !evilExists) {
-                winMessage.classList.remove('hidden');
-                showSubtitle('🎉 ТЫ СВОБОДЕН! Медведи спасли!', 5);
-                return true;
-            }
-            return false;
-        }
+            // Рисуем предметы
+            items.forEach(item => {
+                if (item.collected) return;
 
-        // ===== ОБНОВЛЕНИЕ СУБТИТРОВ =====
-        function updateSubtitles() {
-            if (subtitleTimer > 0) {
-                subtitleTimer--;
-            } else {
-                subtitlesDiv.style.display = 'none';
-            }
-        }
+                let dx = item.x - player.x;
+                let dy = item.y - player.y;
+                let dist = Math.hypot(dx, dy);
+                let angleToItem = Math.atan2(dy, dx) - player.angle;
 
-        // ===== ОТРИСОВКА =====
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+                while (angleToItem > Math.PI) angleToItem -= 2 * Math.PI;
+                while (angleToItem < -Math.PI) angleToItem += 2 * Math.PI;
 
-            // Фон
-            ctx.fillStyle = '#3b6e4b';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Игрок
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-            ctx.fillStyle = player.shield ? '#ffd700' : '#8b4513';
-            ctx.fill();
-            ctx.strokeStyle = '#fff';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-
-            if (player.isCrouching) {
-                ctx.fillStyle = '#aaa';
-                ctx.font = '12px Arial';
-                ctx.fillText('🦵', player.x - 15, player.y - 20);
-            }
-
-            // Щит
-            if (shieldItem.active) {
-                ctx.beginPath();
-                ctx.arc(shieldItem.x, shieldItem.y, shieldItem.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#ffd700';
-                ctx.fill();
-                ctx.strokeStyle = '#ffaa00';
-                ctx.lineWidth = 3;
-                ctx.stroke();
-                ctx.fillStyle = '#000';
-                ctx.font = '16px Arial';
-                ctx.fillText('🛡️', shieldItem.x - 10, shieldItem.y + 5);
-            }
-
-            // Бульдозеры
-            bulldozers.forEach(b => {
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                ctx.fillStyle = b.type === 'evil' ? '#d00' : '#0d0';
-                ctx.fill();
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px Arial';
-                ctx.fillText('🫎', b.x - 10, b.y + 5);
-                
-                if (b.distracted) {
+                if (Math.abs(angleToItem) < fov/2 && dist < 5) {
+                    let screenX = (0.5 + angleToItem / fov) * screenWidth;
+                    let size = 40;
+                    ctx.font = `${size}px Arial`;
                     ctx.fillStyle = '#ff0';
-                    ctx.font = '12px Arial';
-                    ctx.fillText('?', b.x - 20, b.y - 20);
+                    ctx.fillText(item.type, screenX - size/2, screenHeight/2 - 50);
                 }
             });
 
-            // Клокеры
-            cloakers.forEach(c => {
-                ctx.beginPath();
-                ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#222';
-                ctx.fill();
-                ctx.strokeStyle = '#f0f';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.fillStyle = '#fff';
-                ctx.font = '14px Arial';
-                ctx.fillText('⚡', c.x - 8, c.y + 5);
-            });
-
-            // Медведи
-            bears.forEach(b => {
-                ctx.beginPath();
-                ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                ctx.fillStyle = '#8b5a2b';
-                ctx.fill();
-                ctx.strokeStyle = '#fff';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px Arial';
-                ctx.fillText('🐻', b.x - 10, b.y + 5);
-            });
-
-            // Лодка
-            if (boat.active) {
-                ctx.fillStyle = '#8b5a2b';
-                ctx.fillRect(boat.x, boat.y - 20, boat.width, boat.height);
-                ctx.fillStyle = '#c49a6c';
-                ctx.fillRect(boat.x + 10, boat.y - 35, 20, 15);
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px Arial';
-                ctx.fillText('🚤', boat.x + 10, boat.y - 10);
-            }
-
-            // Хинты
+            // HUD
+            ctx.font = '20px monospace';
             ctx.fillStyle = '#fff';
-            ctx.font = '12px Arial';
-            ctx.fillText('🦵 Присесть (C)', 10, 20);
-            ctx.fillText('🗣️ Сплетни', 10, 40);
-            ctx.fillText('🛡️ Щит (E)', 10, 60);
+            ctx.fillText(`Здоровье: ${player.health}`, 10, 30);
+            ctx.fillText(`Угол: ${Math.floor(player.angle * 180 / Math.PI)}°`, 10, 60);
         }
 
-        // ===== ОБНОВЛЕНИЕ =====
+        // Обновление
         function update() {
-            if (player.health <= 0) {
-                loseMessage.classList.remove('hidden');
-                return;
-            }
-
             movePlayer();
-            checkShieldPickup();
-            updateEnemies();
-            updateBears();
-            updateSubtitles();
-            
-            if (checkWin()) return;
-
-            dragoDebt.innerHTML = `💰 Драго должен: ∞`;
+            render3D();
+            document.getElementById('enemyCount').innerText = enemies.filter(e => e.active && e.type !== '🐻').length;
             requestAnimationFrame(update);
         }
 
-        // ===== СБРОС =====
-        function resetGame() {
-            initGame();
-            winMessage.classList.add('hidden');
-            loseMessage.classList.add('hidden');
-            player.health = 100;
-            healthFill.style.width = '100%';
-            player.shield = false;
-            player.hasShield = false;
-            shieldStatus.innerHTML = '🛡️ Щит: НЕТ';
-            stealthStatus.innerHTML = '🦵 Режим: обычный';
-            gossipActive = false;
-            gossipTimer = 0;
-            subtitlesDiv.style.display = 'none';
-        }
-
-        // ===== СТАРТ =====
-        initGame();
-        setupControls();
-        setInterval(update, 1000 / 60);
-        setInterval(draw, 1000 / 60);
+        update();
     </script>
 </body>
 </html>
