@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Остров Маласа 3D Mobile</title>
+    <title>ПОБЕГ ИЗ РАБСТВА — Демо</title>
     <style>
         * {
             margin: 0;
@@ -21,18 +21,19 @@
             min-height: 100vh;
             font-family: 'Arial', sans-serif;
             touch-action: none;
+            overflow: hidden;
         }
 
-        .game-wrapper {
+        .game-container {
             position: relative;
             width: 100%;
-            max-width: 400px;
+            max-width: 1000px;
             height: 100vh;
             max-height: 800px;
             background: #111;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 0 30px #0f0;
+            box-shadow: 0 0 30px #ffd70033;
         }
 
         canvas {
@@ -43,6 +44,31 @@
             touch-action: none;
         }
 
+        .hud {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            text-shadow: 2px 2px 0 #000;
+            font-size: 14px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 15px;
+            border-radius: 40px;
+            backdrop-filter: blur(5px);
+            border: 2px solid #c49a6c;
+            z-index: 100;
+        }
+
+        .hud-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
         .controls {
             height: 30%;
             background: #1a2f3f;
@@ -50,7 +76,7 @@
             flex-direction: column;
             padding: 10px;
             gap: 10px;
-            border-top: 3px solid #0f0;
+            border-top: 4px solid #c49a6c;
         }
 
         .move-panel {
@@ -63,15 +89,15 @@
         .move-buttons {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
+            gap: 8px;
             width: 60%;
         }
 
         .move-btn {
             aspect-ratio: 1;
             background: #2d5a3e;
-            border: 2px solid #c49a6c;
-            border-radius: 15px;
+            border: 3px solid #c49a6c;
+            border-radius: 20px;
             color: white;
             font-size: 28px;
             display: flex;
@@ -89,14 +115,14 @@
         .action-buttons {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
             width: 35%;
         }
 
         .action-btn {
             background: #8b5a2b;
-            border: 2px solid #c49a6c;
-            border-radius: 20px;
+            border: 3px solid #c49a6c;
+            border-radius: 30px;
             color: white;
             font-size: 16px;
             font-weight: bold;
@@ -120,8 +146,8 @@
         .rotate-btn {
             width: 80px;
             background: #2d5a3e;
-            border: 2px solid #c49a6c;
-            border-radius: 30px;
+            border: 3px solid #c49a6c;
+            border-radius: 40px;
             color: white;
             font-size: 24px;
             display: flex;
@@ -135,42 +161,225 @@
             box-shadow: none;
         }
 
-        .hud {
+        .menu-overlay {
             position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #1a2f3f, #0a1a2a);
             display: flex;
-            justify-content: space-between;
-            color: white;
-            text-shadow: 2px 2px 0 #000;
-            font-size: 14px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.5);
-            padding: 8px;
-            border-radius: 20px;
-            backdrop-filter: blur(5px);
-            z-index: 100;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
         }
 
-        .hud-item {
+        .menu-title {
+            font-size: 64px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 30px #ffaa00, 0 0 60px #ff5500;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite;
+            text-align: center;
+        }
+
+        .menu-subtitle {
+            font-size: 24px;
+            color: #c49a6c;
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        .menu-buttons {
             display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 300px;
+        }
+
+        .menu-btn {
+            background: #2d5a3e;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            border: 4px solid #c49a6c;
+            border-radius: 60px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .menu-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px #c49a6c;
+        }
+
+        .briefing-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            gap: 5px;
+            z-index: 900;
+            backdrop-filter: blur(10px);
+        }
+
+        .briefing-box {
+            background: #1a2f3f;
+            border: 4px solid #ffd700;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 600px;
+            text-align: center;
+            margin: 20px;
+        }
+
+        .briefing-title {
+            font-size: 48px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .briefing-text {
+            font-size: 24px;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .enemy-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+            font-size: 40px;
+        }
+
+        .briefing-hint {
+            background: #2d3e5a;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            font-size: 18px;
+            color: #aaddff;
+        }
+
+        .briefing-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .brief-btn {
+            padding: 15px 40px;
+            font-size: 24px;
+            border: 3px solid #c49a6c;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .pause-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 800;
+            backdrop-filter: blur(8px);
+        }
+
+        .pause-box {
+            background: #1a2f3f;
+            border: 4px solid #ffd700;
+            border-radius: 30px;
+            padding: 40px;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .pause-title {
+            font-size: 48px;
+            color: #ffd700;
+            margin-bottom: 40px;
+        }
+
+        .pause-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .pause-btn {
+            padding: 15px;
+            font-size: 20px;
+            border: 3px solid #c49a6c;
+            border-radius: 40px;
+            cursor: pointer;
+            color: white;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes pulse {
+            0% { text-shadow: 0 0 30px #ffaa00; }
+            50% { text-shadow: 0 0 60px #ff5500; }
+            100% { text-shadow: 0 0 30px #ffaa00; }
+        }
+
+        #subtitles {
+            position: absolute;
+            bottom: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 16px;
+            border: 2px solid #c49a6c;
+            text-align: center;
+            max-width: 90%;
+            z-index: 500;
+            display: none;
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
 <body>
-    <div class="game-wrapper">
+    <div class="game-container">
+        <!-- Холст для 3D-игры -->
         <canvas id="gameCanvas"></canvas>
-        
+
+        <!-- HUD (интерфейс) -->
         <div class="hud">
             <div class="hud-item">❤️ <span id="healthValue">100</span></div>
             <div class="hud-item">🛡️ <span id="shieldValue">Нет</span></div>
             <div class="hud-item">🫎 <span id="enemyValue">0</span></div>
             <div class="hud-item">💰 ∞</div>
+            <div class="hud-item">🔊 <span id="noiseValue">0%</span></div>
         </div>
 
+        <!-- Субтитры -->
+        <div id="subtitles"></div>
+
+        <!-- Мобильное управление -->
         <div class="controls">
             <div class="move-panel">
                 <div class="move-buttons">
@@ -182,7 +391,7 @@
                     <div class="move-btn" id="moveRight">➡️</div>
                 </div>
                 <div class="action-buttons">
-                    <div class="action-btn" id="actionShield">🛡️ ЩИТ</div>
+                    <div class="action-btn" id="actionCrouch">🦵 ПРИСЕСТЬ</div>
                     <div class="action-btn" id="actionGossip">🗣️ СПЛЕТНИ</div>
                 </div>
             </div>
@@ -191,13 +400,59 @@
                 <div class="rotate-btn" id="rotateRight">▶️</div>
             </div>
         </div>
+
+        <!-- Главное меню -->
+        <div id="mainMenu" class="menu-overlay">
+            <div class="menu-title">🏝️ ПОБЕГ<br>ИЗ РАБСТВА</div>
+            <div class="menu-subtitle">ДЕМО-ВЕРСИЯ</div>
+            <div class="menu-buttons">
+                <div class="menu-btn" onclick="startGame()">▶️ НАЧАТЬ</div>
+                <div class="menu-btn" onclick="showBriefing()">📜 БРИФИНГ</div>
+                <div class="menu-btn" onclick="window.open('https://t.me/MOTYA_VONEL565', '_blank')">📢 ПОМОЩЬ</div>
+            </div>
+            <div style="position: absolute; bottom: 20px; color: #666;">Драго должен ∞ | v.1.0</div>
+        </div>
+
+        <!-- Брифинг -->
+        <div id="briefing" class="briefing-overlay">
+            <div class="briefing-box">
+                <div class="briefing-title">УРОВЕНЬ 1: ТЮРЬМА</div>
+                <div class="briefing-text">🎯 Сбежать из тюремного блока</div>
+                <div class="enemy-icons">
+                    <span>🫎 x2</span>
+                    <span>⚡ x1</span>
+                    <span>🐻 x1</span>
+                </div>
+                <div class="briefing-hint">
+                    💡 Найди щит — он защитит от клокеров.<br>
+                    💡 Приседай, чтобы не шуметь.<br>
+                    💡 Сплетни про Драго отвлекают врагов.
+                </div>
+                <div class="briefing-buttons">
+                    <div class="brief-btn" style="background: #2d5a3e;" onclick="startLevel()">🚀 СТАРТ</div>
+                    <div class="brief-btn" style="background: #4a2e1e;" onclick="backToMenu()">🔙 НАЗАД</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Меню паузы -->
+        <div id="pauseMenu" class="pause-overlay">
+            <div class="pause-box">
+                <div class="pause-title">⏸️ ПАУЗА</div>
+                <div class="pause-buttons">
+                    <div class="pause-btn" style="background: #2d5a3e;" onclick="resumeGame()">▶️ ПРОДОЛЖИТЬ</div>
+                    <div class="pause-btn" style="background: #4a2e1e;" onclick="restartLevel()">🔄 ЗАНОВО</div>
+                    <div class="pause-btn" style="background: #8b5a2b;" onclick="backToMenu()">🏠 ГЛАВНОЕ МЕНЮ</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // ===== НАСТРОЙКИ =====
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Адаптивный размер
         function resizeCanvas() {
             canvas.width = canvas.clientWidth;
             canvas.height = canvas.clientHeight;
@@ -205,15 +460,15 @@
         resizeCanvas();
         window.addEventListener('resize', resizeCanvas);
 
-        // ===== КАРТА =====
+        // ===== КАРТА УРОВНЯ 1 =====
         const map = [
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,2,0,0,0,3,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,0,5,0,0,0,0,0,0,2,0,0,0,1],
+            [1,0,0,0,5,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-            [1,0,0,3,0,0,0,0,0,0,0,0,0,0,0,1],
+            [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,4,0,0,1],
             [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
@@ -226,76 +481,152 @@
             angle: 0,
             health: 100,
             shield: false,
-            gossipTimer: 0
+            shieldTimer: 0,
+            isCrouching: false,
+            hasShield: false,
+            gossipTimer: 0,
+            noiseLevel: 0
         };
 
-        // ===== ВРАГИ И ПРЕДМЕТЫ =====
-        let entities = [
-            { x: 4, y: 2, type: 'bulldozer', health: 50, active: true },
-            { x: 7, y: 2, type: 'cloaker', health: 30, active: true },
-            { x: 12, y: 4, type: 'bulldozer', health: 50, active: true },
-            { x: 4, y: 6, type: 'cloaker', health: 30, active: true },
-            { x: 13, y: 7, type: 'bear', health: 100, active: true, friendly: true },
+        // ===== ВРАГИ =====
+        let enemies = [
+            { x: 4, y: 2, type: 'bulldozer', health: 100, active: true, angle: 0, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
+            { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, angle: Math.PI, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
+            { x: 12, y: 2, type: 'cloaker', health: 50, active: true, angle: 0, alertLevel: 0, viewAngle: 90 * Math.PI/180, viewDistance: 8, memoryTimer: 0, lastKnown: null },
+            { x: 13, y: 7, type: 'bear', health: 200, active: true, friendly: true, angle: 0 }
+        ];
+
+        // ===== ПРЕДМЕТЫ =====
+        let items = [
             { x: 5, y: 4, type: 'shield', collected: false }
         ];
 
-        // ===== НАСТРОЙКИ =====
+        // ===== ОБЪЕКТЫ ДЛЯ ПРЯТОК =====
+        let hidingSpots = [
+            { x: 3, y: 3, type: 'box', width: 1 },
+            { x: 7, y: 5, type: 'table', width: 1.2 },
+            { x: 10, y: 6, type: 'barrel', width: 0.8 }
+        ];
+
+        // ===== НАСТРОЙКИ 3D =====
         const fov = 60 * Math.PI / 180;
-        const rayCount = 60;
+        const rayCount = 80;
+        let gameRunning = false;
+        let gamePaused = false;
+        let currentLevel = 1;
 
         // ===== УПРАВЛЕНИЕ =====
-        let moveForward = false;
-        let moveBack = false;
-        let moveLeft = false;
-        let moveRight = false;
-        let rotateLeft = false;
-        let rotateRight = false;
+        let moveForward = false, moveBack = false, moveLeft = false, moveRight = false;
+        let rotateLeft = false, rotateRight = false;
+        let crouchPressed = false;
 
-        // Кнопки
-        document.getElementById('moveUp').addEventListener('touchstart', (e) => { e.preventDefault(); moveForward = true; });
-        document.getElementById('moveUp').addEventListener('touchend', (e) => { e.preventDefault(); moveForward = false; });
-        document.getElementById('moveDown').addEventListener('touchstart', (e) => { e.preventDefault(); moveBack = true; });
-        document.getElementById('moveDown').addEventListener('touchend', (e) => { e.preventDefault(); moveBack = false; });
-        document.getElementById('moveLeft').addEventListener('touchstart', (e) => { e.preventDefault(); moveLeft = true; });
-        document.getElementById('moveLeft').addEventListener('touchend', (e) => { e.preventDefault(); moveLeft = false; });
-        document.getElementById('moveRight').addEventListener('touchstart', (e) => { e.preventDefault(); moveRight = true; });
-        document.getElementById('moveRight').addEventListener('touchend', (e) => { e.preventDefault(); moveRight = false; });
-        document.getElementById('rotateLeft').addEventListener('touchstart', (e) => { e.preventDefault(); rotateLeft = true; });
-        document.getElementById('rotateLeft').addEventListener('touchend', (e) => { e.preventDefault(); rotateLeft = false; });
-        document.getElementById('rotateRight').addEventListener('touchstart', (e) => { e.preventDefault(); rotateRight = true; });
-        document.getElementById('rotateRight').addEventListener('touchend', (e) => { e.preventDefault(); rotateRight = false; });
+        // ===== ЗВУКИ =====
+        function speak(text, pitch = 1, rate = 1) {
+            if (!window.speechSynthesis) return;
+            let utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ru-RU';
+            utterance.pitch = pitch;
+            utterance.rate = rate;
+            speechSynthesis.speak(utterance);
+        }
 
-        document.getElementById('actionShield').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (player.shield) {
-                player.shield = false;
-            } else {
-                // Проверяем, есть ли щит в инвентаре
-                entities.forEach(e => {
-                    if (e.type === 'shield' && e.collected) {
-                        player.shield = true;
-                    }
-                });
+        function showSubtitle(text, duration = 2) {
+            let sub = document.getElementById('subtitles');
+            sub.style.display = 'block';
+            sub.innerHTML = '🎬 ' + text;
+            setTimeout(() => { sub.style.display = 'none'; }, duration * 1000);
+        }
+
+        // ===== ФУНКЦИИ ВРАГОВ =====
+        function isWallBetween(x1, y1, x2, y2) {
+            let steps = 10;
+            for (let i = 1; i <= steps; i++) {
+                let t = i / steps;
+                let checkX = x1 + (x2 - x1) * t;
+                let checkY = y1 + (y2 - y1) * t;
+                let mapX = Math.floor(checkX);
+                let mapY = Math.floor(checkY);
+                if (mapY < 0 || mapY >= map.length || mapX < 0 || mapX >= map[0].length) return true;
+                if (map[mapY][mapX] === 1) return true;
             }
-            updateHUD();
-        });
+            return false;
+        }
 
-        document.getElementById('actionGossip').addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            player.gossipTimer = 100; // 2 секунды
-            entities.forEach(e => {
-                if (e.type === 'bulldozer' || e.type === 'cloaker') {
-                    e.distracted = true;
-                    e.targetX = Math.random() * 15;
-                    e.targetY = Math.random() * 8;
+        function isPlayerHidden(px, py, ex, ey) {
+            for (let spot of hidingSpots) {
+                let dx = px - spot.x;
+                let dy = py - spot.y;
+                let distToSpot = Math.hypot(dx, dy);
+                if (distToSpot < spot.width) {
+                    let enemyToPlayer = Math.atan2(py - ey, px - ex);
+                    let enemyToSpot = Math.atan2(spot.y - ey, spot.x - ex);
+                    if (Math.abs(enemyToPlayer - enemyToSpot) < 0.5) return true;
                 }
-            });
-        });
+            }
+            return false;
+        }
 
-        // ===== ДВИЖЕНИЕ =====
+        function updateEnemies() {
+            enemies.forEach(e => {
+                if (!e.active || e.friendly) return;
+
+                let dx = player.x - e.x;
+                let dy = player.y - e.y;
+                let dist = Math.hypot(dx, dy);
+                let angleToPlayer = Math.atan2(dy, dx);
+                let angleDiff = Math.abs(angleToPlayer - e.angle);
+                while (angleDiff > Math.PI) angleDiff -= 2 * Math.PI;
+                angleDiff = Math.abs(angleDiff);
+
+                let seesPlayer = false;
+                if (dist < e.viewDistance && angleDiff < e.viewAngle/2 && !isWallBetween(e.x, e.y, player.x, player.y)) {
+                    if (player.isCrouching) {
+                        seesPlayer = Math.random() < 0.3;
+                    } else {
+                        seesPlayer = true;
+                    }
+                    if (seesPlayer && isPlayerHidden(player.x, player.y, e.x, e.y)) {
+                        seesPlayer = false;
+                    }
+                }
+
+                if (seesPlayer) {
+                    e.alertLevel = 2;
+                    e.lastKnown = { x: player.x, y: player.y };
+                    e.memoryTimer = 100;
+                    if (dist > 0.5) {
+                        e.x += (dx / dist) * 0.03;
+                        e.y += (dy / dist) * 0.03;
+                    } else {
+                        player.health -= 0.5;
+                        if (player.health < 0) player.health = 0;
+                        showSubtitle('🫎 Бульдозер атакует!', 1);
+                    }
+                } else if (e.memoryTimer > 0 && e.lastKnown) {
+                    e.alertLevel = 1;
+                    e.memoryTimer--;
+                    let ldx = e.lastKnown.x - e.x;
+                    let ldy = e.lastKnown.y - e.y;
+                    let ldist = Math.hypot(ldx, ldy);
+                    if (ldist > 0.5) {
+                        e.x += (ldx / ldist) * 0.02;
+                        e.y += (ldy / ldist) * 0.02;
+                    }
+                } else {
+                    e.alertLevel = 0;
+                    e.angle += 0.01;
+                }
+
+                // Обновление здоровья игрока
+                document.getElementById('healthValue').innerText = Math.floor(player.health);
+            });
+        }
+
+        // ===== ДВИЖЕНИЕ ИГРОКА =====
         function movePlayer() {
-            let moveSpeed = 0.1;
-            let rotSpeed = 0.05;
+            let moveSpeed = player.isCrouching ? 0.03 : 0.05;
+            let rotSpeed = 0.03;
+            let noiseIncrease = player.isCrouching ? 0.1 : 1;
 
             if (rotateLeft) player.angle -= rotSpeed;
             if (rotateRight) player.angle += rotSpeed;
@@ -306,6 +637,7 @@
                 if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
                     player.x = newX;
                     player.y = newY;
+                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
                 }
             }
             if (moveBack) {
@@ -314,6 +646,7 @@
                 if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
                     player.x = newX;
                     player.y = newY;
+                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
                 }
             }
             if (moveLeft) {
@@ -322,6 +655,7 @@
                 if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
                     player.x = newX;
                     player.y = newY;
+                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
                 }
             }
             if (moveRight) {
@@ -330,49 +664,43 @@
                 if (map[Math.floor(newY)][Math.floor(newX)] === 0) {
                     player.x = newX;
                     player.y = newY;
+                    player.noiseLevel = Math.min(100, player.noiseLevel + noiseIncrease);
                 }
             }
 
-            // Сплетни
+            player.noiseLevel = Math.max(0, player.noiseLevel - 0.5);
+            document.getElementById('noiseValue').innerText = Math.floor(player.noiseLevel) + '%';
+
             if (player.gossipTimer > 0) {
                 player.gossipTimer--;
-            } else {
-                entities.forEach(e => { e.distracted = false; });
+                player.noiseLevel = 100;
             }
 
-            // Подбор щита
-            entities.forEach(e => {
-                if (e.type === 'shield' && !e.collected) {
-                    let dist = Math.hypot(player.x - e.x, player.y - e.y);
+            items.forEach(item => {
+                if (item.type === 'shield' && !item.collected) {
+                    let dist = Math.hypot(player.x - item.x, player.y - item.y);
                     if (dist < 0.5) {
-                        e.collected = true;
+                        item.collected = true;
+                        player.hasShield = true;
                         player.shield = true;
-                        updateHUD();
+                        player.shieldTimer = 300;
+                        showSubtitle('🛡️ Щит Драго! Теперь ты защищён!', 2);
+                        speak('Щит активирован', 1.2, 1.2);
+                        document.getElementById('shieldValue').innerText = 'Есть';
                     }
                 }
             });
 
-            // Атака врагов
-            entities.forEach(e => {
-                if (!e.active || e.friendly) return;
-                if (e.distracted) return;
-
-                let dist = Math.hypot(player.x - e.x, player.y - e.y);
-                if (dist < 0.5) {
-                    if (player.shield) {
-                        player.shield = false;
-                        e.active = false;
-                        updateHUD();
-                    } else {
-                        player.health -= 20;
-                        if (player.health < 0) player.health = 0;
-                        updateHUD();
-                    }
+            if (player.shieldTimer > 0) {
+                player.shieldTimer--;
+                if (player.shieldTimer === 0) {
+                    player.shield = false;
+                    document.getElementById('shieldValue').innerText = 'Нет';
                 }
-            });
+            }
         }
 
-        // ===== РЕЙКАСТИНГ =====
+        // ===== РЕЙКАСТИНГ (3D) =====
         function render3D() {
             ctx.fillStyle = '#111';
             ctx.fillRect(0, 0, canvas.width, canvas.height/2);
@@ -409,7 +737,6 @@
 
                 let correctedDist = distance * Math.cos(rayAngle - player.angle);
                 let wallHeight = Math.min(canvas.height, canvas.height / correctedDist * 2);
-
                 let brightness = Math.min(255, 255 / (1 + correctedDist * 0.3));
                 let x = ray * rayWidth;
 
@@ -417,10 +744,13 @@
                 ctx.fillRect(x, (canvas.height - wallHeight) / 2, rayWidth + 1, wallHeight);
             }
 
-            // Рисуем сущности
-            entities.forEach(e => {
-                if (!e.active && e.type !== 'shield') return;
-                if (e.type === 'shield' && e.collected) return;
+            // Рисуем врагов
+            ctx.font = `${Math.min(100, canvas.height/5)}px Arial`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            enemies.forEach(e => {
+                if (!e.active) return;
 
                 let dx = e.x - player.x;
                 let dy = e.y - player.y;
@@ -436,43 +766,236 @@
                     let size = Math.min(150, canvas.height / dist * 30);
                     
                     ctx.font = `${size}px Arial`;
-                    ctx.textAlign = 'center';
-                    ctx.textBaseline = 'middle';
-
                     if (e.type === 'bulldozer') {
-                        ctx.fillStyle = e.distracted ? '#ff0' : '#f00';
+                        ctx.fillStyle = e.alertLevel === 2 ? '#f00' : e.alertLevel === 1 ? '#ff0' : '#4a5d23';
                         ctx.fillText('🫎', screenX, canvas.height/2);
                     } else if (e.type === 'cloaker') {
-                        ctx.fillStyle = e.distracted ? '#ff0' : '#0ff';
+                        ctx.fillStyle = '#0ff';
                         ctx.fillText('⚡', screenX, canvas.height/2);
                     } else if (e.type === 'bear') {
-                        ctx.fillStyle = '#0f0';
+                        ctx.fillStyle = '#8b5a2b';
                         ctx.fillText('🐻', screenX, canvas.height/2);
-                    } else if (e.type === 'shield') {
-                        ctx.fillStyle = '#ff0';
-                        ctx.fillText('🛡️', screenX, canvas.height/2);
                     }
                 }
             });
-        }
 
-        // ===== HUD =====
-        function updateHUD() {
-            document.getElementById('healthValue').innerText = player.health;
-            document.getElementById('shieldValue').innerText = player.shield ? 'Есть' : 'Нет';
-            let enemyCount = entities.filter(e => e.active && (e.type === 'bulldozer' || e.type === 'cloaker')).length;
-            document.getElementById('enemyValue').innerText = enemyCount;
+            // Рисуем предметы
+            items.forEach(item => {
+                if (item.collected) return;
+
+                let dx = item.x - player.x;
+                let dy = item.y - player.y;
+                let dist = Math.hypot(dx, dy);
+                if (dist > 5) return;
+
+                let angleToItem = Math.atan2(dy, dx) - player.angle;
+                while (angleToItem > Math.PI) angleToItem -= 2 * Math.PI;
+                while (angleToItem < -Math.PI) angleToItem += 2 * Math.PI;
+
+                if (Math.abs(angleToItem) < fov/2) {
+                    let screenX = (0.5 + angleToItem / fov) * canvas.width;
+                    let size = 40;
+                    ctx.font = `${size}px Arial`;
+                    ctx.fillStyle = '#ff0';
+                    ctx.fillText('🛡️', screenX, canvas.height/2 - 50);
+                }
+            });
+
+            // Прицел
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(canvas.width/2, canvas.height/2, 5, 0, 2*Math.PI);
+            ctx.fill();
         }
 
         // ===== ИГРОВОЙ ЦИКЛ =====
         function gameLoop() {
+            if (!gameRunning || gamePaused) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+
             movePlayer();
+            updateEnemies();
             render3D();
-            updateHUD();
+
+            let enemyCount = enemies.filter(e => e.active && e.type !== 'bear').length;
+            document.getElementById('enemyValue').innerText = enemyCount;
+
+            if (player.health <= 0) {
+                showSubtitle('💀 Ты пойман... Игра окончена', 3);
+                gameRunning = false;
+                setTimeout(() => { backToMenu(); }, 3000);
+            }
+
+            if (enemyCount === 0) {
+                showSubtitle('🎉 Уровень пройден!', 3);
+                gameRunning = false;
+                setTimeout(() => { backToMenu(); }, 3000);
+            }
+
             requestAnimationFrame(gameLoop);
         }
 
-        gameLoop();
+        // ===== УПРАВЛЕНИЕ =====
+        function setupControls() {
+            const btnW = document.getElementById('moveUp');
+            const btnA = document.getElementById('moveLeft');
+            const btnS = document.getElementById('moveDown');
+            const btnD = document.getElementById('moveRight');
+            const btnCrouch = document.getElementById('actionCrouch');
+            const btnGossip = document.getElementById('actionGossip');
+            const btnRotL = document.getElementById('rotateLeft');
+            const btnRotR = document.getElementById('rotateRight');
+
+            function bindTouch(btn, onStart, onEnd) {
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); onStart(); });
+                btn.addEventListener('touchend', (e) => { e.preventDefault(); onEnd(); });
+                btn.addEventListener('mousedown', (e) => { e.preventDefault(); onStart(); });
+                btn.addEventListener('mouseup', (e) => { e.preventDefault(); onEnd(); });
+                btn.addEventListener('mouseleave', onEnd);
+            }
+
+            bindTouch(btnW, () => moveForward = true, () => moveForward = false);
+            bindTouch(btnS, () => moveBack = true, () => moveBack = false);
+            bindTouch(btnA, () => moveLeft = true, () => moveLeft = false);
+            bindTouch(btnD, () => moveRight = true, () => moveRight = false);
+            bindTouch(btnRotL, () => rotateLeft = true, () => rotateLeft = false);
+            bindTouch(btnRotR, () => rotateRight = true, () => rotateRight = false);
+
+            bindTouch(btnCrouch, () => {
+                player.isCrouching = true;
+                showSubtitle('🦵 Режим скрытности', 1);
+            }, () => {
+                player.isCrouching = false;
+            });
+
+            bindTouch(btnGossip, () => {
+                if (player.gossipTimer <= 0) {
+                    player.gossipTimer = 100;
+                    showSubtitle('🗣️ Драго должен! Враги отвлеклись!', 2);
+                    enemies.forEach(e => {
+                        if (e.type !== 'bear') {
+                            e.lastKnown = { x: Math.random() * 10, y: Math.random() * 8 };
+                            e.memoryTimer = 100;
+                        }
+                    });
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                let k = e.key.toLowerCase();
+                if (k === 'w') moveForward = true;
+                if (k === 's') moveBack = true;
+                if (k === 'a') moveLeft = true;
+                if (k === 'd') moveRight = true;
+                if (k === 'arrowleft') rotateLeft = true;
+                if (k === 'arrowright') rotateRight = true;
+                if (k === 'c') {
+                    player.isCrouching = !player.isCrouching;
+                    showSubtitle(player.isCrouching ? '🦵 Присел' : '🦵 Встал', 1);
+                }
+                if (k === 'e' && player.hasShield && player.shieldTimer <= 0) {
+                    player.shield = true;
+                    player.shieldTimer = 300;
+                    showSubtitle('🛡️ Щит активирован', 1);
+                    speak('Щит активирован', 1.2, 1.2);
+                }
+                if (k === 'g' && player.gossipTimer <= 0) {
+                    player.gossipTimer = 100;
+                    showSubtitle('🗣️ Драго должен!', 2);
+                    enemies.forEach(e => {
+                        if (e.type !== 'bear') {
+                            e.lastKnown = { x: Math.random() * 10, y: Math.random() * 8 };
+                            e.memoryTimer = 100;
+                        }
+                    });
+                }
+                if (k === 'escape') {
+                    if (gameRunning && !gamePaused) pauseGame();
+                    else if (gamePaused) resumeGame();
+                }
+                e.preventDefault();
+            });
+
+            document.addEventListener('keyup', (e) => {
+                let k = e.key.toLowerCase();
+                if (k === 'w') moveForward = false;
+                if (k === 's') moveBack = false;
+                if (k === 'a') moveLeft = false;
+                if (k === 'd') moveRight = false;
+                if (k === 'arrowleft') rotateLeft = false;
+                if (k === 'arrowright') rotateRight = false;
+                e.preventDefault();
+            });
+        }
+
+        // ===== ФУНКЦИИ МЕНЮ =====
+        window.startGame = function() {
+            document.getElementById('mainMenu').style.display = 'none';
+            showBriefing();
+        };
+
+        window.showBriefing = function() {
+            document.getElementById('mainMenu').style.display = 'none';
+            document.getElementById('briefing').style.display = 'flex';
+        };
+
+        window.startLevel = function() {
+            document.getElementById('briefing').style.display = 'none';
+            gameRunning = true;
+            gamePaused = false;
+            showSubtitle('🏃 Беги! Свобода близко!', 3);
+            speak('Начинаем побег', 1, 1);
+            gameLoop();
+        };
+
+        window.backToMenu = function() {
+            document.getElementById('briefing').style.display = 'none';
+            document.getElementById('pauseMenu').style.display = 'none';
+            document.getElementById('mainMenu').style.display = 'flex';
+            gameRunning = false;
+            resetGame();
+        };
+
+        window.pauseGame = function() {
+            gamePaused = true;
+            document.getElementById('pauseMenu').style.display = 'flex';
+        };
+
+        window.resumeGame = function() {
+            gamePaused = false;
+            document.getElementById('pauseMenu').style.display = 'none';
+        };
+
+        window.restartLevel = function() {
+            document.getElementById('pauseMenu').style.display = 'none';
+            resetGame();
+            gameRunning = true;
+            gamePaused = false;
+            showSubtitle('🔄 Новая попытка!', 2);
+        };
+
+        function resetGame() {
+            player = {
+                x: 2, y: 2, angle: 0, health: 100, shield: false,
+                shieldTimer: 0, isCrouching: false, hasShield: false,
+                gossipTimer: 0, noiseLevel: 0
+            };
+            enemies = [
+                { x: 4, y: 2, type: 'bulldozer', health: 100, active: true, angle: 0, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
+                { x: 8, y: 3, type: 'bulldozer', health: 100, active: true, angle: Math.PI, alertLevel: 0, viewAngle: 60 * Math.PI/180, viewDistance: 6, memoryTimer: 0, lastKnown: null },
+                { x: 12, y: 2, type: 'cloaker', health: 50, active: true, angle: 0, alertLevel: 0, viewAngle: 90 * Math.PI/180, viewDistance: 8, memoryTimer: 0, lastKnown: null },
+                { x: 13, y: 7, type: 'bear', health: 200, active: true, friendly: true, angle: 0 }
+            ];
+            items = [ { x: 5, y: 4, type: 'shield', collected: false } ];
+            document.getElementById('healthValue').innerText = '100';
+            document.getElementById('shieldValue').innerText = 'Нет';
+        }
+
+        // ===== СТАРТ =====
+        setupControls();
+        resetGame();
     </script>
 </body>
 </html>
