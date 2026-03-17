@@ -2,836 +2,196 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GENSEC: ОХРАНА БАНКА</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENSEC: Охрана банка</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Courier New', monospace;
+            background: #111;
+            color: #fff;
+            overflow: hidden;
             user-select: none;
         }
-
-        body {
-            background: #0a1a2a;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            font-family: 'Arial', sans-serif;
-            overflow: hidden;
-        }
-
-        .game-container {
-            width: 1200px;
-            height: 800px;
-            background: linear-gradient(145deg, #2a3f4f, #1a2f3f);
-            border: 5px solid #c49a6c;
-            border-radius: 30px;
-            padding: 20px;
-            display: flex;
-            gap: 20px;
-            box-shadow: 0 0 50px #ffaa0033;
+        #game {
             position: relative;
-        }
-
-        /* РАБОЧЕЕ МЕСТО ОХРАННИКА */
-        .desk-area {
-            flex: 3;
-            background: #2d5a3e;
-            border: 4px solid #8b5a2b;
-            border-radius: 20px;
-            padding: 20px;
+            width: 100vw;
+            height: 100vh;
+            max-width: 1920px;
+            max-height: 1080px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 20px;
         }
-
-        .desk-top {
-            background: #8b4513;
-            border: 4px solid #c49a6c;
-            border-radius: 15px;
-            padding: 30px;
-            height: 200px;
-            display: flex;
-            gap: 30px;
-            box-shadow: inset 0 -10px 0 #5a2e0e;
-        }
-
-        .desk-item {
-            background: #c49a6c;
-            border: 3px solid #5a2e0e;
-            border-radius: 15px;
-            width: 150px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-            box-shadow: 0 5px 0 #5a2e0e;
-        }
-
-        .desk-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 0 #5a2e0e;
-        }
-
-        .desk-item:active {
-            transform: translateY(5px);
-            box-shadow: 0 0px 0 #5a2e0e;
-        }
-
-        .desk-item-icon {
-            font-size: 48px;
-        }
-
-        .desk-item-text {
-            font-size: 16px;
-            font-weight: bold;
-            color: #1a2f3f;
-        }
-
-        .monitor-area {
-            flex: 1;
-            background: #1a2f3f;
-            border: 4px solid #6b8e4c;
-            border-radius: 15px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .monitor-screen {
-            flex: 1;
-            background: #0a1a2a;
-            border: 3px solid #c49a6c;
-            border-radius: 10px;
-            padding: 10px;
-            color: #0f0;
-            font-family: monospace;
-            overflow-y: auto;
-        }
-
-        .monitor-buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .monitor-btn {
-            flex: 1;
-            background: #2d5a3e;
-            border: 2px solid #c49a6c;
-            border-radius: 10px;
-            padding: 10px;
-            color: white;
-            text-align: center;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .monitor-btn:hover {
-            background: #3e7a5a;
-        }
-
-        /* ПРАВАЯ ПАНЕЛЬ (СТАТУС) */
-        .status-area {
-            flex: 1;
-            background: #1a2f3f;
-            border: 4px solid #8b5a2b;
-            border-radius: 20px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .status-panel {
-            background: #2a3f4f;
-            border: 3px solid #6b8e4c;
-            border-radius: 15px;
-            padding: 15px;
-            color: white;
-        }
-
-        .status-title {
-            font-size: 20px;
-            color: #c49a6c;
-            margin-bottom: 10px;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        .status-item {
+        #interface {
             display: flex;
             justify-content: space-between;
-            margin: 10px 0;
-            font-size: 16px;
-        }
-
-        .door-panel {
-            background: #2a3f4f;
-            border: 3px solid #6b8e4c;
-            border-radius: 15px;
-            padding: 15px;
-        }
-
-        .door-btn {
-            background: #8b5a2b;
-            border: 2px solid #c49a6c;
-            border-radius: 10px;
             padding: 10px;
-            margin: 5px 0;
-            color: white;
-            text-align: center;
+            background: rgba(0,0,0,0.7);
+        }
+        #status {
+            display: flex;
+            gap: 20px;
+        }
+        .status-item {
+            font-size: 14px;
+        }
+        #controls {
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            padding: 8px 12px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
             cursor: pointer;
-            font-weight: bold;
         }
-
-        .door-btn:hover {
-            background: #a8753a;
+        #playground {
+            flex: 1;
+            position: relative;
+            background: #222;
         }
-
-        .door-btn.closed {
-            background: #2d5a3e;
-        }
-
-        /* ПЛАНИРОВКА БАНКА */
-        .map-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .map-content {
-            background: #1a2f3f;
-            border: 5px solid #c49a6c;
-            border-radius: 30px;
-            padding: 40px;
-            text-align: center;
-        }
-
-        .map-svg {
-            width: 800px;
-            height: 600px;
-            background: #2a3f4f;
-            border: 3px solid #6b8e4c;
-            border-radius: 20px;
-        }
-
-        .map-close {
-            margin-top: 20px;
-            padding: 15px 40px;
-            background: #8b5a2b;
-            border: 3px solid #c49a6c;
-            border-radius: 30px;
-            color: white;
-            font-size: 20px;
+        .object {
+            position: absolute;
             cursor: pointer;
-            display: inline-block;
         }
-
-        /* ГАЗЕТА */
-        .newspaper-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .newspaper {
-            width: 600px;
-            background: #f0e6d2;
-            border: 10px solid #8b5a2b;
-            border-radius: 20px;
-            padding: 30px;
-            font-family: 'Times New Roman', serif;
-            transform: rotate(-1deg);
-            box-shadow: 20px 20px 0 rgba(0,0,0,0.5);
-        }
-
-        .newspaper-title {
-            font-size: 48px;
-            font-weight: bold;
-            text-align: center;
-            border-bottom: 3px solid #8b5a2b;
-            margin-bottom: 20px;
-            font-family: 'Arial Black', sans-serif;
-        }
-
-        .newspaper-date {
-            text-align: center;
-            font-style: italic;
-            margin-bottom: 20px;
-        }
-
-        .newspaper-article {
-            column-count: 2;
-            column-gap: 30px;
-            text-align: justify;
-        }
-
-        /* ТЕЛЕФОН */
-        .phone-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .phone {
+        #desk {
             width: 400px;
-            background: #2d5a3e;
-            border: 5px solid #c49a6c;
-            border-radius: 30px;
-            padding: 30px;
+            height: 200px;
+            background: #533;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        #newspaper, #phone, #monitor, #button-police, #ammo-box {
+            position: absolute;
+        }
+        #newspaper { bottom: 150px; left: 300px; width: 80px; height: 60px; background: #eee; color: #000; }
+        #phone { bottom: 160px; left: 400px; width: 60px; height: 40px; background: #ccc; }
+        #monitor { bottom: 170px; left: 500px; width: 100px; height: 80px; background: #000; border: 2px solid #33f; }
+        #button-police { bottom: 180px; left: 620px; width: 50px; height: 30px; background: #f33; }
+        #ammo-box { bottom: 150px; left: 100px; width: 70px; height: 50px; background: #666; }
+        #door-panel {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            background: #444;
+            padding: 10px;
+        }
+        .door-btn {
+            width: 60px;
+            height: 40px;
+            background: #555;
+            margin: 5px 0;
             text-align: center;
-        }
-
-        .phone-speaker {
-            font-size: 40px;
-            margin-bottom: 20px;
-        }
-
-        .phone-screen {
-            background: #1a2f3f;
-            border: 3px solid #6b8e4c;
-            border-radius: 15px;
-            padding: 20px;
-            min-height: 150px;
-            color: #0f0;
-            font-family: monospace;
-            text-align: left;
-            margin-bottom: 20px;
-        }
-
-        .phone-btn {
-            background: #8b5a2b;
-            border: 3px solid #c49a6c;
-            border-radius: 30px;
-            padding: 15px 30px;
-            color: white;
-            font-size: 18px;
+            line-height: 40px;
             cursor: pointer;
-            display: inline-block;
-            margin: 0 10px;
         }
-
-        /* БОЙ */
-        .combat-area {
+        .door-open { background: #4a4; }
+        .door-closed { background: #a44; }
+        .character {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+        }
+        .banker { background: #ddd; border: 1px solid #aaa; }
+        .civilian { background: #888; border: 1px solid #666; }
+        .bandit { background: #222; border: 1px solid #000; color: red; }
+        .police { background: #aaf; border: 1px solid #88f; }
+        #time-display {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+        }
+        #ending {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: none;
-            flex-direction: column;
-            justify-content: flex-end;
-            align-items: center;
-            padding-bottom: 100px;
-            z-index: 2000;
-        }
-
-        .bandit-row {
-            display: flex;
-            gap: 50px;
-            margin-bottom: 50px;
-        }
-
-        .bandit {
-            width: 100px;
-            height: 100px;
-            background: #ff4444;
-            border: 3px solid #000;
-            border-radius: 20px;
+            background: rgba(0,0,0,0.8);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: 0.1s;
-        }
-
-        .bandit:hover {
-            transform: scale(1.1);
-        }
-
-        .bandit:active {
-            transform: scale(0.9);
-        }
-
-        .bandit-mask {
-            font-size: 40px;
-        }
-
-        .bandit-health {
-            color: white;
-            font-weight: bold;
-        }
-
-        .ammo-counter {
-            font-size: 32px;
-            color: white;
-            margin-bottom: 20px;
-        }
-
-        /* КОНЦОВКИ */
-        .end-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-        }
-
-        .end-content {
-            background: linear-gradient(145deg, #1a2f3f, #0a1a2a);
-            border: 5px solid #c49a6c;
-            border-radius: 40px;
-            padding: 60px;
-            text-align: center;
-            color: white;
-        }
-
-        .end-title {
-            font-size: 72px;
-            font-weight: bold;
-            margin-bottom: 30px;
-        }
-
-        .end-subtitle {
-            font-size: 32px;
-            color: #c49a6c;
-            margin-bottom: 40px;
-        }
-
-        .end-btn {
-            background: #2d5a3e;
-            border: 4px solid #c49a6c;
-            border-radius: 40px;
-            padding: 20px 60px;
-            font-size: 32px;
-            color: white;
-            cursor: pointer;
-            display: inline-block;
-        }
-
-        .hidden {
+            z-index: 10;
             display: none;
         }
     </style>
 </head>
 <body>
-    <div class="game-container">
-        <!-- РАБОЧЕЕ МЕСТО -->
-        <div class="desk-area">
-            <div class="desk-top">
-                <div class="desk-item" onclick="readNewspaper()">
-                    <span class="desk-item-icon">📰</span>
-                    <span class="desk-item-text">ГАЗЕТА</span>
-                </div>
-                <div class="desk-item" onclick="usePhone()">
-                    <span class="desk-item-icon">📞</span>
-                    <span class="desk-item-text">ТЕЛЕФОН</span>
-                </div>
-                <div class="desk-item" onclick="showMap()">
-                    <span class="desk-item-icon">🗺️</span>
-                    <span class="desk-item-text">ПЛАНИРОВКА</span>
-                </div>
-                <div class="desk-item" onclick="callPolice()">
-                    <span class="desk-item-icon">🚓</span>
-                    <span class="desk-item-text">ВЫЗВАТЬ</span>
-                </div>
+    <div id="game">
+        <div id="interface">
+            <div id="status">
+                <div class="status-item">Время: <span id="time">22:00</span></div>
+                <div class="status-item">Патроны: <span id="ammo">30</span></div>
+                <div class="status-item">Здоровье: <span id="health">100</span></div>
             </div>
-            <div class="monitor-area">
-                <div class="monitor-screen" id="monitorScreen">
-                    GENSEC Security v1.0<br>
-                    Время: <span id="timeDisplay">22:00</span><br>
-                    Статус: НОРМА<br>
-                    Казна: 1 000 000$<br>
-                    Патроны: <span id="ammoDisplay">30</span>
-                </div>
-                <div class="monitor-buttons">
-                    <div class="monitor-btn" onclick="switchToCameras()">📹 КАМЕРЫ</div>
-                    <div class="monitor-btn" onclick="switchToDesk()">🪑 РАБОЧЕЕ МЕСТО</div>
-                </div>
+            <div id="controls">
+                <button id="read-news">Читать газету</button>
+                <button id="call-boss">Позвонить начальнику</button>
+                <button id="study-map">Изучить планировку</button>
+                <button id="watch-cameras">Смотреть камеры</button>
             </div>
         </div>
-
-        <!-- ПРАВАЯ ПАНЕЛЬ -->
-        <div class="status-area">
-            <div class="status-panel">
-                <div class="status-title">СТАТУС</div>
-                <div class="status-item">
-                    <span>Время:</span>
-                    <span id="rightTime">22:00</span>
-                </div>
-                <div class="status-item">
-                    <span>Казна:</span>
-                    <span id="vaultStatus">1 000 000$</span>
-                </div>
-                <div class="status-item">
-                    <span>Бандиты:</span>
-                    <span id="banditCount">0</span>
-                </div>
+        <div id="playground">
+            <div id="time-display">22:00</div>
+            <div id="desk">
+                <div id="newspaper" class="object" title="Газета с новостями про PAYDAY"></div>
+                <div id="phone" class="object" title="Телефон для звонков"></div>
+<div id="monitor" class="object" title="Монитор с камерами"></div>
+                <div id="button-police" class="object" title="Кнопка вызова полиции"></div>
+                <div id="ammo-box" class="object" title="Ящик с патронами"></div>
             </div>
-            <div class="door-panel">
-                <div class="status-title">ДВЕРИ</div>
-                <div class="door-btn closed" id="door1" onclick="toggleDoor(1)">🚪 ДВЕРЬ 1 (ЗАКРЫТА)</div>
-                <div class="door-btn closed" id="door2" onclick="toggleDoor(2)">🚪 ДВЕРЬ 2 (ЗАКРЫТА)</div>
-                <div class="door-btn closed" id="door3" onclick="toggleDoor(3)">🚪 ДВЕРЬ 3 (ЗАКРЫТА)</div>
+            <div id="door-panel">
+                <div class="door-btn door-open" id="door1">Дверь 1</div>
+                <div class="door-btn door-open" id="door2">Дверь 2</div>
+                <div class="door-btn door-open" id="door3">Дверь 3</div>
             </div>
-        </div>
-    </div>
-
-    <!-- ПЛАНИРОВКА -->
-    <div class="map-overlay" id="mapOverlay">
-        <div class="map-content">
-            <svg class="map-svg" viewBox="0 0 800 600">
-                <rect width="800" height="600" fill="#2a3f4f" stroke="#6b8e4c" stroke-width="3"/>
-                
-                <!-- Стены -->
-                <rect x="100" y="100" width="600" height="400" fill="none" stroke="#c49a6c" stroke-width="5"/>
-                
-                <!-- Комнаты -->
-                <rect x="150" y="150" width="200" height="100" fill="#3a5a3a" stroke="#8b5a2b" stroke-width="3"/>
-                <text x="250" y="200" text-anchor="middle" fill="white">ХОЛЛ</text>
-                
-                <rect x="450" y="150" width="200" height="100" fill="#3a5a3a" stroke="#8b5a2b" stroke-width="3"/>
-                <text x="550" y="200" text-anchor="middle" fill="white">ЗАЛ</text>
-                
-                <rect x="150" y="300" width="200" height="100" fill="#3a5a3a" stroke="#8b5a2b" stroke-width="3"/>
-                <text x="250" y="350" text-anchor="middle" fill="white">КАССЫ</text>
-                
-                <rect x="450" y="300" width="200" height="100" fill="#3a5a3a" stroke="#8b5a2b" stroke-width="3"/>
-                <text x="550" y="350" text-anchor="middle" fill="white">СЕЙФ</text>
-                
-                <!-- Пути бандитов -->
-                <path d="M200 250 L200 300 L250 300" stroke="#ff4444" stroke-width="3" stroke-dasharray="10,10"/>
-                <path d="M500 250 L500 300 L450 300" stroke="#ff4444" stroke-width="3" stroke-dasharray="10,10"/>
-                <circle cx="200" cy="250" r="10" fill="#ff4444"/>
-                <circle cx="500" cy="250" r="10" fill="#ff4444"/>
-            </svg>
-            <div class="map-close" onclick="closeMap()">ЗАКРЫТЬ</div>
-        </div>
-    </div>
-
-    <!-- ГАЗЕТА -->
-    <div class="newspaper-overlay" id="newspaperOverlay">
-        <div class="newspaper">
-            <div class="newspaper-title">GENSEC NEWS</div>
-            <div class="newspaper-date">Сан-Фиерро, 17 марта 2026</div>
-            <div class="newspaper-article">
-                <h3>В городе ожидается визит PAYDAY</h3>
-                <p>По данным нашей разведки, банда PAYDAY планирует ограбление одного из банков города. Особое внимание уделяется филиалу GENSEC в центре. Будьте бдительны!</p>
-                <p>Начальник службы безопасности рекомендует всем охранникам внимательно изучить планировку банка и быть готовыми к любым неожиданностям.</p>
-                <p>Напоминаем: в случае нападения немедленно вызывайте полицию и используйте служебное оружие.</p>
+            <div id="ending">
+                <h1 id="ending-title"></h1>
+                <p id="ending-text"></p>
+                <button id="restart">Новая смена</button>
             </div>
-        </div>
-        <div class="map-close" onclick="closeNewspaper()" style="margin-top: 20px;">ЗАКРЫТЬ</div>
-    </div>
-
-    <!-- ТЕЛЕФОН -->
-    <div class="phone-overlay" id="phoneOverlay">
-        <div class="phone">
-            <div class="phone-speaker">📞</div>
-            <div class="phone-screen" id="phoneScreen">
-                Начальник: Алло, это служба безопасности. Что случилось?
-            </div>
-            <div>
-                <div class="phone-btn" onclick="phoneOption(1)">Всё нормально</div>
-                <div class="phone-btn" onclick="phoneOption(2)">Что-то подозрительно</div>
-            </div>
-            <div style="margin-top: 10px;">
-                <div class="phone-btn" onclick="closePhone()">Повесить</div>
-            </div>
-        </div>
-    </div>
-
-    <!-- БОЙ -->
-    <div class="combat-area" id="combatArea">
-        <div class="ammo-counter">🔫 Патроны: <span id="combatAmmo">30</span></div>
-        <div class="bandit-row" id="banditRow"></div>
-    </div>
-
-    <!-- КОНЦОВКА -->
-    <div class="end-screen" id="endScreen">
-        <div class="end-content">
-            <div class="end-title" id="endTitle">КОНЦОВКА</div>
-            <div class="end-subtitle" id="endSubtitle"></div>
-            <div class="end-btn" onclick="restartGame()">🔄 НАЧАТЬ ЗАНОВО</div>
         </div>
     </div>
 
     <script>
-        // ===== ИГРОВЫЕ ПЕРЕМЕННЫЕ =====
-        let gameTime = 22 * 60; // 22:00
-        let vaultMoney = 1000000;
-        let ammo = 30;
-        let doors = [true, true, true]; // true = закрыто
-        let bandits = [];
-        let policeCalled = false;
-        let policeTimer = null;
-        let gameActive = true;
-        let currentMode = 'desk'; // desk, cameras, combat
-        let bossPhrases = [
-            "Как обстановка, охранник?",
-            "Следи за камерами внимательнее!",
-            "Говорят, PAYDAY в городе...",
-            "Если что, сразу звони!",
-            "Не спи на посту!"
-        ];
-
-        // ===== ОБНОВЛЕНИЕ ВРЕМЕНИ =====
-        setInterval(() => {
-            if (!gameActive) return;
-            
-            gameTime += 0.1; // 6 минут в секунду реального времени
-            
-            // Час пробил (60 минут прошло)
-            if (Math.floor(gameTime) % 60 === 0 && Math.floor(gameTime) > 22*60) {
-                // Появление бандитов
-                spawnBandits();
-            }
-            
-            updateDisplay();
-        }, 1000);
-
-        // ===== ПОЯВЛЕНИЕ БАНДИТОВ =====
-        function spawnBandits() {
-            if (bandits.length > 0) return;
-            
-            bandits = [
-                { id: 1, health: 100, position: 'hall', active: true },
-                { id: 2, health: 100, position: 'hall', active: true },
-                { id: 3, health: 100, position: 'vault', active: true }
-            ];
-            
-            showMessage('🔴 ВНИМАНИЕ! В банке замечены подозрительные лица!');
-            document.getElementById('banditCount').innerText = bandits.length;
-        }
-
-        // ===== НАЧАЛО БОЯ =====
-        function startCombat() {
-            currentMode = 'combat';
-            document.getElementById('combatArea').style.display = 'flex';
-            updateCombatDisplay();
-        }
-
-        function updateCombatDisplay() {
-            let row = document.getElementById('banditRow');
-            row.innerHTML = '';
-            
-            bandits.forEach(b => {
-                if (!b.active) return;
-                
-                let div = document.createElement('div');
-                div.className = 'bandit';
-                div.onclick = () => shootBandit(b.id);
-                div.innerHTML = `
-                    <span class="bandit-mask">🎭</span>
-                    <span class="bandit-health">${b.health}</span>
-                `;
-                row.appendChild(div);
-            });
-            
-            document.getElementById('combatAmmo').innerText = ammo;
-        }
-
-        // ===== СТРЕЛЬБА =====
-        function shootBandit(id) {
-            if (ammo <= 0) {
-                showMessage('🔫 Нет патронов! Закрывай двери!');
-                return;
-            }
-            
-            ammo--;
-            document.getElementById('ammoDisplay').innerText = ammo;
-            
-            let bandit = bandits.find(b => b.id === id);
-            if (bandit) {
-                bandit.health -= 34;
-                if (bandit.health <= 0) {
-                    bandit.active = false;
-                    showMessage('✅ Бандит уничтожен!');
-                }
-            }
-            
-            // Проверка, остались ли бандиты
-            let remaining = bandits.filter(b => b.active).length;
-            if (remaining === 0) {
-                endGame('hero', 'ГЕРОЙ', 'Ты уничтожил всех бандитов, но казна цела!');
-            }
-            
-            updateCombatDisplay();
-        }
-
-        // ===== ДВЕРИ =====
-        window.toggleDoor = function(num) {
-            doors[num-1] = !doors[num-1];
-            let btn = document.getElementById(`door${num}`);
-            btn.innerText = `🚪 ДВЕРЬ ${num} (${doors[num-1] ? 'ЗАКРЫТА' : 'ОТКРЫТА'})`;
-            btn.style.background = doors[num-1] ? '#2d5a3e' : '#8b5a2b';
+        // Инициализация игры
+        const game = {
+            time: 22,
+            minutes: 0,
+            ammo: 30,
+            health: 100,
+            bandits: [],
+            doors: [true, true, true], // true = открыта
+            policeCalled: false,
+            policeArrived: false,
+            allBanditsKilled: false,
+            gameOver: false
         };
 
-        // ===== ГАЗЕТА =====
-        window.readNewspaper = function() {
-            document.getElementById('newspaperOverlay').style.display = 'flex';
-        };
+        // DOM элементы
+        const timeEl = document.getElementById('time');
+        const ammoEl = document.getElementById('ammo');
+        const healthEl = document.getElementById('health');
+        const timeDisplay = document.getElementById('time-display');
+        const ending = document.getElementById('ending');
+        const endingTitle = document.getElementById('ending-title');
+        const endingText = document.getElementById('ending-text');
+        const playground = document.getElementById('playground');
 
-        window.closeNewspaper = function() {
-            document.getElementById('newspaperOverlay').style.display = 'none';
-        };
-
-        // ===== ПЛАНИРОВКА =====
-        window.showMap = function() {
-            document.getElementById('mapOverlay').style.display = 'flex';
-        };
-
-        window.closeMap = function() {
-            document.getElementById('mapOverlay').style.display = 'none';
-        };
-
-        // ===== ТЕЛЕФОН =====
-        window.usePhone = function() {
-            document.getElementById('phoneOverlay').style.display = 'flex';
-            let screen = document.getElementById('phoneScreen');
-            screen.innerHTML = `Начальник: ${bossPhrases[Math.floor(Math.random() * bossPhrases.length)]}`;
-        };
-
-        window.phoneOption = function(opt) {
-            let screen = document.getElementById('phoneScreen');
-            if (opt === 1) {
-                screen.innerHTML = 'Начальник: Молодец, так держать!';
-            } else {
-                screen.innerHTML = 'Начальник: Будь внимательнее! Следи за камерами.';
-            }
-        };
-
-        window.closePhone = function() {
-            document.getElementById('phoneOverlay').style.display = 'none';
-        };
-
-        // ===== ВЫЗОВ ПОЛИЦИИ =====
-        window.callPolice = function() {
-            if (policeCalled) return;
-            
-            policeCalled = true;
-            showMessage('🚓 Полиция вызвана! Прибудет через 5 минут');
-            
-            // Если бандиты уже в банке
-            if (bandits.length > 0) {
-                setTimeout(() => {
-                    if (bandits.filter(b => b.active).length > 0) {
-                        endGame('call', 'ВЫЗОВ', 'Полиция приехала и арестовала бандитов!');
-                    }
-                }, 5000);
-            } else {
-                // Концовка "Всевидящий"
-                setTimeout(() => {
-                    endGame('allSeeing', 'ВСЕВИДЯЩИЙ', 'Полиция приехала до ограбления!');
-                }, 5000);
-            }
-        };
-
-        // ===== ПЕРЕКЛЮЧЕНИЕ РЕЖИМОВ =====
-        window.switchToCameras = function() {
-            currentMode = 'cameras';
-            document.querySelector('.desk-area').style.background = '#2d5a3e';
-            showMessage('📹 Режим камер (в разработке)');
-        };
-
-        window.switchToDesk = function() {
-            currentMode = 'desk';
-            document.querySelector('.desk-area').style.background = '#2d5a3e';
-        };
-
-        // ===== КОНЦОВКИ =====
-        function endGame(type, title, subtitle) {
-            gameActive = false;
-            document.getElementById('endTitle').innerText = title;
-            document.getElementById('endSubtitle').innerText = subtitle;
-            document.getElementById('endScreen').style.display = 'flex';
-            document.getElementById('combatArea').style.display = 'none';
-        }
-
-        // ===== ПЕРЕЗАПУСК =====
-        window.restartGame = function() {
-            gameTime = 22 * 60;
-            vaultMoney = 1000000;
-            ammo = 30;
-            doors = [true, true, true];
-            bandits = [];
-            policeCalled = false;
-            gameActive = true;
-            currentMode = 'desk';
-            
-            document.getElementById('endScreen').style.display = 'none';
-            document.getElementById('combatArea').style.display = 'none';
-            document.getElementById('ammoDisplay').innerText = ammo;
-            document.getElementById('banditCount').innerText = '0';
-            document.getElementById('vaultStatus').innerText = '1 000 000$';
-            
-            for (let i = 1; i <= 3; i++) {
-                let btn = document.getElementById(`door${i}`);
-                btn.innerText = `🚪 ДВЕРЬ ${i} (ЗАКРЫТА)`;
-                btn.style.background = '#2d5a3e';
-            }
-            
-            updateDisplay();
-        };
-
-        // ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА =====
-        function updateDisplay() {
-            let hours = Math.floor(gameTime / 60);
-            let minutes = Math.floor(gameTime % 60);
-            let timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
-            
-            document.getElementById('timeDisplay').innerText = timeStr;
-            document.getElementById('rightTime').innerText = timeStr;
-            document.getElementById('vaultStatus').innerText = vaultMoney.toLocaleString() + '$';
-            
-            // Проверка начала боя
-            if (bandits.length > 0 && currentMode !== 'combat' && gameActive) {
-                startCombat();
-            }
-        }
-
-        // ===== СООБЩЕНИЯ =====
-        function showMessage(text) {
-            let screen = document.getElementById('monitorScreen');
-            screen.innerHTML = `GENSEC Security v1.0<br>Время: ${document.getElementById('timeDisplay').innerText}<br>⚠️ ${text}`;
-        }
-
-        // Инициализация
-        updateDisplay();
-    </script>
-</body>
-</html>
+        // Обновление интерфейса
+        function updateUI() {
+            const minutesStr = game.minutes < 10 ? `0${game.minutes}` : game.minutes;
+            timeEl.textContent = `${game.time}:${minutesStr}`;
+            timeDisplay
+            script
+        body
+        html
