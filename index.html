@@ -2,8 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Остров Маласа — Побег</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Остров Маласа — DOOM Edition</title>
     <style>
         * {
             margin: 0;
@@ -14,21 +14,23 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #1a3f2a;
+            background: #0a1420;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
+            background: #1a2f3f;
         }
 
         .game-container {
             background: #2d5a3e;
             border: 4px solid #8b5a2b;
             border-radius: 20px;
-            padding: 20px;
+            padding: 15px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            max-width: 100%;
         }
 
         canvas {
@@ -37,34 +39,28 @@
             background: #3b6e4b;
             border: 3px solid #c49a6c;
             border-radius: 10px;
+            width: 100%;
+            height: auto;
+            max-width: 800px;
+            aspect-ratio: 16/10;
             cursor: none;
         }
 
-      <!-- МОБИЛЬНОЕ УПРАВЛЕНИЕ -->
-<div class="mobile-controls" style="display: flex; justify-content: space-between; margin-top: 15px; gap: 10px;">
-    <div style="display: flex; gap: 5px;">
-        <button class="mobile-btn" id="btnW" style="width: 60px; height: 60px; background: #8b5a2b; color: white; border: 3px solid #c49a6c; border-radius: 15px; font-size: 24px; font-weight: bold;">W</button>
-        <button class="mobile-btn" id="btnS" style="width: 60px; height: 60px; background: #8b5a2b; color: white; border: 3px solid #c49a6c; border-radius: 15px; font-size: 24px; font-weight: bold;">S</button>
-    </div>
-    <div style="display: flex; gap: 5px;">
-        <button class="mobile-btn" id="btnA" style="width: 60px; height: 60px; background: #8b5a2b; color: white; border: 3px solid #c49a6c; border-radius: 15px; font-size: 24px; font-weight: bold;">A</button>
-        <button class="mobile-btn" id="btnD" style="width: 60px; height: 60px; background: #8b5a2b; color: white; border: 3px solid #c49a6c; border-radius: 15px; font-size: 24px; font-weight: bold;">D</button>
-    </div>
-</div>
-
         .info-panel {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             margin-top: 15px;
             color: #f0e6d2;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             text-shadow: 2px 2px 0 #2d3e1f;
+            gap: 10px;
         }
 
         .health-bar {
-            width: 200px;
+            width: 150px;
             height: 25px;
             background: #4a2e1e;
             border: 2px solid #c49a6c;
@@ -90,7 +86,7 @@
             border: none;
             padding: 8px 20px;
             border-radius: 30px;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: bold;
             cursor: pointer;
             border: 2px solid #c49a6c;
@@ -100,8 +96,48 @@
             background: #a8753a;
         }
 
+        .mobile-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .mobile-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .mobile-btn {
+            width: 70px;
+            height: 70px;
+            background: #8b5a2b;
+            color: white;
+            border: 3px solid #c49a6c;
+            border-radius: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #4a2e1e;
+            transition: 0.05s;
+        }
+
+        .mobile-btn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+
+        .action-btn {
+            width: 120px;
+            height: 60px;
+            font-size: 16px;
+            border-radius: 30px;
+        }
+
         .win-message, .lose-message {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
@@ -111,23 +147,42 @@
             border-radius: 20px;
             text-align: center;
             border: 4px solid gold;
-            z-index: 100;
+            z-index: 2000;
+            max-width: 90%;
         }
 
         .win-message h1 {
             color: gold;
-            font-size: 48px;
+            font-size: 36px;
             margin-bottom: 20px;
         }
 
         .lose-message h1 {
             color: #f55;
-            font-size: 48px;
+            font-size: 36px;
             margin-bottom: 20px;
         }
 
         .hidden {
             display: none;
+        }
+
+        #subtitles {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-size: 16px;
+            border: 2px solid #c49a6c;
+            text-align: center;
+            max-width: 90%;
+            z-index: 1500;
+            display: none;
+            backdrop-filter: blur(5px);
         }
     </style>
 </head>
@@ -140,24 +195,45 @@
                 <div class="health-fill" id="healthFill" style="width: 100%"></div>
             </div>
             <div id="shieldStatus">🛡️ Щит: НЕТ</div>
-            <div id="dragoDebt">💰 Драго должен: 100500$</div>
-            <button class="button" onclick="resetGame()">🔄 Сбежать заново</button>
+            <div id="dragoDebt">💰 Драго должен: ∞</div>
+            <div id="stealthStatus">🦵 Режим: обычный</div>
+            <button class="button" onclick="resetGame()">🔄 Заново</button>
+        </div>
+
+        <!-- МОБИЛЬНОЕ УПРАВЛЕНИЕ -->
+        <div class="mobile-controls">
+            <div class="mobile-row">
+                <button class="mobile-btn" id="btnW">⬆️</button>
+            </div>
+            <div class="mobile-row">
+                <button class="mobile-btn" id="btnA">⬅️</button>
+                <button class="mobile-btn" id="btnS">⬇️</button>
+                <button class="mobile-btn" id="btnD">➡️</button>
+            </div>
+            <div class="mobile-row">
+                <button class="mobile-btn action-btn" id="btnCrouch">🦵 ПРИСЕСТЬ</button>
+                <button class="mobile-btn action-btn" id="btnGossip">🗣️ СПЛЕТНИ</button>
+            </div>
+            <div class="mobile-row">
+                <button class="mobile-btn action-btn" id="btnShield">🛡️ ЩИТ</button>
+            </div>
         </div>
     </div>
 
     <div id="winMessage" class="win-message hidden">
-        <h1>🎉 ТЫ СВОБОДЕН! 🎉</h1>
-        <p>Медведи высадились, бульдозеры повержены!</p>
-        <p>Драго всё ещё должен 100500$, но это не твоя проблема.</p>
-        <button class="button" onclick="resetGame()">🔄 Играть снова</button>
+        <h1>🎉 СВОБОДА! 🎉</h1>
+        <p>Медведи спасли тебя!</p>
+        <p>Драго всё ещё должен ∞$</p>
+        <button class="button" onclick="resetGame()">🔄 Ещё раз</button>
     </div>
 
     <div id="loseMessage" class="lose-message hidden">
         <h1>💀 ТЫ ПОЙМАН 💀</h1>
-        <p>Бульдозер добрался до тебя...</p>
-        <p>Малас не прощает попыток побега.</p>
+        <p>Бульдозер добрался...</p>
         <button class="button" onclick="resetGame()">🔄 Попробовать снова</button>
     </div>
+
+    <div id="subtitles">🎬</div>
 
     <script>
         // ===== КОНСТАНТЫ =====
@@ -165,8 +241,11 @@
         const ctx = canvas.getContext('2d');
         const healthFill = document.getElementById('healthFill');
         const shieldStatus = document.getElementById('shieldStatus');
+        const stealthStatus = document.getElementById('stealthStatus');
+        const dragoDebt = document.getElementById('dragoDebt');
         const winMessage = document.getElementById('winMessage');
         const loseMessage = document.getElementById('loseMessage');
+        const subtitlesDiv = document.getElementById('subtitles');
 
         // ===== ИГРОК =====
         let player = {
@@ -176,32 +255,17 @@
             speed: 3,
             health: 100,
             maxHealth: 100,
-            shield: false
+            shield: false,
+            isCrouching: false,
+            hasShield: false
         };
 
-        // ===== БУЛЬДОЗЕРЫ =====
+        // ===== ВРАГИ =====
         let bulldozers = [];
-        const BULLDOZER_TYPES = {
-            EVIL: 'evil',
-            GOOD: 'good'
-        };
-
-        // ===== КЛОКЕРЫ =====
         let cloakers = [];
-
-        // ===== МЕДВЕДИ =====
         let bears = [];
 
-        // ===== ЛОДКА =====
-        let boat = {
-            x: 750,
-            y: 400,
-            width: 40,
-            height: 60,
-            active: false
-        };
-
-        // ===== ЩИТ ДРАГО =====
+        // ===== ПРЕДМЕТЫ =====
         let shieldItem = {
             x: 400,
             y: 200,
@@ -209,18 +273,24 @@
             radius: 15
         };
 
-        // ===== КЛАВИШИ =====
-        let keys = {
-            w: false,
-            a: false,
-            s: false,
-            d: false
+        let boat = {
+            x: 750,
+            y: 400,
+            width: 40,
+            height: 60,
+            active: true
         };
 
-        // ===== ДОЛГ ДРАГО =====
-        let dragoDebt = 100500;
+        // ===== УПРАВЛЕНИЕ =====
+        let keys = { w: false, a: false, s: false, d: false };
+        let isCrouching = false;
+        let gossipActive = false;
+        let gossipTimer = 0;
 
-        // ===== ГЕНЕРАЦИЯ МИРА =====
+        // ===== СУБТИТРЫ =====
+        let subtitleTimer = 0;
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
         function initGame() {
             player = {
                 x: 100,
@@ -229,7 +299,9 @@
                 speed: 3,
                 health: 100,
                 maxHealth: 100,
-                shield: false
+                shield: false,
+                isCrouching: false,
+                hasShield: false
             };
 
             bulldozers = [];
@@ -237,75 +309,166 @@
             bears = [];
 
             // Злые бульдозеры
-            for (let i = 0; i < 5; i++) {
+            for (let i = 0; i < 4; i++) {
                 bulldozers.push({
-                    x: 300 + Math.random() * 400,
-                    y: 50 + Math.random() * 350,
+                    x: 400 + Math.random() * 300,
+                    y: 100 + Math.random() * 300,
                     radius: 20,
-                    type: BULLDOZER_TYPES.EVIL,
-                    speed: 1.5,
-                    stunned: false,
-                    stunTimer: 0
+                    type: 'evil',
+                    speed: 1.2,
+                    alert: false,
+                    distracted: false,
+                    targetX: 0,
+                    targetY: 0
                 });
             }
 
             // Добрые бульдозеры
             for (let i = 0; i < 3; i++) {
                 bulldozers.push({
-                    x: 200 + Math.random() * 300,
-                    y: 100 + Math.random() * 300,
+                    x: 200 + Math.random() * 200,
+                    y: 150 + Math.random() * 200,
                     radius: 20,
-                    type: BULLDOZER_TYPES.GOOD,
-                    speed: 1,
-                    stunned: false,
-                    stunTimer: 0
+                    type: 'good',
+                    speed: 0.8,
+                    alert: false,
+                    distracted: false,
+                    targetX: 0,
+                    targetY: 0
                 });
             }
 
             // Клокеры
-            for (let i = 0; i < 4; i++) {
+            for (let i = 0; i < 3; i++) {
                 cloakers.push({
-                    x: 150 + Math.random() * 500,
-                    y: 80 + Math.random() * 300,
+                    x: 500 + Math.random() * 200,
+                    y: 300 + Math.random() * 150,
                     radius: 15,
-                    speed: 2.5,
+                    speed: 2.0,
                     active: true,
                     attackTimer: 0
                 });
             }
 
-            // Щит
             shieldItem.active = true;
-            shieldItem.x = 400;
-            shieldItem.y = 200;
-
-            // Лодка
             boat.active = true;
 
+            showSubtitle('🫎 Остров Маласа. Ты — раб. Беги!', 4);
+            
             winMessage.classList.add('hidden');
             loseMessage.classList.add('hidden');
         }
 
-        // ===== ОБРАБОТКА КЛАВИШ =====
-        document.addEventListener('keydown', (e) => {
-            switch(e.key.toLowerCase()) {
-                case 'w': keys.w = true; e.preventDefault(); break;
-                case 'a': keys.a = true; e.preventDefault(); break;
-                case 's': keys.s = true; e.preventDefault(); break;
-                case 'd': keys.d = true; e.preventDefault(); break;
-            }
-        });
+        // ===== ПОКАЗ СУБТИТРОВ =====
+        function showSubtitle(text, duration = 2) {
+            subtitlesDiv.style.display = 'block';
+            subtitlesDiv.innerHTML = '🎬 ' + text;
+            subtitleTimer = duration * 60;
+        }
 
-        document.addEventListener('keyup', (e) => {
-            switch(e.key.toLowerCase()) {
-                case 'w': keys.w = false; e.preventDefault(); break;
-                case 'a': keys.a = false; e.preventDefault(); break;
-                case 's': keys.s = false; e.preventDefault(); break;
-                case 'd': keys.d = false; e.preventDefault(); break;
-            }
-        });
+        // ===== УПРАВЛЕНИЕ =====
+        function setupControls() {
+            const btnW = document.getElementById('btnW');
+            const btnA = document.getElementById('btnA');
+            const btnS = document.getElementById('btnS');
+            const btnD = document.getElementById('btnD');
+            const btnCrouch = document.getElementById('btnCrouch');
+            const btnGossip = document.getElementById('btnGossip');
+            const btnShield = document.getElementById('btnShield');
 
-        // ===== ДВИЖЕНИЕ ИГРОКА =====
+            function bindButton(btn, key) {
+                btn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                });
+                btn.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                btn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    keys[key] = true;
+                });
+                btn.addEventListener('mouseup', (e) => {
+                    e.preventDefault();
+                    keys[key] = false;
+                });
+                btn.addEventListener('mouseleave', () => { keys[key] = false; });
+            }
+
+            bindButton(btnW, 'w');
+            bindButton(btnA, 'a');
+            bindButton(btnS, 's');
+            bindButton(btnD, 'd');
+
+            btnCrouch.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                player.isCrouching = true;
+                player.speed = 1;
+                stealthStatus.innerHTML = '🦵 Режим: скрытный';
+                showSubtitle('🤫 Крадёмся...', 1);
+            });
+            btnCrouch.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                player.isCrouching = false;
+                player.speed = 3;
+                stealthStatus.innerHTML = '🦵 Режим: обычный';
+            });
+
+            btnGossip.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                gossipActive = true;
+                gossipTimer = 180;
+                showSubtitle('🗣️ Драго должен! Сплетни разносятся...', 2);
+                
+                bulldozers.forEach(b => {
+                    if (b.type === 'evil') {
+                        b.distracted = true;
+                        b.targetX = Math.random() * canvas.width;
+                        b.targetY = Math.random() * canvas.height;
+                    }
+                });
+            });
+
+            btnShield.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (player.hasShield) {
+                    player.shield = !player.shield;
+                    shieldStatus.innerHTML = player.shield ? '🛡️ Щит: АКТИВЕН' : '🛡️ Щит: ЕСТЬ';
+                    showSubtitle(player.shield ? '✨ Щит активирован!' : '💤 Щит отключён', 1);
+                } else {
+                    showSubtitle('❌ Сначала найди щит!', 1);
+                }
+            });
+
+            // Клавиатура
+            document.addEventListener('keydown', (e) => {
+                const k = e.key.toLowerCase();
+                if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
+                    keys[k] = true;
+                    e.preventDefault();
+                }
+                if (k === 'c') {
+                    player.isCrouching = !player.isCrouching;
+                    player.speed = player.isCrouching ? 1 : 3;
+                    stealthStatus.innerHTML = player.isCrouching ? '🦵 Режим: скрытный' : '🦵 Режим: обычный';
+                }
+                if (k === 'e' && player.hasShield) {
+                    player.shield = !player.shield;
+                    shieldStatus.innerHTML = player.shield ? '🛡️ Щит: АКТИВЕН' : '🛡️ Щит: ЕСТЬ';
+                }
+            });
+
+            document.addEventListener('keyup', (e) => {
+                const k = e.key.toLowerCase();
+                if (k === 'w' || k === 'a' || k === 's' || k === 'd') {
+                    keys[k] = false;
+                    e.preventDefault();
+                }
+            });
+        }
+
+        // ===== ДВИЖЕНИЕ =====
         function movePlayer() {
             let dx = 0, dy = 0;
             if (keys.w) dy -= player.speed;
@@ -318,138 +481,120 @@
                 dy *= 0.7;
             }
 
-            // Границы
             player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x + dx));
             player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y + dy));
         }
 
-        // ===== ВЗАИМОДЕЙСТВИЕ С ЩИТОМ =====
+        // ===== ПОДБОР ЩИТА =====
         function checkShieldPickup() {
             if (!shieldItem.active) return;
             
             const dist = Math.hypot(player.x - shieldItem.x, player.y - shieldItem.y);
             if (dist < player.radius + shieldItem.radius) {
+                player.hasShield = true;
                 player.shield = true;
                 shieldItem.active = false;
-                shieldStatus.innerHTML = '🛡️ Щит: АКТИВЕН (золотой)';
-                shieldStatus.style.color = 'gold';
+                shieldStatus.innerHTML = '🛡️ Щит: АКТИВЕН';
+                showSubtitle('🛡️ Щит Драго! Теперь ты защищён!', 3);
             }
         }
 
-        // ===== КЛОКЕРЫ АТАКУЮТ =====
-        function updateCloakers() {
+        // ===== ОБНОВЛЕНИЕ ВРАГОВ =====
+        function updateEnemies() {
+            // Клокеры
             cloakers = cloakers.filter(c => {
                 if (!c.active) return false;
 
-                // Движение к игроку
                 const dx = player.x - c.x;
                 const dy = player.y - c.y;
                 const dist = Math.hypot(dx, dy);
                 
-                if (dist > 0) {
+                if (dist > 0 && !player.isCrouching) {
                     c.x += (dx / dist) * c.speed;
                     c.y += (dy / dist) * c.speed;
                 }
 
-                // Атака
                 if (dist < player.radius + c.radius) {
                     if (player.shield) {
-                        // Отражаем
                         player.shield = false;
                         shieldStatus.innerHTML = '🛡️ Щит: НЕТ';
-                        shieldStatus.style.color = 'white';
-                        
-                        // Клокер исчезает
+                        showSubtitle('🛡️ Щит разбит!', 1);
                         return false;
                     } else {
-                        // Бьют с ноги
                         player.health = Math.max(0, player.health - 25);
                         healthFill.style.width = (player.health / player.maxHealth * 100) + '%';
-                        
-                        // Отбрасываем
-                        player.x -= dx * 2;
-                        player.y -= dy * 2;
-                        
-                        // Клокер исчезает после удара
+                        showSubtitle('⚡ Клокер ударил с ноги!', 1);
                         return false;
                     }
                 }
                 return true;
             });
-        }
 
-        // ===== БУЛЬДОЗЕРЫ =====
-        function updateBulldozers() {
+            // Бульдозеры
             bulldozers.forEach(b => {
-                // Стан
-                if (b.stunned) {
-                    b.stunTimer--;
-                    if (b.stunTimer <= 0) b.stunned = false;
+                if (b.type !== 'evil') return;
+
+                if (b.distracted) {
+                    const dx = b.targetX - b.x;
+                    const dy = b.targetY - b.y;
+                    const dist = Math.hypot(dx, dy);
+                    if (dist > 5) {
+                        b.x += (dx / dist) * b.speed * 1.5;
+                        b.y += (dy / dist) * b.speed * 1.5;
+                    } else {
+                        b.distracted = false;
+                    }
                     return;
                 }
 
-                if (b.type === BULLDOZER_TYPES.EVIL) {
-                    // Злые бульдозеры бегут к игроку
-                    const dx = player.x - b.x;
-                    const dy = player.y - b.y;
-                    const dist = Math.hypot(dx, dy);
-                    
-                    if (dist > 0) {
-                        b.x += (dx / dist) * b.speed;
-                        b.y += (dy / dist) * b.speed;
-                    }
+                const dx = player.x - b.x;
+                const dy = player.y - b.y;
+                const dist = Math.hypot(dx, dy);
+                
+                if (dist > 0 && !player.isCrouching) {
+                    b.x += (dx / dist) * b.speed;
+                    b.y += (dy / dist) * b.speed;
+                }
 
-                    // Если догнал
-                    if (dist < player.radius + b.radius) {
-                        player.health = 0;
-                        healthFill.style.width = '0%';
-                    }
+                if (dist < player.radius + b.radius) {
+                    player.health = 0;
+                    healthFill.style.width = '0%';
+                    showSubtitle('🫎 Бульдозер догнал...', 2);
                 }
             });
 
-            // Добрые бульдозеры станят злых
-            bulldozers.forEach(good => {
-                if (good.type !== BULLDOZER_TYPES.GOOD) return;
-                
-                bulldozers.forEach(evil => {
-                    if (evil.type !== BULLDOZER_TYPES.EVIL) return;
-                    if (evil.stunned) return;
-
-                    const dist = Math.hypot(good.x - evil.x, good.y - evil.y);
-                    if (dist < good.radius + evil.radius) {
-                        evil.stunned = true;
-                        evil.stunTimer = 200; // 10 сек (при 60fps)
-                    }
-                });
-            });
+            // Сплетни
+            if (gossipActive) {
+                gossipTimer--;
+                if (gossipTimer <= 0) {
+                    gossipActive = false;
+                    bulldozers.forEach(b => b.distracted = false);
+                }
+            }
         }
 
-        // ===== МЕДВЕДИ СПАСАЮТ =====
+        // ===== МЕДВЕДИ =====
         function updateBears() {
-            // Медведи появляются, когда игрок близко к лодке
-            if (boat.active && !bears.length) {
+            if (bears.length === 0 && boat.active) {
                 if (Math.hypot(player.x - boat.x, player.y - boat.y) < 200) {
-                    for (let i = 0; i < 5; i++) {
+                    for (let i = 0; i < 4; i++) {
                         bears.push({
-                            x: boat.x - 50 - i * 30,
+                            x: boat.x - 40 - i * 30,
                             y: boat.y + 20,
                             radius: 15,
                             active: true
                         });
                     }
+                    showSubtitle('🐻 Медведи приплыли! С чаем!', 3);
                 }
             }
 
-            // Медведи бегут на помощь и атакуют злых бульдозеров
             bears.forEach(bear => {
-                if (!bear.active) return;
-
-                // Ищем ближайшего злого бульдозера
                 let closestEvil = null;
                 let minDist = Infinity;
                 
                 bulldozers.forEach(b => {
-                    if (b.type === BULLDOZER_TYPES.EVIL && b.active !== false) {
+                    if (b.type === 'evil') {
                         const dist = Math.hypot(bear.x - b.x, bear.y - b.y);
                         if (dist < minDist) {
                             minDist = dist;
@@ -459,21 +604,19 @@
                 });
 
                 if (closestEvil) {
-                    // Движение к злому бульдозеру
                     const dx = closestEvil.x - bear.x;
                     const dy = closestEvil.y - bear.y;
                     const dist = Math.hypot(dx, dy);
                     
                     if (dist > 0) {
-                        bear.x += (dx / dist) * 2.5;
-                        bear.y += (dy / dist) * 2.5;
+                        bear.x += (dx / dist) * 2;
+                        bear.y += (dy / dist) * 2;
                     }
 
-                    // Атака
-                    if (dist < bear.radius + closestEvil.radius) {
-                        // Удаляем злого бульдозера
+         if (dist < bear.radius + closestEvil.radius) {
                         const index = bulldozers.indexOf(closestEvil);
                         if (index !== -1) bulldozers.splice(index, 1);
+                        showSubtitle('🐻 Медведь заломал бульдозера!', 2);
                     }
                 }
             });
@@ -484,36 +627,23 @@
             if (!boat.active) return false;
             
             const dist = Math.hypot(player.x - boat.x, player.y - boat.y);
-            if (dist < player.radius + 20) {
-                // Проверяем, что все злые бульдозеры уничтожены
-                const evilExists = bulldozers.some(b => b.type === BULLDOZER_TYPES.EVIL && b.active !== false);
-                if (!evilExists) {
-                    winMessage.classList.remove('hidden');
-                    return true;
-                }
+            const evilExists = bulldozers.some(b => b.type === 'evil');
+            
+            if (dist < player.radius + 20 && !evilExists) {
+                winMessage.classList.remove('hidden');
+                showSubtitle('🎉 ТЫ СВОБОДЕН! Медведи спасли!', 5);
+                return true;
             }
             return false;
         }
 
-        // ===== ОБНОВЛЕНИЕ ИГРЫ =====
-        function update() {
-            if (player.health <= 0) {
-                loseMessage.classList.remove('hidden');
-                return;
+        // ===== ОБНОВЛЕНИЕ СУБТИТРОВ =====
+        function updateSubtitles() {
+            if (subtitleTimer > 0) {
+                subtitleTimer--;
+            } else {
+                subtitlesDiv.style.display = 'none';
             }
-
-            movePlayer();
-            checkShieldPickup();
-            updateCloakers();
-            updateBulldozers();
-            updateBears();
-            
-            if (checkWin()) return;
-
-            // Обновление UI
-            document.getElementById('dragoDebt').innerHTML = `💰 Драго должен: ${dragoDebt}$`;
-
-            requestAnimationFrame(update);
         }
 
         // ===== ОТРИСОВКА =====
@@ -524,13 +654,7 @@
             ctx.fillStyle = '#3b6e4b';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Трава/текстура
-            ctx.fillStyle = '#4c7a5a';
-            for (let i = 0; i < 50; i++) {
-                ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, 2, 2);
-            }
-
-            // Игрок (раб Маласа)
+            // Игрок
             ctx.beginPath();
             ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
             ctx.fillStyle = player.shield ? '#ffd700' : '#8b4513';
@@ -539,7 +663,13 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Щит Драго
+            if (player.isCrouching) {
+                ctx.fillStyle = '#aaa';
+                ctx.font = '12px Arial';
+                ctx.fillText('🦵', player.x - 15, player.y - 20);
+            }
+
+            // Щит
             if (shieldItem.active) {
                 ctx.beginPath();
                 ctx.arc(shieldItem.x, shieldItem.y, shieldItem.radius, 0, Math.PI * 2);
@@ -549,7 +679,7 @@
                 ctx.lineWidth = 3;
                 ctx.stroke();
                 ctx.fillStyle = '#000';
-                ctx.font = '12px Arial';
+                ctx.font = '16px Arial';
                 ctx.fillText('🛡️', shieldItem.x - 10, shieldItem.y + 5);
             }
 
@@ -557,23 +687,20 @@
             bulldozers.forEach(b => {
                 ctx.beginPath();
                 ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
-                
-                if (b.stunned) {
-                    ctx.fillStyle = '#aaa';
-                } else if (b.type === BULLDOZER_TYPES.EVIL) {
-                    ctx.fillStyle = '#d00';
-                } else {
-                    ctx.fillStyle = '#0d0';
-                }
-                
+                ctx.fillStyle = b.type === 'evil' ? '#d00' : '#0d0';
                 ctx.fill();
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.stroke();
-                
                 ctx.fillStyle = '#fff';
-                ctx.font = '14px Arial';
+                ctx.font = '16px Arial';
                 ctx.fillText('🫎', b.x - 10, b.y + 5);
+                
+                if (b.distracted) {
+                    ctx.fillStyle = '#ff0';
+                    ctx.font = '12px Arial';
+                    ctx.fillText('?', b.x - 20, b.y - 20);
+                }
             });
 
             // Клокеры
@@ -586,13 +713,12 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
+                ctx.font = '14px Arial';
                 ctx.fillText('⚡', c.x - 8, c.y + 5);
             });
 
             // Медведи
             bears.forEach(b => {
-                if (!b.active) return;
                 ctx.beginPath();
                 ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#8b5a2b';
@@ -601,7 +727,7 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 ctx.fillStyle = '#fff';
-                ctx.font = '14px Arial';
+                ctx.font = '16px Arial';
                 ctx.fillText('🐻', b.x - 10, b.y + 5);
             });
 
@@ -612,22 +738,35 @@
                 ctx.fillStyle = '#c49a6c';
                 ctx.fillRect(boat.x + 10, boat.y - 35, 20, 15);
                 ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
+                ctx.font = '16px Arial';
                 ctx.fillText('🚤', boat.x + 10, boat.y - 10);
             }
 
-            // Подсказки
+            // Хинты
             ctx.fillStyle = '#fff';
-            ctx.font = '14px Arial';
-            ctx.fillText('WASD — движение', 10, 20);
-            ctx.fillText('🛡️ Щит — защита от клокеров', 10, 40);
-            ctx.fillText('🫎 Красный — злой / Зелёный — добрый', 10, 60);
+            ctx.font = '12px Arial';
+            ctx.fillText('🦵 Присесть (C)', 10, 20);
+            ctx.fillText('🗣️ Сплетни', 10, 40);
+            ctx.fillText('🛡️ Щит (E)', 10, 60);
         }
 
-        // ===== ИГРОВОЙ ЦИКЛ =====
-        function gameLoop() {
-            draw();
-            requestAnimationFrame(gameLoop);
+        // ===== ОБНОВЛЕНИЕ =====
+        function update() {
+            if (player.health <= 0) {
+                loseMessage.classList.remove('hidden');
+                return;
+            }
+
+            movePlayer();
+            checkShieldPickup();
+            updateEnemies();
+            updateBears();
+            updateSubtitles();
+            
+            if (checkWin()) return;
+
+            dragoDebt.innerHTML = `💰 Драго должен: ∞`;
+            requestAnimationFrame(update);
         }
 
         // ===== СБРОС =====
@@ -638,62 +777,19 @@
             player.health = 100;
             healthFill.style.width = '100%';
             player.shield = false;
+            player.hasShield = false;
             shieldStatus.innerHTML = '🛡️ Щит: НЕТ';
-            shieldStatus.style.color = 'white';
+            stealthStatus.innerHTML = '🦵 Режим: обычный';
+            gossipActive = false;
+            gossipTimer = 0;
+            subtitlesDiv.style.display = 'none';
         }
 
         // ===== СТАРТ =====
         initGame();
-        gameLoop();
-        setInterval(update, 1000 / 60); // 60 FPS
-
-      // ===== МОБИЛЬНОЕ УПРАВЛЕНИЕ =====
-const btnW = document.getElementById('btnW');
-const btnA = document.getElementById('btnA');
-const btnS = document.getElementById('btnS');
-const btnD = document.getElementById('btnD');
-
-function handleTouchStart(btn, key) {
-    btn.addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        keys[key] = true;
-        btn.style.background = '#c49a6c';
-    });
-    
-    btn.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        keys[key] = false;
-        btn.style.background = '#8b5a2b';
-    });
-    
-    // Для мышки (на случай если на планшете)
-    btn.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        keys[key] = true;
-        btn.style.background = '#c49a6c';
-    });
-    
-    btn.addEventListener('mouseup', (e) => {
-        e.preventDefault();
-        keys[key] = false;
-        btn.style.background = '#8b5a2b';
-    });
-    
-    btn.addEventListener('mouseleave', (e) => {
-        keys[key] = false;
-        btn.style.background = '#8b5a2b';
-    });
-}
-
-handleTouchStart(btnW, 'w');
-handleTouchStart(btnA, 'a');
-handleTouchStart(btnS, 's');
-handleTouchStart(btnD, 'd');
-
-// Отключаем стандартное нажатие на кнопках
-document.querySelectorAll('.mobile-btn').forEach(btn => {
-    btn.addEventListener('click', (e) => e.preventDefault());
-});
+        setupControls();
+        setInterval(update, 1000 / 60);
+        setInterval(draw, 1000 / 60);
     </script>
 </body>
 </html>
