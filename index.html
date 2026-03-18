@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FBI: НОЧНАЯ СМЕНА - ПОЛНОЦЕННЫЙ 3D РЕЙКАСТИНГ</title>
+    <title>FBI: НОЧНАЯ СМЕНА - ПОЛНАЯ ВЕРСИЯ</title>
     <style>
         body { margin: 0; padding: 0; background: #000; color: #fff; font-family: 'Courier New', monospace; overflow: hidden; touch-action: none; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; image-rendering: crisp-edges; }
@@ -32,6 +32,13 @@
             backdrop-filter: blur(4px);
         }
         
+        #hostage-counter {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            font-size: 28px; background: rgba(150,50,50,0.9); padding: 10px 30px;
+            border-radius: 40px; border: 3px solid #faa; z-index: 5;
+            box-shadow: 0 0 20px red; pointer-events: none;
+        }
+        
         #overlay { 
             position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
             display: flex; align-items: center; justify-content: center; 
@@ -41,7 +48,6 @@
         #overlay h1 { font-size: 72px; margin-bottom: 20px; text-shadow: 0 0 40px #3af; letter-spacing: 4px; }
         #overlay p { font-size: 28px; margin: 10px; color: #9cf; }
         
-        /* Джойстик */
         #joystick-container {
             position: absolute;
             bottom: 40px;
@@ -114,7 +120,7 @@
 <div id="overlay">
     <div>
         <h1>FBI: НОЧНАЯ СМЕНА</h1>
-        <p>🔫 ПОЛНОЦЕННЫЙ 3D РЕЙКАСТИНГ | НИЗКОПОЛИГОНАЛЬНЫЕ МОДЕЛИ</p>
+        <p>🔫 ПОЛНАЯ ВЕРСИЯ | ОФИСНЫЕ РАБОТНИКИ | ЗАЛОЖНИКИ</p>
         <p style="font-size:24px;">WASD / Джойстик - движение | Клик / 🔫 - стрельба | F / 🔦 - фонарь | 5 / 5 - подмога</p>
         <p style="color:#ffaa00; font-size:28px;">Кликните, чтобы начать</p>
     </div>
@@ -122,6 +128,7 @@
 
 <div id="crosshair"></div>
 <div id="flashlight-indicator">🔦 ФОНАРЬ: ВКЛ</div>
+<div id="hostage-counter">👥 ЗАЛОЖНИКИ: 5 | ВЫКУП: $0</div>
 <div id="drago-easter">👺 ДРАГО: Я ДОЛЖЕН!</div>
 
 <div id="ui">
@@ -147,7 +154,7 @@
     const ctx = canvas.getContext('2d');
     const overlay = document.getElementById('overlay');
     
-    // --- КАРТА 16x16 (офис ФБР) ---
+    // --- КАРТА 16x16 С ПАНОРАМНЫМИ ОКНАМИ (3 - окна) ---
     const mapSize = 16;
     const map = [
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
@@ -168,11 +175,11 @@
         1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
     ];
 
-    // --- ТЕКСТУРЫ ДЛЯ СТЕН (больше не прозрачные) ---
+    // --- ТЕКСТУРЫ ДЛЯ СТЕН ---
     const wallTextures = {
         1: { base: '#7a8d9c', dark: '#5a6f7e' },  // бетон
         2: { base: '#4a7a9c', dark: '#2a5a7c' },  // компьютеры
-        3: { base: '#9c7a5a', dark: '#7c5a3a' }   // дерево
+        3: { base: '#9cafc0', dark: '#7a8d9c' }   // окна (панорамные)
     };
 
     // --- ИГРОК ---
@@ -180,17 +187,28 @@
         x: 2.5, y: 2.5, dir: 1.57,
         hp: 100, ammo: 30,
         flashlight: true,
-        speed: 0.05,  // нормальная скорость
+        speed: 0.05,
         rotSpeed: 0.04
     };
 
-    // --- ВРАГИ С РАЗНЫМИ МАСКАМИ И КОСТЮМАМИ ---
+    // --- ОФИСНЫЕ РАБОТНИКИ (сидят за столами) ---
+    let workers = [
+        {x: 4.5, y: 4.5, type: 'worker', active: true, hostage: false, hostageTaker: null},
+        {x: 5.5, y: 5.5, type: 'worker', active: true, hostage: false, hostageTaker: null},
+        {x: 7.5, y: 6.5, type: 'worker', active: true, hostage: false, hostageTaker: null},
+        {x: 9.5, y: 3.5, type: 'worker', active: true, hostage: false, hostageTaker: null},
+        {x: 11.5, y: 5.5, type: 'worker', active: true, hostage: false, hostageTaker: null}
+    ];
+
+    // --- ВРАГИ ---
     let enemies = [];
-    let phase = 'patrol'; // patrol, scout, assault, backup
+    let phase = 'patrol';
     let scoutSpawned = false;
     let mainForceSpawned = false;
+    let ransomAmount = 0;
+    let hostagesCount = 0;
     
-    // Спавн разведчиков (2 бандита)
+    // Спавн разведчиков
     function spawnScouts() {
         if (scoutSpawned) return;
         scoutSpawned = true;
@@ -202,7 +220,7 @@
         document.getElementById('phase-display').innerText = 'РАЗВЕДКА';
     }
     
-    // Спавн основной группы (ещё 4 бандита)
+    // Спавн основной группы
     function spawnMainForce() {
         if (mainForceSpawned) return;
         mainForceSpawned = true;
@@ -220,18 +238,19 @@
     let backupActive = false;
     let gameRunning = false;
     let endingType = null;
-    let helicopterEscape = false; // для секретной концовки
+    let helicopterEscape = false;
 
     const keys = {};
     let isShooting = false;
     let dragoTimer = 0;
     const dragoElem = document.getElementById('drago-easter');
+    const hostageCounter = document.getElementById('hostage-counter');
 
-    // --- ДЖОЙСТИК (исправленное управление) ---
+    // --- ДЖОЙСТИК ---
     const joystickBase = document.getElementById('joystick-base');
     const joystickContainer = document.getElementById('joystick-container');
     let joystickActive = false;
-    let joystickDir = { x: 0, y: 0 };
+    let joystickX = 0, joystickY = 0;
     let joystickMagnitude = 0;
 
     function initJoystick() {
@@ -260,10 +279,8 @@
             
             if (dist > 5) {
                 joystickMagnitude = dist / maxDist;
-                joystickAngle = Math.atan2(dy, dx);
-                // ИСПРАВЛЕНО: теперь y отвечает за движение вперед/назад, x за поворот
-                joystickDir.y = Math.cos(joystickAngle) * joystickMagnitude; // вперед/назад
-                joystickDir.x = Math.sin(joystickAngle) * joystickMagnitude; // поворот
+                joystickX = dx / maxDist;
+                joystickY = dy / maxDist;
                 
                 base.style.transform = `translate(${dx}px, ${dy}px) scale(1.2)`;
             }
@@ -272,8 +289,8 @@
         const handleEnd = (e) => {
             e.preventDefault();
             joystickActive = false;
-            joystickDir.x = 0;
-            joystickDir.y = 0;
+            joystickX = 0;
+            joystickY = 0;
             joystickMagnitude = 0;
             base.style.transform = 'translate(0px, 0px) scale(1)';
         };
@@ -287,7 +304,6 @@
         container.addEventListener('mouseleave', handleEnd);
     }
 
-    // --- ВЫЗОВ ПОДМОГИ ---
     function callBackup() {
         if (!backupAvailable || backupActive) return;
         backupAvailable = false;
@@ -356,7 +372,28 @@
         setTimeout(() => isShooting = false, 150);
     }
 
-    // --- ЛОГИКА ФБР ---
+    // --- ПРОВЕРКА ВИДИМОСТИ МЕЖДУ ТОЧКАМИ (луч) ---
+    function isVisible(x1, y1, x2, y2) {
+        let dx = x2 - x1;
+        let dy = y2 - y1;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+        let steps = Math.floor(dist * 5);
+        for (let i = 1; i < steps; i++) {
+            let t = i / steps;
+            let cx = x1 + dx * t;
+            let cy = y1 + dy * t;
+            let mx = Math.floor(cx);
+            let my = Math.floor(cy);
+            if (mx >= 0 && mx < mapSize && my >= 0 && my < mapSize) {
+                if (map[my * mapSize + mx] !== 0) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // --- ЛОГИКА ФБР (с проверкой видимости) ---
     function updateFBI() {
         const fbis = enemies.filter(e => e.active && e.type === 'fbi');
         const bandits = enemies.filter(e => e.active && e.type === 'payday');
@@ -369,7 +406,8 @@
                 const dx = b.x - fbi.x;
                 const dy = b.y - fbi.y;
                 const d = Math.sqrt(dx*dx + dy*dy);
-                if (d < minDist) {
+                // ФБР видит только если есть прямая видимость
+                if (d < minDist && isVisible(fbi.x, fbi.y, b.x, b.y)) {
                     minDist = d;
                     target = b;
                 }
@@ -380,8 +418,11 @@
                 const dy = target.y - fbi.y;
                 const dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist > 1.5) {
-                    fbi.x += (dx / dist) * 0.03;
-                    fbi.y += (dy / dist) * 0.03;
+                    // Движение только если есть прямой путь
+                    if (isVisible(fbi.x, fbi.y, fbi.x + dx/dist * 0.1, fbi.y + dy/dist * 0.1)) {
+                        fbi.x += (dx / dist) * 0.03;
+                        fbi.y += (dy / dist) * 0.03;
+                    }
                 } else {
                     target.hp -= 0.8;
                     if (target.hp <= 0) target.active = false;
@@ -390,11 +431,38 @@
         });
     }
 
-    // --- ОБНОВЛЕНИЕ ---
+    // --- ЛОГИКА ЗАЛОЖНИКОВ ---
+    function updateHostages() {
+        hostagesCount = 0;
+        ransomAmount = 0;
+        
+        workers.forEach(w => {
+            if (!w.active) return;
+            
+            // Проверяем, есть ли рядом бандит
+            let nearbyBandit = enemies.find(e => e.active && e.type === 'payday' && 
+                Math.abs(e.x - w.x) < 1.5 && Math.abs(e.y - w.y) < 1.5);
+            
+            if (nearbyBandit && !w.hostage) {
+                w.hostage = true;
+                w.hostageTaker = nearbyBandit;
+            } else if (!nearbyBandit && w.hostage) {
+                w.hostage = false;
+                w.hostageTaker = null;
+            }
+            
+            if (w.hostage) {
+                hostagesCount++;
+                ransomAmount += 10000; // $10k за заложника
+            }
+        });
+        
+        hostageCounter.innerHTML = `👥 ЗАЛОЖНИКИ: ${hostagesCount} | ВЫКУП: $${ransomAmount}`;
+    }
+
     function update() {
         if (!gameRunning) return;
         
-        // Автоматический спавн по времени
         if (phase === 'patrol' && !scoutSpawned) {
             setTimeout(() => spawnScouts(), 5000);
         }
@@ -402,22 +470,19 @@
             setTimeout(() => spawnMainForce(), 8000);
         }
         
-        // движение с джойстика (ИСПРАВЛЕНО: теперь нормальное)
+        // Джойстик
         if (joystickActive && joystickMagnitude > 0.1) {
-            // движение вперед/назад (joystickDir.y)
-            let move = joystickDir.y * player.speed * 1.2;
+            let move = -joystickY * player.speed * 1.5;
             let nx = player.x + Math.cos(player.dir) * move;
             let ny = player.y + Math.sin(player.dir) * move;
             if (map[Math.floor(ny)*mapSize + Math.floor(nx)] === 0) {
                 player.x = nx;
                 player.y = ny;
             }
-            
-            // поворот (joystickDir.x)
-            player.dir += joystickDir.x * 0.08;
+            player.dir += joystickX * 0.1;
         }
         
-        // клавиатура
+        // Клавиатура
         if (keys['KeyW']) { 
             let nx = player.x + Math.cos(player.dir) * player.speed;
             let ny = player.y + Math.sin(player.dir) * player.speed;
@@ -431,13 +496,13 @@
         if (keys['KeyA']) player.dir -= player.rotSpeed;
         if (keys['KeyD']) player.dir += player.rotSpeed;
         
-        // движение бандитов
+        // Движение бандитов
         enemies.forEach(e => {
             if (!e.active || e.type === 'fbi') return;
             const dx = player.x - e.x;
             const dy = player.y - e.y;
             const dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 8 && dist > 1) {
+            if (dist < 8 && dist > 1 && isVisible(e.x, e.y, player.x, player.y)) {
                 e.x += (dx / dist) * 0.015;
                 e.y += (dy / dist) * 0.015;
             }
@@ -445,8 +510,8 @@
         });
         
         updateFBI();
+        updateHostages();
         
-        // пасхалка Драго
         dragoTimer++;
         if (dragoTimer > 150 && Math.random() < 0.02) {
             dragoElem.style.opacity = '1';
@@ -454,14 +519,13 @@
             dragoTimer = 0;
         }
         
-        // Секретная концовка (выход на крышу - в угол карты)
+        // Секретная концовка (лестница на крышу)
         if (player.x < 2.0 && player.y < 2.0 && !helicopterEscape) {
             helicopterEscape = true;
             endingType = 'helicopter';
             gameRunning = false;
         }
         
-        // концовки
         const aliveBandits = enemies.filter(e => e.active && e.type === 'payday').length;
         if (aliveBandits === 0 && enemies.length > 0 && !helicopterEscape) {
             endingType = backupActive ? 'backup' : 'hero';
@@ -477,72 +541,75 @@
         document.getElementById('ecount').innerText = enemies.filter(e => e.active && e.type === 'payday').length;
     }
 
-    // --- НИЗКОПОЛИГОНАЛЬНЫЕ 3D МОДЕЛИ (улучшенные) ---
-    function drawLowPolyCharacter(x, y, size, type, suit, mask) {
-        const bodyHeight = size * 1.8;
-        const bodyWidth = size * 0.8;
+    // --- РИСОВАНИЕ ПЕРСОНАЖЕЙ (нормального размера) ---
+    function drawCharacter(x, y, size, type, suit, mask, isHostage = false) {
+        const bodyHeight = size * 1.2; // Уменьшил рост
+        const bodyWidth = size * 0.6;
+        
+        ctx.shadowColor = '#00000080';
+        ctx.shadowBlur = 10;
         
         if (type === 'payday') {
-            // Тени для объёма
-            ctx.shadowColor = '#00000080';
-            ctx.shadowBlur = 10;
-            
-            // Ноги
             ctx.fillStyle = suit === 'black' ? '#222' : (suit === 'blue' ? '#225588' : '#6f7f8f');
             ctx.fillRect(x - bodyWidth/2, y - bodyHeight/2 + bodyHeight*0.5, bodyWidth*0.35, bodyHeight*0.3);
             ctx.fillRect(x + bodyWidth/2 - bodyWidth*0.35, y - bodyHeight/2 + bodyHeight*0.5, bodyWidth*0.35, bodyHeight*0.3);
             
-            // Тело
             ctx.fillStyle = suit === 'black' ? '#333' : (suit === 'blue' ? '#2a6a9c' : '#8a9aad');
             ctx.fillRect(x - bodyWidth/2, y - bodyHeight/2 + bodyHeight*0.1, bodyWidth, bodyHeight*0.6);
             
-            // Голова (3D-эффект)
             ctx.fillStyle = '#dbb87c';
             ctx.beginPath();
-            ctx.ellipse(x, y - bodyHeight/2 - size*0.15, size*0.3, size*0.35, 0, 0, Math.PI*2);
+            ctx.ellipse(x, y - bodyHeight/2 - size*0.1, size*0.25, size*0.3, 0, 0, Math.PI*2);
             ctx.fill();
             
-            // Маска
             ctx.fillStyle = '#b33e3e';
             if (mask === 'clown') {
                 ctx.beginPath();
-                ctx.arc(x, y - bodyHeight/2 - size*0.22, size*0.25, 0, Math.PI*2);
+                ctx.arc(x, y - bodyHeight/2 - size*0.15, size*0.2, 0, Math.PI*2);
                 ctx.fill();
             } else if (mask === 'hockey') {
-                ctx.fillRect(x - size*0.25, y - bodyHeight/2 - size*0.32, size*0.5, size*0.2);
+                ctx.fillRect(x - size*0.2, y - bodyHeight/2 - size*0.2, size*0.4, size*0.15);
             } else {
-                ctx.fillRect(x - size*0.2, y - bodyHeight/2 - size*0.27, size*0.4, size*0.25);
+                ctx.fillRect(x - size*0.15, y - bodyHeight/2 - size*0.15, size*0.3, size*0.2);
             }
             
-            // Глаза (светятся)
             ctx.fillStyle = '#ffeb99';
             ctx.shadowColor = '#ffff00';
             ctx.shadowBlur = 15;
             ctx.beginPath();
-            ctx.arc(x - size*0.1, y - bodyHeight/2 - size*0.22, size*0.06, 0, Math.PI*2);
-            ctx.arc(x + size*0.1, y - bodyHeight/2 - size*0.22, size*0.06, 0, Math.PI*2);
+            ctx.arc(x - size*0.08, y - bodyHeight/2 - size*0.15, size*0.04, 0, Math.PI*2);
+            ctx.arc(x + size*0.08, y - bodyHeight/2 - size*0.15, size*0.04, 0, Math.PI*2);
             ctx.fill();
             
-            ctx.shadowBlur = 0;
-            ctx.shadowColor = 'transparent';
-            
-        } else {
-            // Агент ФБР
+        } else if (type === 'fbi') {
             ctx.fillStyle = '#1f6390';
             ctx.fillRect(x - bodyWidth/2, y - bodyHeight/2 + bodyHeight*0.1, bodyWidth, bodyHeight*0.6);
             ctx.fillStyle = '#dbb87c';
             ctx.beginPath();
-            ctx.ellipse(x, y - bodyHeight/2 - size*0.15, size*0.3, size*0.35, 0, 0, Math.PI*2);
+            ctx.ellipse(x, y - bodyHeight/2 - size*0.1, size*0.25, size*0.3, 0, 0, Math.PI*2);
             ctx.fill();
             ctx.fillStyle = '#f2c744';
-            ctx.fillRect(x - size*0.2, y - bodyHeight/2 - size*0.3, size*0.4, size*0.1);
+            ctx.fillRect(x - size*0.15, y - bodyHeight/2 - size*0.2, size*0.3, size*0.1);
             ctx.fillStyle = 'white';
+            ctx.font = `${Math.floor(size*0.15)}px monospace`;
+            ctx.fillText('FBI', x - size*0.1, y - bodyHeight/2 - size*0.25);
+        } else if (type === 'worker') {
+            ctx.fillStyle = isHostage ? '#aa5555' : '#5a6b7c';
+            ctx.fillRect(x - bodyWidth/2, y - bodyHeight/2 + bodyHeight*0.1, bodyWidth, bodyHeight*0.6);
+            ctx.fillStyle = '#dbb87c';
+            ctx.beginPath();
+            ctx.ellipse(x, y - bodyHeight/2 - size*0.1, size*0.25, size*0.3, 0, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
             ctx.font = `${Math.floor(size*0.2)}px monospace`;
-            ctx.fillText('FBI', x - size*0.15, y - bodyHeight/2 - size*0.4);
+            ctx.fillText('👔', x - size*0.1, y - bodyHeight/2 - size*0.2);
         }
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
     }
 
-    // --- РЕНДЕРИНГ (РЕЙКАСТИНГ С ТЕКСТУРАМИ) ---
+    // --- РЕНДЕРИНГ ---
     function draw() {
         if (!gameRunning) {
             ctx.fillStyle = '#000';
@@ -556,23 +623,21 @@
             else if (endingType === 'helicopter') {
                 ctx.fillStyle = '#7af';
                 ctx.fillText('СЕКРЕТНАЯ КОНЦОВКА', canvas.width/2, canvas.height/2-80);
-                ctx.fillText('ВЕРТОЛЁТ ЭВАКУИРОВАЛ ВАС', canvas.width/2, canvas.height/2);
-                ctx.font = '40px monospace';
-                ctx.fillText('🚁 ДРАГО МАШЕТ КРЫЛОМ 🚁', canvas.width/2, canvas.height/2+80);
+                ctx.fillText('ЛЕСТНИЦА НА КРЫШУ', canvas.width/2, canvas.height/2-20);
+                ctx.fillText('🚁 ВЕРТОЛЁТ ЭВАКУИРОВАЛ ВАС 🚁', canvas.width/2, canvas.height/2+40);
             }
             return;
         }
         
         const w = canvas.width, h = canvas.height;
         
-        // Небо и пол с текстурами
         ctx.fillStyle = '#0a1a2a'; ctx.fillRect(0,0,w,h/2);
         ctx.fillStyle = '#2a403a'; ctx.fillRect(0,h/2,w,h/2);
         
         const FOV = Math.PI/2.2;
         const zBuffer = new Array(w).fill(20);
         
-        // Стены с текстурами (НЕ ПРОЗРАЧНЫЕ)
+        // Стены и окна
         for (let i=0; i<w; i+=2) {
             let ray = player.dir - FOV/2 + (i/w)*FOV;
             let d=0, hit=0;
@@ -590,7 +655,6 @@
             let corr = d * Math.cos(ray - player.dir);
             let wallH = Math.min(1000, h/(corr+0.1));
             
-            // Яркая текстура (непрозрачная)
             let bright = player.flashlight ? 255 - d*12 : Math.max(60, 200-d*15);
             bright = Math.max(40, Math.min(255, bright));
             
@@ -599,33 +663,55 @@
             
             ctx.fillStyle = color;
             ctx.fillRect(i, h/2 - wallH/2, 3, wallH);
+            
+            // Эффект окна
+            if (hit === 3) {
+                ctx.fillStyle = `rgba(100,150,200,${player.flashlight ? 0.3 : 0.1})`;
+                ctx.fillRect(i, h/2 - wallH/2, 3, wallH);
+            }
         }
         
-        // Отрисовка 3D персонажей
-        enemies.filter(e=>e.active).forEach(e=>{
-            let dx=e.x-player.x, dy=e.y-player.y;
-            let ang=Math.atan2(dy,dx)-player.dir;
-            while(ang<-Math.PI) ang+=2*Math.PI;
-            while(ang>Math.PI) ang-=2*Math.PI;
-            let dist=Math.sqrt(dx*dx+dy*dy);
-            if(dist>0.3 && dist<12 && Math.abs(ang)<FOV/1.5) {
-                let sx = (0.5 + ang/FOV)*w;
+        // Рисуем работников
+        workers.filter(w => w.active).forEach(w => {
+            let dx = w.x - player.x, dy = w.y - player.y;
+            let ang = Math.atan2(dy, dx) - player.dir;
+            while (ang < -Math.PI) ang += 2*Math.PI;
+            while (ang > Math.PI) ang -= 2*Math.PI;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 0.3 && dist < 12 && Math.abs(ang) < FOV/1.5) {
+                let sx = (0.5 + ang/FOV) * w;
                 if (dist < zBuffer[Math.floor(sx)]) {
-                    let size = Math.min(250, h/(dist*0.7));
-                    drawLowPolyCharacter(sx, h/2 + size*0.3, size, e.type, e.suit, e.mask);
+                    let size = Math.min(150, h/(dist*0.8));
+                    drawCharacter(sx, h/2 + size*0.2, size, 'worker', null, null, w.hostage);
                 }
             }
         });
         
-        // Оружие (Глок)
+        // Рисуем врагов и ФБР
+        enemies.filter(e => e.active).forEach(e => {
+            let dx = e.x - player.x, dy = e.y - player.y;
+            let ang = Math.atan2(dy, dx) - player.dir;
+            while (ang < -Math.PI) ang += 2*Math.PI;
+            while (ang > Math.PI) ang -= 2*Math.PI;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 0.3 && dist < 12 && Math.abs(ang) < FOV/1.5) {
+                let sx = (0.5 + ang/FOV) * w;
+                if (dist < zBuffer[Math.floor(sx)]) {
+                    let size = Math.min(150, h/(dist*0.8));
+                    drawCharacter(sx, h/2 + size*0.2, size, e.type, e.suit, e.mask);
+                }
+            }
+        });
+        
+        // Оружие (нормального размера)
         ctx.fillStyle = '#444';
-        ctx.fillRect(w/2-80, h-160, 140, 140);
+        ctx.fillRect(w/2-30, h-100, 60, 80);
         ctx.fillStyle = '#222';
-        ctx.fillRect(w/2-60, h-190, 80, 40);
+        ctx.fillRect(w/2-20, h-120, 40, 25);
         if (isShooting) {
             ctx.fillStyle = 'orange';
             ctx.beginPath();
-            ctx.arc(w/2+50, h/2+20, 30, 0, Math.PI*2);
+            ctx.arc(w/2+15, h/2-10, 20, 0, Math.PI*2);
             ctx.fill();
         }
     }
