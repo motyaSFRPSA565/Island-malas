@@ -6,268 +6,263 @@
     <title>ОСТРОВ МАЛАСА: ПОБЕГ</title>
     <script src="https://cdnjs.cloudflare.com"></script>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #ui { position: absolute; top: 10px; left: 10px; color: #0f0; text-shadow: 2px 2px #000; pointer-events: none; }
-        #noise-bar { width: 200px; height: 10px; border: 1px solid #fff; margin-top: 5px; }
-        #noise-fill { width: 0%; height: 100%; background: #f00; transition: width 0.2s; }
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid rgba(255,255,255,0.5); transform: translate(-50%, -50%); border-radius: 50%; }
-        #menu, #game-over { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; text-align: center; z-index: 100; }
-        button { padding: 15px 30px; font-size: 1.2rem; cursor: pointer; background: #b00; color: #fff; border: none; margin: 10px; border-radius: 5px; }
-        #mobile-controls { position: absolute; bottom: 20px; width: 100%; display: none; justify-content: space-between; padding: 0 50px; box-sizing: border-box; }
-        .m-btn { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; }
-        @media (max-width: 800px) { #mobile-controls { display: flex; } }
+        body { margin: 0; overflow: hidden; background: #1a1a1a; font-family: 'Courier New', monospace; color: #fff; }
+        #ui { position: absolute; top: 20px; left: 20px; z-index: 10; pointer-events: none; text-shadow: 2px 2px #000; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; border: 2px solid rgba(0,255,0,0.5); transform: translate(-50%, -50%); border-radius: 50%; }
+        #menu, #game-over { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; text-align: center; }
+        button { padding: 15px 40px; font-size: 1.2rem; cursor: pointer; background: #008000; color: #fff; border: 2px solid #fff; margin-top: 20px; transition: 0.3s; }
+        button:hover { background: #00ff00; color: #000; }
+        .stat { margin-bottom: 5px; font-weight: bold; font-size: 1.1rem; }
+        #noise-bar { width: 150px; height: 8px; border: 1px solid #fff; display: inline-block; vertical-align: middle; }
+        #noise-fill { height: 100%; background: #ff0000; width: 0%; }
     </style>
 </head>
 <body>
 
 <div id="ui">
-    <div id="mission-info">МИССИЯ: ТЮРЬМА (ОБУЧЕНИЕ)</div>
-    <div id="hp-bar">HP: 100</div>
-    <div id="ammo-ui" style="display:none">ДРОБОВИК: 8 / 32</div>
-    <div id="noise-container" style="display:none">ШУМ: <div id="noise-bar"><div id="noise-fill"></div></div></div>
-    <div id="timer-ui" style="display:none">ВРЕМЯ: 03:00</div>
+    <div id="mission-label" class="stat">МИССИЯ: 1 - ПОБЕГ ИЗ ТЮРЬМЫ</div>
+    <div id="hp-label" class="stat">ЗДОРОВЬЕ: 100%</div>
+    <div id="ammo-label" class="stat" style="display:none">ПАТРОНЫ: 0</div>
+    <div id="noise-ui" class="stat" style="display:none">ШУМ: <div id="noise-bar"><div id="noise-fill"></div></div></div>
+    <div id="timer-label" class="stat" style="display:none">ТАЙМЕР: 03:00</div>
 </div>
 
 <div id="crosshair"></div>
 
 <div id="menu">
     <h1>ОСТРОВ МАЛАСА</h1>
-    <p>Вы были рабом на этом острове долгие годы. Пора уходить.</p>
-    <button onclick="startGame()">НАЧАТЬ ПОБЕГ</button>
-    <button onclick="resetSave()" style="background:#444">СБРОСИТЬ ПРОГРЕСС</button>
+    <p style="max-width: 600px;">Вы проснулись в камере. Оружия нет. <br>Найдите выход (белый портал), чтобы продвинуться дальше.</p>
+    <button onclick="startGame()">НАЧАТЬ ИГРУ</button>
+    <p style="font-size: 0.8rem; margin-top: 20px;">W,A,S,D - Ходить | Shift - Присесть/Стелс | F - Фонарь | Клик - Огонь</p>
 </div>
 
 <div id="game-over" style="display:none">
-    <h1 id="result-title">ВЫ ПОГИБЛИ</h1>
-    <p id="result-desc"></p>
-    <button onclick="location.reload()">ПОПРОБОВАТЬ СНОВА</button>
-</div>
-
-<div id="mobile-controls">
-    <div class="m-btn" id="m-up">W</div>
-    <div style="display:flex; gap:10px;">
-        <div class="m-btn" id="m-f">F</div>
-        <div class="m-btn" id="m-fire">FIRE</div>
-    </div>
+    <h1 id="res-title">ВЫ ПОГИБЛИ</h1>
+    <p id="res-desc"></p>
+    <button onclick="location.reload()">ЗАНОВО</button>
 </div>
 
 <script>
-/** ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ **/
-let scene, camera, renderer, clock, player, flashLight, weapon;
+/** ENGINE CORE **/
+let scene, camera, renderer, clock, flashLight, moonLight;
 let enemies = [], allies = [], objects = [];
-let currentMission = localStorage.getItem('malasa_mission') || 1;
-let hp = 100, ammo = 0, hasWeapon = false, isCrouching = false, noise = 0;
+let hp = 100, ammo = 0, hasWeapon = false, noise = 0, currentMission = 1;
 let gameState = 'menu';
 let missionTimer = 180;
-
 const keys = {};
 
+// Инициализация Three.js
 function init() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x000000, 0.05);
+    scene.background = new THREE.Color(0x111111);
+    scene.fog = new THREE.FogExp2(0x111111, 0.05);
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    
     renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
     document.body.appendChild(renderer.domElement);
 
     clock = new THREE.Clock();
 
-    // Свет
-    const ambient = new THREE.AmbientLight(0x404040, 0.5);
+    // СВЕТ (Добавлено больше яркости)
+    const ambient = new THREE.AmbientLight(0xffffff, 0.5); 
     scene.add(ambient);
 
-    flashLight = new THREE.SpotLight(0xffffff, 2, 20, Math.PI/6);
+    moonLight = new THREE.DirectionalLight(0xaaaaff, 0.3);
+    moonLight.position.set(5, 10, 5);
+    scene.add(moonLight);
+
+    flashLight = new THREE.SpotLight(0xffffff, 5, 35, Math.PI/4, 0.5);
     flashLight.visible = false;
     scene.add(flashLight);
+    scene.add(flashLight.target);
 
-    setupMission(currentMission);
+    loadMission(currentMission);
 
     window.addEventListener('keydown', e => { 
         keys[e.code] = true;
-        if(e.code === 'KeyF') toggleFlashlight();
+        if(e.code === 'KeyF') flashLight.visible = !flashLight.visible;
     });
     window.addEventListener('keyup', e => keys[e.code] = false);
-    window.addEventListener('mousedown', () => { if(hasWeapon) fire(); });
-
+    window.addEventListener('mousedown', () => { if(hasWeapon && gameState === 'playing') fire(); });
+    
     animate();
 }
 
-function setupMission(num) {
-    // Очистка сцены
+/** MISSIONS **/
+function loadMission(n) {
+    // Чистка
     enemies.forEach(e => scene.remove(e.mesh));
     objects.forEach(o => scene.remove(o));
+    allies.forEach(a => scene.remove(a.mesh));
     enemies = []; objects = []; allies = [];
 
     // Пол
-    const floorGeo = new THREE.PlaneGeometry(100, 100);
-    const floorMat = new THREE.MeshPhongMaterial({ color: 0x222222 });
-    const floor = new THREE.Mesh(floorGeo, floorMat);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(200,200), new THREE.MeshPhongMaterial({color: 0x222222}));
     floor.rotation.x = -Math.PI/2;
     scene.add(floor);
 
-    if(num == 1) { // Тюрьма
+    // Выход (Портал)
+    const portal = new THREE.Mesh(new THREE.BoxGeometry(2,4,2), new THREE.MeshBasicMaterial({color: 0xffffff}));
+    portal.position.set(0, 2, -45);
+    portal.name = "EXIT";
+    scene.add(portal);
+    objects.push(portal);
+
+    if(n == 1) { // Тюрьма
+        spawnAlly(3, 0, -5, "Медведь");
         createWall(0, 0, -10, 20, 5);
-        spawnAlly(3, 0, -5, "Медведь с чаем");
-        document.getElementById('mission-info').innerText = "МИССИЯ 1: ТЮРЬМА (Найдите выход)";
+        document.getElementById('mission-label').innerText = "МИССИЯ 1: ТЮРЬМА (Дойдите до белого портала)";
     } 
-    else if(num == 2) { // Подземелье
-        document.getElementById('noise-container').style.display = 'block';
-        spawnEnemy(0, 0, -15, 'cloaker');
-        document.getElementById('mission-info').innerText = "МИССИЯ 2: ПОДЗЕМЕЛЬЕ (Тихо!)";
+    else if(n == 2) { // Подземелье
+        document.getElementById('noise-ui').style.display = 'block';
+        spawnEnemy(0, 0, -20, 'cloaker');
+        document.getElementById('mission-label').innerText = "МИССИЯ 2: ПОДЗЕМЕЛЬЕ (Используйте Shift)";
     }
-    else if(num == 3) { // Лагерь
-        hasWeapon = true;
-        ammo = 32;
-        document.getElementById('ammo-ui').style.display = 'block';
-        spawnEnemy(5, 0, -20, 'bulldozer');
-        spawnEnemy(-5, 0, -25, 'bulldozer');
-        document.getElementById('mission-info').innerText = "МИССИЯ 3: ЛАГЕРЬ (Бой)";
+    else if(n == 3) { // Лагерь
+        hasWeapon = true; ammo = 32;
+        document.getElementById('ammo-label').style.display = 'block';
+        document.getElementById('ammo-label').innerText = "ПАТРОНЫ: 32";
+        spawnEnemy(10, 0, -20, 'bulldozer');
+        spawnEnemy(-10, 0, -30, 'bulldozer');
+        document.getElementById('mission-label').innerText = "МИССИЯ 3: ЛАГЕРЬ (Бой)";
     }
-    else if(num == 4) { // Доки
-        document.getElementById('timer-ui').style.display = 'block';
-        spawnEnemy(0, 0, -30, 'giga');
-        document.getElementById('mission-info').innerText = "МИССИЯ 4: ДОКИ (Убить Босса)";
+    else if(n == 4) { // Доки
+        document.getElementById('timer-label').style.display = 'block';
+        spawnEnemy(0, 0, -35, 'giga');
+        document.getElementById('mission-label').innerText = "МИССИЯ 4: ДОКИ (Босс)";
     }
 }
 
-/** ГЕНЕРАЦИЯ СУЩЕСТВ **/
-function spawnEnemy(x, y, z, type) {
+/** ENTITIES **/
+function spawnEnemy(x, z, type) {
     const group = new THREE.Group();
-    let color = 0x556b2f; // Бульдозер
-    if(type === 'cloaker') color = 0x111111;
-    if(type === 'giga') color = 0xffd700;
+    let color = (type === 'cloaker') ? 0x000000 : (type === 'giga' ? 0xffd700 : 0x556b2f);
+    let scale = (type === 'giga') ? 2 : 1;
 
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 1), new THREE.MeshPhongMaterial({color}));
-    const head = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.5), new THREE.MeshPhongMaterial({color: 0xffffff}));
-    head.position.y = 1.3;
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1*scale, 2*scale, 1*scale), new THREE.MeshPhongMaterial({color}));
+    const head = new THREE.Mesh(new THREE.BoxGeometry(0.6*scale, 0.6*scale, 0.6*scale), new THREE.MeshPhongMaterial({color: 0xff0000}));
+    head.position.y = 1.3 * scale;
     group.add(body, head);
-    group.position.set(x, 1, z);
+    group.position.set(x, 1 * scale, z);
     scene.add(group);
-    enemies.push({ mesh: group, type, hp: type==='giga'?500:100 });
+    enemies.push({ mesh: group, hp: type==='giga'?500:100, type });
 }
 
-function spawnAlly(x, y, z, type) {
-    const bear = new THREE.Group();
-    const body = new THREE.Mesh(new THREE.SphereGeometry(0.8), new THREE.MeshPhongMaterial({color: 0x8b4513}));
-    bear.add(body);
-    bear.position.set(x, 0.8, z);
+function spawnAlly(x, y, z) {
+    const bear = new THREE.Mesh(new THREE.SphereGeometry(1), new THREE.MeshPhongMaterial({color: 0x8b4513}));
+    bear.position.set(x, 1, z);
     scene.add(bear);
-    allies.push({ mesh: bear, type });
+    allies.push({ mesh: bear });
 }
 
 function createWall(x, y, z, w, h) {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 1), new THREE.MeshPhongMaterial({color: 0x444444}));
+    const wall = new THREE.Mesh(new THREE.BoxGeometry(w, h, 2), new THREE.MeshPhongMaterial({color: 0x333333}));
     wall.position.set(x, h/2, z);
     scene.add(wall);
     objects.push(wall);
 }
 
-/** ЛОГИКА **/
-function toggleFlashlight() {
-    flashLight.visible = !flashLight.visible;
-}
-
+/** GAMEPLAY **/
 function fire() {
     if(ammo <= 0) return;
     ammo--;
-    document.getElementById('ammo-ui').innerText = `ДРОБОВИК: ${ammo} / 32`;
-    
-    // Простая проверка попадания лучем
+    document.getElementById('ammo-label').innerText = "ПАТРОНЫ: " + ammo;
+
     const raycaster = new THREE.Raycaster();
-    raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-    const intersects = raycaster.intersectObjects(enemies.map(e => e.mesh), true);
+    const center = new THREE.Vector2(0, 0);
+    raycaster.setFromCamera(center, camera);
     
+    const intersects = raycaster.intersectObjects(enemies.map(e => e.mesh), true);
     if(intersects.length > 0) {
-        const targetMesh = intersects[0].object.parent;
-        const enemy = enemies.find(e => e.mesh === targetMesh);
-        if(enemy) {
-            enemy.hp -= 50;
-            if(enemy.hp <= 0) {
-                scene.remove(enemy.mesh);
-                checkMissionProgress();
+        let hitMesh = intersects[0].object;
+        while(hitMesh.parent && !hitMesh.parent.isScene) hitMesh = hitMesh.parent;
+        const target = enemies.find(e => e.mesh === hitMesh);
+        if(target) {
+            target.hp -= 40;
+            if(target.hp <= 0) {
+                scene.remove(target.mesh);
+                enemies = enemies.filter(e => e !== target);
             }
         }
     }
-}
-
-function checkMissionProgress() {
-    const aliveEnemies = enemies.filter(e => e.hp > 0).length;
-    if(aliveEnemies === 0) {
-        if(currentMission < 4) {
-            currentMission++;
-            localStorage.setItem('malasa_mission', currentMission);
-            alert("Миссия выполнена! Переход к следующей...");
-            setupMission(currentMission);
-        } else {
-            endGame("ЛЕГЕНДА", "Вы победили Гига-Бульдозера и сбежали с острова!");
-        }
-    }
-}
-
-function endGame(title, desc) {
-    gameState = 'over';
-    document.getElementById('game-over').style.display = 'flex';
-    document.getElementById('result-title').innerText = title;
-    document.getElementById('result-desc').innerText = desc;
 }
 
 function update(delta) {
     if(gameState !== 'playing') return;
 
-    const moveSpeed = (keys['ShiftLeft'] ? 2 : 5) * delta;
-    isCrouching = keys['ShiftLeft'];
+    // Movement
+    const speed = (keys['ShiftLeft'] ? 2.5 : 6) * delta;
+    const oldPos = camera.position.clone();
+    
+    if(keys['KeyW']) camera.translateZ(-speed);
+    if(keys['KeyS']) camera.translateZ(speed);
+    if(keys['KeyA']) camera.translateX(-speed);
+    if(keys['KeyD']) camera.translateX(speed);
+    camera.position.y = (keys['ShiftLeft'] ? 1.0 : 1.8);
 
-    // Движение (упрощенно)
-    if(keys['KeyW']) camera.translateZ(-moveSpeed);
-    if(keys['KeyS']) camera.translateZ(moveSpeed);
-    if(keys['KeyA']) camera.translateX(-moveSpeed);
-    if(keys['KeyD']) camera.translateX(moveSpeed);
-
-    camera.position.y = isCrouching ? 1 : 1.7;
-
-    // Фонарик следует за камерой
-    flashLight.position.copy(camera.position);
-    flashLight.target.position.set(
-        camera.position.x - Math.sin(camera.rotation.y),
-        camera.position.y,
-        camera.position.z - Math.cos(camera.rotation.y)
-    );
-    flashLight.target.updateMatrixWorld();
-
-    // Шум в стелс-миссии
+    // Noise Logic
     if(currentMission == 2) {
-        if(!isCrouching && (keys['KeyW'] || keys['KeyS'])) noise = Math.min(100, noise + 1);
-        else noise = Math.max(0, noise - 0.5);
+        if(!keys['ShiftLeft'] && (keys['KeyW'] || keys['KeyS'] || keys['KeyA'] || keys['KeyD'])) {
+            noise = Math.min(100, noise + 40 * delta);
+        } else {
+            noise = Math.max(0, noise - 20 * delta);
+        }
         document.getElementById('noise-fill').style.width = noise + '%';
-        if(noise >= 100) { hp -= 0.5; }
+        if(noise > 90) hp -= 10 * delta;
     }
 
-    // Таймер в финале
-    if(currentMission == 4) {
-        missionTimer -= delta;
-        let mins = Math.floor(missionTimer/60);
-        let secs = Math.floor(missionTimer%60);
-        document.getElementById('timer-ui').innerText = `ВРЕМЯ: ${mins}:${secs < 10 ? '0'+secs : secs}`;
-        if(missionTimer <= 0) endGame("СМЕРТЬ", "Вы не успели на корабль...");
-    }
+    // Flashlight Direction
+    flashLight.position.copy(camera.position);
+    const dir = new THREE.Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
+    flashLight.target.position.copy(camera.position).add(dir);
 
-    // Логика врагов (преследование)
+    // Enemy AI
     enemies.forEach(en => {
-        if(en.hp > 0) {
-            const dist = en.mesh.position.distanceTo(camera.position);
-            if(dist < 10) {
-                en.mesh.lookAt(camera.position.x, 1, camera.position.z);
-                en.mesh.translateZ(0.03);
-                if(dist < 1.5) {
-                    hp -= 0.2;
-                    document.getElementById('hp-bar').innerText = `HP: ${Math.floor(hp)}`;
-                    if(hp <= 0) endGame("СМЕРТЬ", "Остров Маласа поглотил вас...");
-                }
-            }
+        const dist = en.mesh.position.distanceTo(camera.position);
+        if(dist < 15) {
+            en.mesh.lookAt(camera.position.x, en.mesh.position.y, camera.position.z);
+            en.mesh.translateZ( (en.type === 'cloaker' ? 5 : 2) * delta );
+            if(dist < 2) hp -= 20 * delta;
         }
     });
+
+    // Check Portal Collision
+    if(camera.position.distanceTo(new THREE.Vector3(0, 0, -45)) < 3) {
+        nextLevel();
+    }
+
+    // Timer (Mission 4)
+    if(currentMission == 4) {
+        missionTimer -= delta;
+        const m = Math.floor(missionTimer/60);
+        const s = Math.floor(missionTimer%60);
+        document.getElementById('timer-label').innerText = `ТАЙМЕР: 0${m}:${s<10?'0'+s:s}`;
+        if(missionTimer <= 0) finishGame("СМЕРТЬ", "Вы не успели до отплытия корабля!");
+    }
+
+    // HP Update
+    document.getElementById('hp-label').innerText = `ЗДОРОВЬЕ: ${Math.max(0, Math.floor(hp))}%`;
+    if(hp <= 0) finishGame("СМЕРТЬ", "Вас поймали стражи острова Маласа.");
+}
+
+function nextLevel() {
+    if(currentMission < 4) {
+        currentMission++;
+        camera.position.set(0, 1.8, 0);
+        loadMission(currentMission);
+    } else {
+        finishGame("ЛЕГЕНДА", "Вы убили Гига-Бульдозера и угнали лодку!");
+    }
+}
+
+function finishGame(title, desc) {
+    gameState = 'over';
+    document.exitPointerLock();
+    document.getElementById('game-over').style.display = 'flex';
+    document.getElementById('res-title').innerText = title;
+    document.getElementById('res-desc').innerText = desc;
 }
 
 function animate() {
@@ -281,20 +276,14 @@ function startGame() {
     document.getElementById('menu').style.display = 'none';
     gameState = 'playing';
     init();
+    document.body.requestPointerLock();
 }
 
-function resetSave() {
-    localStorage.removeItem('malasa_mission');
-    location.reload();
-}
-
-// Управление мышью (Lock Pointer)
-document.addEventListener('click', () => {
-    if(gameState === 'playing') document.body.requestPointerLock();
-});
+// Pointer Lock
 document.addEventListener('mousemove', (e) => {
-    if(document.pointerLockElement === document.body) {
+    if(document.pointerLockElement === document.body && gameState === 'playing') {
         camera.rotation.y -= e.movementX * 0.002;
+        camera.rotation.x = Math.max(-Math.PI/3, Math.min(Math.PI/3, camera.rotation.x - e.movementY * 0.002));
     }
 });
 </script>
