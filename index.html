@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CS 1.6: Мост Сан-Фиерро - Грузовик смерти</title>
+    <title>CS 1.6: Мост Сан-Фиерро - Финальная битва</title>
     <style>
         * {
             user-select: none;
@@ -232,20 +232,34 @@
             text-shadow: 2px 2px 0 #000;
             z-index: 100;
         }
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            z-index: 1000;
+            pointer-events: none;
+            box-shadow: 0 0 5px black;
+        }
     </style>
 </head>
 <body>
-    <div id="info">🌉 МОСТ САН-ФИЕРРО | СПЕЦОПЕРАЦИЯ "ГРУЗ"</div>
+    <div id="crosshair"></div>
+    <div id="info">🌉 МОСТ САН-ФИЕРРО | ОПЕРАЦИЯ "ГРУЗ"</div>
     <div id="story-container">
-        <div id="story">📖 СЮЖЕТ: Террористы заминировали мост, чтобы уничтожить грузовик с продовольствием для города. Грузовик приближается! У вас есть 2 минуты, пока он не въедет на мост. Если бомба взорвётся до того, как грузовик проедет - миссия провалена. Если грузовик успеет проехать до взрыва - победа спецназа.</div>
+        <div id="story">📖 СЮЖЕТ: Террористы заминировали мост, чтобы уничтожить грузовик с продовольствием. Грузовик приближается по мосту! У вас есть 2 минуты, пока он не доедет до конца. Если бомба взорвётся до того, как грузовик проедет - миссия провалена.</div>
         <div id="toggle-story">✕</div>
     </div>
-    <div id="objective">🎯 Т: Удерживайте мост 2 мин | CT: Разминируйте до приезда грузовика</div>
+    <div id="objective">🎯 T: Удерживайте мост 2 мин | CT: Разминируйте до приезда грузовика</div>
     <div id="timer">02:00</div>
-    <div id="truck-status">🚚 Грузовик: 100м до моста</div>
+    <div id="truck-status">🚚 Грузовик: 100м до финиша</div>
     <div id="camera-feed">
         <div class="cam-row">📹 МОСТ ЦЕНТР: 3T / 2CT</div>
-        <div class="cam-row">📹 ПОДХОДЫ: Грузовик</div>
+        <div class="cam-row">📹 ПОДХОДЫ: Грузовик на мосту</div>
         <div class="cam-row">📹 ЛЕС: Чисто</div>
     </div>
     <div id="chat">🎮 Нажмите 1 (CT) или 2 (T)</div>
@@ -285,10 +299,10 @@
         // --- Инициализация сцены ---
         const scene = new THREE.Scene();
         scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, 60, 250);
+        scene.fog = new THREE.Fog(0x87CEEB, 80, 300);
 
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 7, 20);
+        camera.position.set(0, 12, 25); // На уровне моста
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -299,22 +313,22 @@
         // Освещение
         const ambientLight = new THREE.AmbientLight(0x404060);
         scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.3);
-        sunLight.position.set(20, 40, 20);
+        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
+        sunLight.position.set(30, 50, 30);
         sunLight.castShadow = true;
         sunLight.receiveShadow = true;
         sunLight.shadow.mapSize.width = 2048;
         sunLight.shadow.mapSize.height = 2048;
         sunLight.shadow.camera.near = 1;
-        sunLight.shadow.camera.far = 100;
-        sunLight.shadow.camera.left = -40;
-        sunLight.shadow.camera.right = 40;
-        sunLight.shadow.camera.top = 40;
-        sunLight.shadow.camera.bottom = -40;
+        sunLight.shadow.camera.far = 200;
+        sunLight.shadow.camera.left = -50;
+        sunLight.shadow.camera.right = 50;
+        sunLight.shadow.camera.top = 50;
+        sunLight.shadow.camera.bottom = -50;
         scene.add(sunLight);
 
-        // --- Текстурные холмы ---
-        const groundGeo = new THREE.PlaneGeometry(600, 600);
+        // --- Ландшафт под мостом ---
+        const groundGeo = new THREE.PlaneGeometry(800, 800);
         const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a5a2a });
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
@@ -322,87 +336,95 @@
         ground.receiveShadow = true;
         scene.add(ground);
 
-        // Холмы под мостом
-        for (let i = -3; i <= 3; i+=2) {
-            const hill = new THREE.Mesh(new THREE.ConeGeometry(15, 8, 8), new THREE.MeshStandardMaterial({ color: 0x3d6b3d }));
-            hill.position.set(i*20, 4, -60);
-            hill.castShadow = true;
-            hill.receiveShadow = true;
-            scene.add(hill);
-        }
+        // Река под мостом
+        const riverGeo = new THREE.PlaneGeometry(40, 600);
+        const riverMat = new THREE.MeshStandardMaterial({ color: 0x1a4a7a });
+        const river = new THREE.Mesh(riverGeo, riverMat);
+        river.rotation.x = -Math.PI / 2;
+        river.position.set(0, 0.1, 0);
+        river.receiveShadow = true;
+        scene.add(river);
 
         // Деревья
         function addTree(x, z) {
             const group = new THREE.Group();
             const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
             const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 4), trunkMat);
-            trunk.position.y = 2;
+            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 5), trunkMat);
+            trunk.position.y = 2.5;
             trunk.castShadow = true;
             trunk.receiveShadow = true;
             group.add(trunk);
             
-            const leaf1 = new THREE.Mesh(new THREE.ConeGeometry(1.5, 2, 6), leafMat);
-            leaf1.position.y = 4;
+            const leaf1 = new THREE.Mesh(new THREE.ConeGeometry(1.8, 2.5, 6), leafMat);
+            leaf1.position.y = 5;
             leaf1.castShadow = true;
             group.add(leaf1);
-            const leaf2 = new THREE.Mesh(new THREE.ConeGeometry(1.2, 1.8, 6), leafMat);
-            leaf2.position.y = 5.5;
-            leaf2.castShadow = true;
-            group.add(leaf2);
             
             group.position.set(x, 0, z);
             scene.add(group);
         }
-        for (let i = -100; i < 100; i+=15) {
-            for (let j = -100; j < 100; j+=15) {
-                if (Math.random() > 0.6 && !(i > -30 && i < 30 && j > -30 && j < 30)) {
-                    addTree(i + Math.random()*8, j + Math.random()*8);
+        for (let i = -150; i < 150; i+=20) {
+            for (let j = -150; j < 150; j+=20) {
+                if (Math.random() > 0.5 && Math.abs(j) > 40) {
+                    addTree(i + Math.random()*10, j + Math.random()*10);
                 }
             }
         }
 
-        // --- Мост на опорах (приподнят) ---
+        // --- Мост на высокой насыпи ---
         const bridgeGroup = new THREE.Group();
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x555555 });
-        const road = new THREE.Mesh(new THREE.BoxGeometry(14, 1, 100), roadMat);
-        road.position.set(0, 8, 0); // Высота моста 8 единиц
+        
+        // Насыпь под мостом
+        const embankmentMat = new THREE.MeshStandardMaterial({ color: 0x6b4c3b });
+        for (let k = -60; k <= 60; k+=20) {
+            const embankment = new THREE.Mesh(new THREE.BoxGeometry(20, 6, 18), embankmentMat);
+            embankment.position.set(0, 3, k);
+            embankment.castShadow = true;
+            embankment.receiveShadow = true;
+            bridgeGroup.add(embankment);
+        }
+        
+        // Дорожное полотно (на высоте 9)
+        const roadMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+        const road = new THREE.Mesh(new THREE.BoxGeometry(14, 1, 160), roadMat);
+        road.position.set(0, 9, 0);
         road.castShadow = true;
         road.receiveShadow = true;
         bridgeGroup.add(road);
         
         // Разметка
         const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffcc00 });
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 100), stripeMat);
-        stripe.position.set(0, 8.5, 0);
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 160), stripeMat);
+        stripe.position.set(0, 9.5, 0);
         bridgeGroup.add(stripe);
         
         // Перила
         const railMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
         for (let i = -1; i <= 1; i+=2) {
-            const rail = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2, 100), railMat);
-            rail.position.set(i*7, 9, 0);
+            const rail = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2, 160), railMat);
+            rail.position.set(i*7, 10, 0);
             rail.castShadow = true;
             bridgeGroup.add(rail);
             
-            for (let j = -45; j <= 45; j+=10) {
+            for (let j = -70; j <= 70; j+=15) {
                 const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3, 0.8), railMat);
-                pillar.position.set(i*7, 9.5, j);
+                pillar.position.set(i*7, 10.5, j);
                 pillar.castShadow = true;
                 bridgeGroup.add(pillar);
             }
         }
         
-        // Мощные опоры
+        // Опоры
         const pillarMat = new THREE.MeshStandardMaterial({ color: 0x8a6d4b });
-        for (let k = -40; k <= 40; k+=20) {
-            const pillar1 = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 6), pillarMat);
+        for (let k = -60; k <= 60; k+=30) {
+            const pillar1 = new THREE.Mesh(new THREE.BoxGeometry(4, 18, 6), pillarMat);
             pillar1.position.set(-5, 0, k);
             pillar1.castShadow = true;
             pillar1.receiveShadow = true;
             bridgeGroup.add(pillar1);
             
-            const pillar2 = new THREE.Mesh(new THREE.BoxGeometry(4, 16, 6), pillarMat);
+            const pillar2 = new THREE.Mesh(new THREE.BoxGeometry(4, 18, 6), pillarMat);
             pillar2.position.set(5, 0, k);
             pillar2.castShadow = true;
             pillar2.receiveShadow = true;
@@ -411,48 +433,46 @@
         
         scene.add(bridgeGroup);
 
-        // --- Грузовик (движется к мосту) ---
+        // --- Грузовик (едет ПО МОСТУ) ---
         const truckGroup = new THREE.Group();
         const cabMat = new THREE.MeshStandardMaterial({ color: 0x3366cc });
         const trailerMat = new THREE.MeshStandardMaterial({ color: 0xcc5533 });
         
-        const cab = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 3), cabMat);
-        cab.position.set(0, 1, 1.5);
+        // Кабина
+        const cab = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 3.5), cabMat);
+        cab.position.set(0, 1, 2);
         cab.castShadow = true;
         truckGroup.add(cab);
         
-        const trailer = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 6), trailerMat);
-        trailer.position.set(0, 1.5, -2);
+        // Прицеп
+        const trailer = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 7), trailerMat);
+        trailer.position.set(0, 1.5, -2.5);
         trailer.castShadow = true;
         truckGroup.add(trailer);
         
+        // Колёса
         const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
         for (let i = -1; i <= 1; i+=2) {
-            const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), wheelMat);
-            wheel.rotation.z = Math.PI/2;
-            wheel.position.set(i*1.2, 0.6, 2);
-            wheel.castShadow = true;
-            truckGroup.add(wheel);
-            
-            const wheel2 = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), wheelMat);
-            wheel2.rotation.z = Math.PI/2;
-            wheel2.position.set(i*1.2, 0.6, -1);
-            wheel2.castShadow = true;
-            truckGroup.add(wheel2);
+            for (let j = 0; j < 2; j++) {
+                const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), wheelMat);
+                wheel.rotation.z = Math.PI/2;
+                wheel.position.set(i*1.2, 0.6, 2.5 - j*4);
+                wheel.castShadow = true;
+                truckGroup.add(wheel);
+            }
         }
         
-        truckGroup.position.set(0, 0, -150); // Далеко за мостом
+        truckGroup.position.set(0, 9, -120); // На мосту, далеко сзади
         truckGroup.rotation.y = 0;
         scene.add(truckGroup);
 
-        // --- Улучшенные модели персонажей ---
+        // --- Улучшенные модели персонажей НА МОСТУ ---
         const enemies = [];
         const allies = [];
 
-        function createTerrorist(x, z, y = 8) { // y=8 для моста
+        function createTerrorist(x, z) {
             const group = new THREE.Group();
             
-            // Тело
             const bodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 1.8, 8);
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3c7a3c });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
@@ -460,7 +480,6 @@
             body.castShadow = true;
             group.add(body);
             
-            // Голова
             const headGeo = new THREE.SphereGeometry(0.35, 8);
             const headMat = new THREE.MeshStandardMaterial({ color: 0xf0d0b0 });
             const head = new THREE.Mesh(headGeo, headMat);
@@ -468,8 +487,7 @@
             head.castShadow = true;
             group.add(head);
             
-            // Автомат
-            const gunGeo = new THREE.BoxGeometry(0.2, 0.2, 0.9);
+            const gunGeo = new THREE.BoxGeometry(0.2, 0.2, 1);
             const gunMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
             const gun = new THREE.Mesh(gunGeo, gunMat);
             gun.position.set(0.4, 0.8, -0.4);
@@ -477,23 +495,14 @@
             gun.castShadow = true;
             group.add(gun);
             
-            // Рюкзак
-            const packGeo = new THREE.BoxGeometry(0.5, 0.5, 0.3);
-            const packMat = new THREE.MeshStandardMaterial({ color: 0x5a3e1a });
-            const pack = new THREE.Mesh(packGeo, packMat);
-            pack.position.set(-0.3, 1.0, -0.3);
-            pack.castShadow = true;
-            group.add(pack);
-            
-            group.position.set(x, y, z);
-            group.userData = { health: 100, type: 'enemy', lastShot: 0 };
+            group.position.set(x, 9, z); // На мосту
+            group.userData = { health: 100, type: 'enemy', lastShot: 0, patrolDir: Math.random() > 0.5 ? 1 : -1 };
             return group;
         }
 
-        function createSWAT(x, z, y = 8) {
+        function createSWAT(x, z) {
             const group = new THREE.Group();
             
-            // Тело
             const bodyGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.8, 8);
             const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111122 });
             const body = new THREE.Mesh(bodyGeo, bodyMat);
@@ -501,7 +510,6 @@
             body.castShadow = true;
             group.add(body);
             
-            // Бронежилет
             const vestGeo = new THREE.BoxGeometry(0.9, 1.0, 0.4);
             const vestMat = new THREE.MeshStandardMaterial({ color: 0x223366 });
             const vest = new THREE.Mesh(vestGeo, vestMat);
@@ -509,7 +517,6 @@
             vest.castShadow = true;
             group.add(vest);
             
-            // Голова в шлеме
             const headGeo = new THREE.SphereGeometry(0.4, 8);
             const headMat = new THREE.MeshStandardMaterial({ color: 0x404040 });
             const head = new THREE.Mesh(headGeo, headMat);
@@ -517,47 +524,44 @@
             head.castShadow = true;
             group.add(head);
             
-            // Щит
             const shieldGeo = new THREE.BoxGeometry(1.0, 1.4, 0.2);
-            const shieldMat = new THREE.MeshStandardMaterial({ color: 0x2a4b7c, emissive: 0x112233 });
+            const shieldMat = new THREE.MeshStandardMaterial({ color: 0x2a4b7c });
             const shield = new THREE.Mesh(shieldGeo, shieldMat);
             shield.position.set(0, 1.0, 0.7);
             shield.castShadow = true;
             group.add(shield);
             
-            group.position.set(x, y, z);
+            group.position.set(x, 9, z);
             group.userData = { health: 100, type: 'ally', lastShot: 0 };
             return group;
         }
 
         // Размещаем врагов на мосту
-        enemies.push(createTerrorist(-4, -15, 8));
-        enemies.push(createTerrorist(3, -5, 8));
-        enemies.push(createTerrorist(-2, 10, 8));
-        enemies.push(createTerrorist(5, 20, 8));
+        enemies.push(createTerrorist(-4, -50));
+        enemies.push(createTerrorist(3, -20));
+        enemies.push(createTerrorist(-2, 10));
+        enemies.push(createTerrorist(5, 40));
         enemies.forEach(e => scene.add(e));
 
         // Союзники на мосту
-        allies.push(createSWAT(2, -10, 8));
-        allies.push(createSWAT(-3, 0, 8));
-        allies.push(createSWAT(4, 15, 8));
+        allies.push(createSWAT(2, -40));
+        allies.push(createSWAT(-3, 0));
+        allies.push(createSWAT(4, 30));
         allies.forEach(a => scene.add(a));
 
-        // Блэкхавк (патрулирует)
+        // Блэкхавк
         const blackhawk = new THREE.Group();
         const bhBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.4, 5.5), new THREE.MeshStandardMaterial({ color: 0x1a2b3c }));
         bhBody.position.y = 0.7;
         bhBody.castShadow = true;
         blackhawk.add(bhBody);
-        
         const rotor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 5), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
         rotor.position.set(0, 1.4, 0);
         blackhawk.add(rotor);
-        
-        blackhawk.position.set(40, 30, 20);
+        blackhawk.position.set(40, 35, 20);
         scene.add(blackhawk);
 
-        // Оружие игрока
+        // --- Оружие игрока (ВИДНО) ---
         const weaponGroup = new THREE.Group();
         const gunBarrel = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1.4), new THREE.MeshStandardMaterial({ color: 0x444444 }));
         gunBarrel.position.set(0.3, -0.2, -0.9);
@@ -565,6 +569,9 @@
         const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
         gunBody.position.set(0.3, -0.1, -0.3);
         weaponGroup.add(gunBody);
+        const gunHandle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.2), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
+        gunHandle.position.set(0.3, -0.2, -0.4);
+        weaponGroup.add(gunHandle);
         camera.add(weaponGroup);
 
         // Рация
@@ -578,28 +585,19 @@
         radioGroup.visible = false;
         camera.add(radioGroup);
 
-        // --- Коллизии (простые стены вокруг моста) ---
+        // --- Коллизии (стены по краям моста) ---
         const collisionWalls = [];
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0 }); // невидимые стены
-        const wall1 = new THREE.Mesh(new THREE.BoxGeometry(30, 10, 2), wallMat);
-        wall1.position.set(0, 5, -55);
-        scene.add(wall1);
-        collisionWalls.push(wall1);
+        const wallMat = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0 });
         
-        const wall2 = new THREE.Mesh(new THREE.BoxGeometry(30, 10, 2), wallMat);
-        wall2.position.set(0, 5, 55);
-        scene.add(wall2);
-        collisionWalls.push(wall2);
+        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 160), wallMat);
+        leftWall.position.set(-7.5, 10.5, 0);
+        scene.add(leftWall);
+        collisionWalls.push(leftWall);
         
-        const wall3 = new THREE.Mesh(new THREE.BoxGeometry(2, 10, 120), wallMat);
-        wall3.position.set(-18, 5, 0);
-        scene.add(wall3);
-        collisionWalls.push(wall3);
-        
-        const wall4 = new THREE.Mesh(new THREE.BoxGeometry(2, 10, 120), wallMat);
-        wall4.position.set(18, 5, 0);
-        scene.add(wall4);
-        collisionWalls.push(wall4);
+        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 160), wallMat);
+        rightWall.position.set(7.5, 10.5, 0);
+        scene.add(rightWall);
+        collisionWalls.push(rightWall);
 
         // --- Игровые переменные ---
         let team = null;
@@ -607,29 +605,65 @@
         let health = 100;
         let ammo = 30;
         let gameActive = true;
-        let timeLeft = 120; // 2 минуты
-        let truckDistance = 100; // метров до моста
+        let timeLeft = 120;
+        let truckProgress = 0; // от 0 до 100
         let bombPlanted = false;
-        let bombTimer = null;
         
         // Управление
         const keys = { w: false, a: false, s: false, d: false };
         const velocity = new THREE.Vector3();
         let onGround = true;
+        
+        // Поворот камеры мышкой/тачем
+        let pitch = 0;
+        let yaw = 0;
+        const sensitivity = 0.002;
+        
+        document.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
+            yaw -= e.movementX * sensitivity;
+            pitch -= e.movementY * sensitivity;
+            pitch = Math.max(-1.5, Math.min(1.5, pitch));
+            camera.rotation.y = yaw;
+            camera.rotation.x = pitch;
+        });
+        
+        // Мобильный поворот через джойстик
+        let lookJoystick = { active: false, x: 0, y: 0 };
+        const lookArea = document.getElementById('joystick-look');
+        lookArea.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            lookJoystick.active = true;
+        });
+        lookArea.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = lookArea.getBoundingClientRect();
+            const centerX = rect.left + rect.width/2;
+            const centerY = rect.top + rect.height/2;
+            lookJoystick.x = (touch.clientX - centerX) / (rect.width/2);
+            lookJoystick.y = (touch.clientY - centerY) / (rect.height/2);
+            lookJoystick.x = Math.max(-1, Math.min(1, lookJoystick.x));
+            lookJoystick.y = Math.max(-1, Math.min(1, lookJoystick.y));
+        });
+        lookArea.addEventListener('touchend', () => {
+            lookJoystick.active = false;
+            lookJoystick.x = 0;
+            lookJoystick.y = 0;
+        });
 
-        // --- UI элементы ---
+        // UI элементы
         const timerEl = document.getElementById('timer');
         const truckStatusEl = document.getElementById('truck-status');
         const healthEl = document.getElementById('health');
         const chatEl = document.getElementById('chat');
         const storyContainer = document.getElementById('story-container');
         
-        // Скрыть сюжет
         document.getElementById('toggle-story').addEventListener('click', () => {
             storyContainer.style.transform = storyContainer.style.transform ? '' : 'translateY(-200px)';
         });
 
-        // --- Клавиши ---
+        // Клавиши
         window.addEventListener('keydown', (e) => {
             if (!gameActive) return;
             switch(e.code) {
@@ -655,17 +689,17 @@
         });
 
         // Мобильные кнопки
-        const setupBtn = (id, key, isDown) => {
+        const setupBtn = (id, key) => {
             const el = document.getElementById(id);
-            el.addEventListener('mousedown', () => keys[key] = isDown);
-            el.addEventListener('mouseup', () => keys[key] = !isDown);
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = isDown; });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = !isDown; });
+            el.addEventListener('mousedown', () => keys[key] = true);
+            el.addEventListener('mouseup', () => keys[key] = false);
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
         };
-        setupBtn('btn-w', 'w', true);
-        setupBtn('btn-s', 's', true);
-        setupBtn('btn-a', 'a', true);
-        setupBtn('btn-d', 'd', true);
+        setupBtn('btn-w', 'w');
+        setupBtn('btn-s', 's');
+        setupBtn('btn-a', 'a');
+        setupBtn('btn-d', 'd');
         
         document.getElementById('btn-jump').addEventListener('click', () => { if (onGround) velocity.y = 8; });
 
@@ -688,7 +722,7 @@
             radioGroup.visible = (idx === 2);
         }
 
-        // Стрельба с AI реакцией
+        // Стрельба
         document.getElementById('btn-shoot').addEventListener('click', shoot);
         function shoot() {
             if (!gameActive || currentWeapon !== 0 || ammo <= 0) return;
@@ -716,18 +750,6 @@
                     }
                 }
             }
-            
-            // AI отвечает огнем
-            enemies.forEach(enemy => {
-                if (Math.random() > 0.7 && gameActive) {
-                    health -= 10;
-                    healthEl.innerHTML = `❤️ ${health}`;
-                    if (health <= 0) {
-                        chatEl.innerHTML = '💀 Вы погибли... Игра окончена';
-                        gameActive = false;
-                    }
-                }
-            });
         }
 
         // Рация
@@ -735,7 +757,7 @@
             if (currentWeapon === 2 && gameActive) {
                 chatEl.innerHTML = '📡 Вызов подмоги...';
                 setTimeout(() => {
-                    const newSWAT = createSWAT(camera.position.x + 2, camera.position.z + 3, camera.position.y);
+                    const newSWAT = createSWAT(camera.position.x + 2, camera.position.z + 3);
                     scene.add(newSWAT);
                     allies.push(newSWAT);
                     chatEl.innerHTML = '🚁 Подмога прибыла!';
@@ -747,10 +769,10 @@
         let camMode = 0;
         document.getElementById('btn-cam').addEventListener('click', () => {
             camMode = (camMode + 1) % 4;
-            if (camMode === 0) camera.position.set(0, 7, 20);
-            else if (camMode === 1) camera.position.set(-15, 15, -30);
-            else if (camMode === 2) camera.position.set(20, 15, 10);
-            else camera.position.set(0, 20, 0);
+            if (camMode === 0) camera.position.set(0, 12, 25);
+            else if (camMode === 1) camera.position.set(-15, 18, -30);
+            else if (camMode === 2) camera.position.set(20, 18, 10);
+            else camera.position.set(0, 25, 0);
         });
 
         // Перезарядка
@@ -768,42 +790,59 @@
             const secs = timeLeft % 60;
             timerEl.innerHTML = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
             
-            // Грузовик движется
-            truckDistance = Math.max(0, truckDistance - 0.8); // 0.8 м/сек
-            truckStatusEl.innerHTML = `🚚 Грузовик: ${Math.floor(truckDistance)}м до моста`;
+            // Грузовик движется ПО МОСТУ (в положительном направлении Z)
+            if (truckProgress < 100) {
+                truckProgress += 0.7; // скорость
+                truckGroup.position.z = -120 + (truckProgress * 2.2); // от -120 до +100 примерно
+            }
             
-            // Позиция грузовика
-            truckGroup.position.z = -150 + (100 - truckDistance) * 2.5;
+            truckStatusEl.innerHTML = `🚚 Грузовик: ${Math.floor(100 - truckProgress)}м до финиша`;
             
             // Проверка условий победы
-            if (truckDistance <= 0 && !bombPlanted) {
+            if (truckProgress >= 100 && !bombPlanted) {
                 chatEl.innerHTML = '🏆 Грузовик проехал! Победа спецназа!';
                 gameActive = false;
             }
             
-            if (timeLeft <= 0) {
-                if (bombPlanted) {
-                    chatEl.innerHTML = '💥 Бомба взорвалась! Террористы победили!';
-                } else {
-                    chatEl.innerHTML = '⏰ Время вышло! Террористы удерживали мост!';
-                }
+            if (timeLeft <= 0 && bombPlanted) {
+                chatEl.innerHTML = '💥 Бомба взорвалась! Террористы победили!';
                 gameActive = false;
             }
             
-            if (bombPlanted && truckDistance <= 0) {
+            if (bombPlanted && truckProgress >= 100) {
                 chatEl.innerHTML = '💥 Бомба взорвалась на мосту! Грузовик уничтожен! Победа Т!';
                 gameActive = false;
             }
         }, 1000);
 
-        // --- AI для NPC (патрулирование и стрельба) ---
+        // C4
+        document.getElementById('weap2').addEventListener('click', () => {
+            if (currentWeapon === 1 && team === 'T' && !bombPlanted) {
+                bombPlanted = true;
+                chatEl.innerHTML = '💣 Бомба заложена! Взрыв через 2 мин';
+                setTimeout(() => {
+                    if (bombPlanted && gameActive) {
+                        chatEl.innerHTML = '💥 Бомба взорвалась! Террористы победили!';
+                        gameActive = false;
+                    }
+                }, 120000);
+            }
+        });
+
+        // --- AI для NPC ---
         function updateAI() {
             if (!gameActive) return;
             
-            // Враги стреляют по игроку, если он близко
             enemies.forEach(enemy => {
+                // Патрулирование по мосту
+                enemy.position.z += enemy.userData.patrolDir * 0.1;
+                if (enemy.position.z > 70 || enemy.position.z < -70) {
+                    enemy.userData.patrolDir *= -1;
+                }
+                
+                // Стрельба по игроку
                 const dist = enemy.position.distanceTo(camera.position);
-                if (dist < 20 && Math.random() < 0.02) {
+                if (dist < 25 && Math.random() < 0.02) {
                     health -= 5;
                     healthEl.innerHTML = `❤️ ${health}`;
                     if (health <= 0) {
@@ -811,14 +850,8 @@
                         gameActive = false;
                     }
                 }
-                
-                // Патрулирование (движение взад-вперед по мосту)
-                if (!enemy.userData.patrolDir) enemy.userData.patrolDir = 1;
-                enemy.position.z += enemy.userData.patrolDir * 0.05;
-                if (enemy.position.z > 30 || enemy.position.z < -30) enemy.userData.patrolDir *= -1;
             });
             
-            // Союзники стреляют по врагам
             allies.forEach(ally => {
                 enemies.forEach(enemy => {
                     const dist = ally.position.distanceTo(enemy.position);
@@ -833,17 +866,18 @@
             });
         }
 
-        // --- Коллизии с препятствиями ---
+        // --- Коллизии ---
         function checkCollisions() {
-            const playerBox = new THREE.Box3().setFromObject(camera);
+            const playerPos = camera.position.clone();
+            
             for (let wall of collisionWalls) {
                 const wallBox = new THREE.Box3().setFromObject(wall);
-                if (playerBox.intersectsBox(wallBox)) {
+                if (playerPos.x > -7 && playerPos.x < 7 && playerPos.z > -75 && playerPos.z < 75) {
+                    // Внутри моста - ок
+                } else {
                     // Отталкивание
-                    if (keys.w) camera.translateZ(0.5);
-                    if (keys.s) camera.translateZ(-0.5);
-                    if (keys.a) camera.translateX(0.5);
-                    if (keys.d) camera.translateX(-0.5);
+                    if (playerPos.x <= -7) camera.position.x = -6.5;
+                    if (playerPos.x >= 7) camera.position.x = 6.5;
                 }
             }
         }
@@ -855,37 +889,46 @@
             lastTime = performance.now();
 
             if (gameActive) {
-                // Движение игрока
-                const speed = 4 * delta;
-                if (keys.w) camera.translateZ(-speed);
-                if (keys.s) camera.translateZ(speed);
-                if (keys.a) camera.translateX(-speed);
-                if (keys.d) camera.translateX(speed);
-
-                // Гравитация
-                velocity.y -= 12 * delta;
-                camera.position.y += velocity.y * delta;
-                if (camera.position.y < 7) { // На мосту
-                    camera.position.y = 7;
-                    velocity.y = 0;
-                    onGround = true;
-                } else {
-                    onGround = false;
+                // Поворот от джойстика
+                if (lookJoystick.active) {
+                    yaw -= lookJoystick.x * 0.05;
+                    pitch -= lookJoystick.y * 0.05;
+                    pitch = Math.max(-1.5, Math.min(1.5, pitch));
+                    camera.rotation.y = yaw;
+                    camera.rotation.x = pitch;
                 }
+                
+                // Движение
+                const speed = 5 * delta;
+                const forward = new THREE.Vector3(0, 0, -1).applyEuler(camera.rotation);
+                const right = new THREE.Vector3(1, 0, 0).applyEuler(camera.rotation);
+                forward.y = 0;
+                right.y = 0;
+                forward.normalize();
+                right.normalize();
+                
+                if (keys.w) camera.position.addScaledVector(forward, speed);
+                if (keys.s) camera.position.addScaledVector(forward, -speed);
+                if (keys.a) camera.position.addScaledVector(right, -speed);
+                if (keys.d) camera.position.addScaledVector(right, speed);
 
-                // Проверка коллизий
-                checkCollisions();
+                // Гравитация (держим на мосту)
+                camera.position.y = 11; // Фиксированная высота моста
+                
+                // Ограничитель моста
+                camera.position.x = Math.max(-6, Math.min(6, camera.position.x));
+                camera.position.z = Math.max(-70, Math.min(70, camera.position.z));
 
                 // AI
                 updateAI();
 
                 // Вертолет
-                blackhawk.position.x = 40 + Math.sin(Date.now() * 0.0008) * 20;
-                blackhawk.position.z = 20 + Math.cos(Date.now() * 0.0008) * 30;
-                blackhawk.rotation.y = Math.sin(Date.now() * 0.0003) * 0.3;
+                blackhawk.position.x = 40 + Math.sin(Date.now() * 0.001) * 30;
+                blackhawk.position.z = 20 + Math.cos(Date.now() * 0.001) * 40;
+                blackhawk.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
             }
 
-            // Обновление UI
+            // UI
             healthEl.innerHTML = `❤️ ${health}`;
             document.getElementById('weap1').innerHTML = `🔫 M4 (${ammo}/90)`;
 
@@ -894,7 +937,6 @@
         }
         animate();
 
-        // Размер окна
         window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
