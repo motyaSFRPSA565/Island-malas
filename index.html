@@ -2,73 +2,83 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>GENSEC: TOTAL ASSAULT</title>
+    <title>GENSEC: TOTAL ASSAULT FIXED</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', sans-serif; color: #0f0; }
-        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
-        #hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.9); padding: 15px; border: 2px solid #555; pointer-events: none; }
-        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px; }
-        .btn { pointer-events: auto; cursor: pointer; background: #222; border: 1px solid #777; color: #fff; padding: 10px; margin: 3px; font-weight: bold; }
-        #flash, #damage { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
-        #flash { background: rgba(255,255,255,0.7); }
-        #damage { background: rgba(150,0,0,0.5); }
-        #hp-box { width: 150px; height: 10px; background: #300; border: 1px solid #f00; margin: 5px 0; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; transition: 0.1s; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #0f0; }
+        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
+        #hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.8); padding: 15px; border: 1px solid #333; pointer-events: none; }
+        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 30px; }
+        .btn { pointer-events: auto; cursor: pointer; background: #111; border: 1px solid #0f0; color: #0f0; padding: 15px 25px; font-weight: bold; }
+        #start-screen { position: absolute; inset: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; }
+        #hp-bar { width: 150px; height: 10px; background: #300; border: 1px solid #f00; }
+        #hp-fill { width: 100%; height: 100%; background: #f00; }
     </style>
 </head>
 <body>
 
+<div id="start-screen">
+    <h1>GENSEC: ОХРАНА БАНКА</h1>
+    <button class="btn" onclick="startGame()">НАЧАТЬ СМЕНУ</button>
+</div>
+
 <canvas id="game"></canvas>
-<div id="flash"></div>
-<div id="damage"></div>
 
 <div id="hud">
-    <b>GENSEC OVERWATCH</b><br>
-    БРОНЯ: <div id="hp-box"><div id="hp-fill"></div></div>
+    <b>GENSEC UNIT</b> | HP: <div id="hp-bar"><div id="hp-fill"></div></div>
     СТАТУС: <span id="status">ДЕЖУРСТВО</span><br>
-    РЕЗЕРВ: [G] Обычные | [H] Тяжелые
+    ТАЙМЕР: <span id="timer">03:00</span>
 </div>
 
 <div id="ui">
     <button class="btn" id="act-btn" onclick="toggleSit()">ВСТАТЬ С МЕСТА</button>
-    <div style="color: #666; font-size: 11px;">[F] Оружие | [LMB] Огонь | [G/H] Подкрепление</div>
+    <p>[F] Оружие | [G] Охрана | [H] Тяжелые | [LMB] Огонь</p>
 </div>
 
 <script>
-/** АУДИО ДВИЖОК (Синтезированный) **/
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-function playSound(freq, type, dur, vol = 0.1) {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + dur);
-    gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + dur);
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.start(); osc.stop(audioCtx.currentTime + dur);
-}
-
-function speak(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = 'ru-RU'; msg.volume = 0.6; msg.pitch = 0.8;
-    window.speechSynthesis.speak(msg);
-}
-
-/** МИР И ГЕЙМПЛЕЙ **/
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const W = 640, H = 360;
 canvas.width = W; canvas.height = H;
 
+// КАРТА: 1-Стена, 0-Пусто, 2-Сейф, 5-Колонна
 const M = 16;
-const world =;
+const world = [
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
+    1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,1,0,0,0,5,0,0,5,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,0,0,0,5,0,0,5,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,5,0,0,0,0,1,1,1,1,1,0,0,1,
+    1,0,0,0,0,0,0,0,1,2,2,2,1,0,0,1,
+    1,0,0,5,0,0,0,0,1,2,2,2,1,0,0,1,
+    1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,
+    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+];
 
-let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false, recoil: 0 };
-let sprites = [{x: 2.2, y: 2.0, type: 'desk'}, {x: 14.5, y: 1.5, type: 'drago'}];
-let zBuf = new Array(W), heist = false, timer = 180;
+let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false };
+let sprites = [{x: 2.1, y: 2.1, type: 'desk'}];
+let keys = {}, timeLeft = 180, heist = false;
 
-for(let i=0; i<8; i++) sprites.push({x: 6+Math.random()*7, y: 2+Math.random()*8, type: 'civ'});
+// Звук
+let audioCtx;
+function playSound(f, d) {
+    if(!audioCtx) return;
+    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.frequency.value = f; g.gain.value = 0.1;
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+    o.stop(audioCtx.currentTime + d);
+}
+
+function startGame() {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    document.getElementById('start-screen').style.display = 'none';
+    for(let i=0; i<8; i++) sprites.push({x: 6+Math.random()*6, y: 2+Math.random()*7, type: 'civ'});
+    loop();
+}
 
 function render() {
     ctx.fillStyle = "#050505"; ctx.fillRect(0,0,W,H/2);
@@ -78,15 +88,14 @@ function render() {
     for(let i=0; i<W; i++) {
         let a = (player.dir - fov/2) + (i/W) * fov;
         let d=0, hit=0, dx=Math.cos(a), dy=Math.sin(a);
-        while(d<16) {
+        while(d < 16) {
             d += 0.05;
-            let cx=Math.floor(player.x+dx*d), cy=Math.floor(player.y+dy*d);
-            if(world[cy*M+cx]>0) { hit=world[cy*M+cx]; break; }
+            let cx = Math.floor(player.x + dx*d), cy = Math.floor(player.y + dy*d);
+            if(world[cy*M + cx] > 0) { hit = world[cy*M+cx]; break; }
         }
-        zBuf[i] = d;
         let h = H / (d * Math.cos(a - player.dir));
-        let c = Math.max(5, 90 - d*6);
-        ctx.fillStyle = hit===5 ? `rgb(0,0,${c+20})` : hit===2 ? `rgb(${c+30},${c+30},0)` : `rgb(${c},${c},${c})`;
+        let c = Math.max(10, 100 - d*7);
+        ctx.fillStyle = hit===5 ? `rgb(0,0,${c+20})` : hit===2 ? `rgb(${c},${c},0)` : `rgb(${c},${c},${c})`;
         ctx.fillRect(i, H/2-h/2, 1, h);
     }
 
@@ -96,83 +105,50 @@ function render() {
         let dist = Math.hypot(dx, dy);
         let a = Math.atan2(dy, dx) - player.dir;
         while(a < -Math.PI) a += 2*Math.PI; while(a > Math.PI) a -= 2*Math.PI;
-        if(Math.abs(a) < fov/2 + 0.1 && dist < zBuf[Math.floor((a/fov+0.5)*W)]) {
+        if(Math.abs(a) < fov/2 + 0.1) {
             let sx = (a/fov+0.5)*W, h = H/dist;
-            if(s.type==='drago'){ ctx.fillStyle="#ffd700"; ctx.fillRect(sx-h/2, H/2-h, h, h*2); }
-            else if(s.type==='desk'){ ctx.fillStyle="#211"; ctx.fillRect(sx-h/2, H/2+h/10, h, h/3); }
+            if(s.type === 'desk') { ctx.fillStyle="#321"; ctx.fillRect(sx-h/2, H/2+h/10, h, h/3); }
             else {
-                ctx.fillStyle = s.type==='bandit'?"#222":s.type==='heavy'?"#000":s.type==='guard'?"#fff":"#445";
+                ctx.fillStyle = s.type==='bandit'?"#222":s.type==='guard'?"#fff":"#445";
                 ctx.fillRect(sx-h/6, H/2, h/3, h/2);
                 ctx.fillStyle = "#d2b48c"; ctx.fillRect(sx-h/10, H/2-h/5, h/5, h/5);
-                if(s.shooting > 0) { ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(sx+h/5, H/2+h/10, h/10, 0, 7); ctx.fill(); s.shooting--; }
             }
         }
     });
 
     if(!player.isSitting) {
-        ctx.save(); ctx.translate(0, player.recoil);
         ctx.fillStyle = "#111";
-        if(player.hasGun) { ctx.fillRect(W/2+40, H-140, 30, 140); ctx.fillRect(W/2+40, H-150, 100, 45); }
-        else { ctx.fillRect(W/2+60, H-140, 45, 100); ctx.fillStyle="#000"; ctx.fillRect(W/2+80, H-180, 5, 40); }
-        ctx.restore(); if(player.recoil > 0) player.recoil -= 3;
+        if(player.hasGun) { ctx.fillRect(W/2+40, H-140, 30, 140); ctx.fillRect(W/2+40, H-150, 100, 40); }
+        else { ctx.fillRect(W/2+60, H-130, 40, 80); ctx.fillRect(W/2+75, H-160, 5, 30); }
     }
 }
 
-function handleCombat() {
-    sprites.forEach(s => {
-        if(s.type === 'guard' || s.type === 'heavy' || s.type === 'bandit') {
-            let target = sprites.find(t => (s.type==='bandit' ? (t.type==='guard' || t.type==='heavy' || t===player) : t.type==='bandit'));
-            if(target && Math.random() < (s.type==='heavy'?0.01:0.03)) {
-                s.shooting = 5;
-                let soundF = s.type==='heavy'? 100 : 400;
-                playSound(soundF, 'square', 0.2);
-                if(target === player) {
-                    player.hp -= 4;
-                    document.getElementById('hp-fill').style.width = player.hp+"%";
-                    document.getElementById('damage').style.opacity = 1; setTimeout(()=>document.getElementById('damage').style.opacity=0, 80);
-                    if(player.hp<=0) location.reload();
-                } else if(Math.random() < (s.type==='heavy'?0.4:0.1)) {
-                    sprites = sprites.filter(x => x !== target);
-                }
-            }
-        }
-    });
-}
-
 function toggleSit() {
-    let d = Math.hypot(player.x-2.5, player.y-2.0);
-    if(player.isSitting) { player.isSitting = false; speak("Пост покинут, приступаю к патрулированию."); }
-    else if(d < 1.2) { player.isSitting = true; player.x=2.5; player.y=2.2; player.dir=0; speak("Вернулся на пост."); }
-    document.getElementById('act-btn').innerText = player.isSitting ? "ВСТАТЬ С МЕСТА" : (d<1.2?"СЕСТЬ":"ПАТРУЛЬ");
+    let d = Math.hypot(player.x-2.1, player.y-2.1);
+    if(player.isSitting) { player.isSitting = false; }
+    else if(d < 1.5) { player.isSitting = true; player.x=2.5; player.y=2.2; player.dir=0; }
 }
 
 window.onclick = () => {
     if(!player.hasGun || player.isSitting) return;
-    player.recoil = 25; playSound(600, 'sawtooth', 0.1, 0.2);
-    document.getElementById('flash').style.opacity = 1; setTimeout(()=>document.getElementById('flash').style.opacity=0, 50);
+    playSound(400, 0.1);
     sprites.forEach((s,i) => {
         if(s.type === 'bandit') {
             let a = Math.atan2(s.y-player.y, s.x-player.x) - player.dir;
             while(a < -Math.PI) a += 2*Math.PI;
-            if(Math.abs(a) < 0.12) sprites.splice(i, 1);
+            if(Math.abs(a) < 0.1) sprites.splice(i, 1);
         }
     });
 };
 
 window.onkeydown = e => {
-    if(e.code === 'KeyG' && !player.isSitting) {
-        speak("Центр, это патруль. Требуется поддержка!");
-        for(let i=0; i<2; i++) sprites.push({x: 4, y: 3.5, type: 'guard', shooting: 0});
-    }
-    if(e.code === 'KeyH' && !player.isSitting) {
-        speak("Вызываю тяжелую группу GENSEC. Всем отойти!");
-        for(let i=0; i<2; i++) sprites.push({x: 4, y: 4, type: 'heavy', shooting: 0});
-    }
-    if(e.code === 'KeyF' && !player.isSitting) player.hasGun = !player.hasGun;
     keys[e.code] = true;
+    if(e.code === 'KeyF' && !player.isSitting) player.hasGun = !player.hasGun;
+    if(e.code === 'KeyG' && !player.isSitting) {
+        for(let i=0; i<2; i++) sprites.push({x: 4.5, y: 3.5, type: 'guard'});
+    }
 };
 window.onkeyup = e => keys[e.code] = false;
-const keys = {};
 
 function loop() {
     if(!player.isSitting) {
@@ -181,21 +157,23 @@ function loop() {
         if(keys['KeyS']) { nx -= Math.cos(player.dir)*0.07; ny -= Math.sin(player.dir)*0.07; }
         if(keys['KeyA']) player.dir -= 0.05; if(keys['KeyD']) player.dir += 0.05;
         if(world[Math.floor(ny)*M+Math.floor(nx)] === 0) { player.x = nx; player.y = ny; }
-        if(player.x > 14 && player.y < 2) { player.hp = 100; document.getElementById('hp-fill').style.width = "100%"; }
+        
+        let d = Math.hypot(player.x-2.1, player.y-2.1);
+        document.getElementById('act-btn').innerText = d < 1.5 ? "СЕСТЬ ЗА СТОЛ" : "ПАТРУЛИРОВАТЬ";
     }
 
-    if(timer > 0) {
-        timer -= 0.016;
-        if(timer <= 0 && !heist) {
-            heist = true; document.getElementById('status').innerText = "КРИТИЧЕСКАЯ СИТУАЦИЯ";
-            speak("Внимание всем постам! Ограбление банка! Работаем по протоколу!");
-            for(let i=0; i<7; i++) sprites.push({x: 14, y: 2+i, type: 'bandit', shooting: 0});
-            setInterval(() => playSound(100 + Math.sin(Date.now()/100)*20, 'sine', 0.5, 0.05), 1000);
+    if(timeLeft > 0) {
+        timeLeft -= 0.016;
+        let m = Math.floor(timeLeft/60), s = Math.floor(timeLeft%60);
+        document.getElementById('timer').innerText = `${m}:${s<10?'0':''}${s}`;
+        if(timeLeft <= 0 && !heist) {
+            heist = true; document.getElementById('status').innerText = "ОГРАБЛЕНИЕ!";
+            for(let i=0; i<6; i++) sprites.push({x: 14, y: 2+i, type: 'bandit'});
         }
     }
-    handleCombat(); render(); requestAnimationFrame(loop);
+    
+    render(); requestAnimationFrame(loop);
 }
-loop();
 </script>
 </body>
 </html>
