@@ -3,280 +3,247 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FBI: NIGHT SHIFT</title>
+    <title>GENSEC: BANK SECURITY</title>
     <style>
-        body { margin: 0; padding: 0; background: #000; color: #fff; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        #ui { position: absolute; bottom: 20px; left: 20px; pointer-events: none; }
-        #hud { font-size: 24px; text-shadow: 2px 2px #000; }
-        #mobile-controls { position: absolute; bottom: 20px; right: 20px; display: none; gap: 10px; }
-        .btn { width: 60px; height: 60px; background: rgba(255,255,255,0.2); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; user-select: none; pointer-events: auto; }
-        @media (max-width: 800px) { #mobile-controls { display: grid; grid-template-columns: repeat(3, 1fr); } }
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border: 2px solid red; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; }
-        #overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.8); z-index: 10; cursor: pointer; text-align: center; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; color: #fff; user-select: none; }
+        canvas { display: block; image-rendering: pixelated; width: 100vw; height: 100vh; }
+        
+        /* Интерфейс рабочего места */
+        #ui-layer { position: absolute; inset: 0; pointer-events: none; transition: 0.5s; }
+        .desk-item { 
+            position: absolute; pointer-events: auto; cursor: pointer; 
+            background: rgba(20,20,20,0.8); border: 2px solid #555; 
+            padding: 15px; border-radius: 5px; transition: 0.2s;
+        }
+        .desk-item:hover { border-color: #0f0; transform: translateY(-5px); }
+        
+        #phone { bottom: 120px; left: 15%; }
+        #map-tab { bottom: 120px; left: 42%; }
+        #tablet { bottom: 120px; right: 15%; }
+        #action-btn { bottom: 30px; left: 50%; transform: translateX(-50%); padding: 20px 40px; border-color: #0f0; color: #0f0; font-weight: bold; }
+
+        /* Оверлеи (Телефон, Камеры) */
+        #overlay { 
+            display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80%; height: 70%; background: #111; border: 4px solid #333; z-index: 100; pointer-events: auto;
+            padding: 20px; box-shadow: 0 0 50px rgba(0,0,0,0.9);
+        }
+        .close-btn { float: right; background: #f00; border: none; color: #fff; cursor: pointer; padding: 5px 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; height: 90%; margin-top: 20px; }
+        .cam-box { background: #222; border: 1px solid #444; display: flex; align-items: center; justify-content: center; position: relative; font-size: 12px; }
+        .cam-label { position: absolute; top: 5px; left: 5px; background: rgba(0,0,0,0.5); }
+
+        #hud { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); padding: 10px; border-left: 5px solid #0f0; }
+        .crosshair { position: absolute; top: 50%; left: 50%; width: 20px; height: 20px; border: 2px solid #0f0; border-radius: 50%; transform: translate(-50%, -50%); display: none; }
     </style>
 </head>
 <body>
 
-<div id="overlay">
-    <div>
-        <h1>FBI: НОЧНАЯ СМЕНА</h1>
-        <p>Кликните, чтобы начать</p>
-        <p>WASD - Ходить | Мышь/L - Огонь | F - Фонарик | 5 - Подмога</p>
+    <canvas id="game"></canvas>
+    <div class="crosshair" id="crosshair"></div>
+
+    <div id="hud">
+        <b>GENSEC SECURITY UNIT</b><br>
+        СТАТУС: <span id="status">ДЕЖУРСТВО</span><br>
+        ОБЪЕКТ: ЦЕНТРАЛЬНЫЙ БАНК
     </div>
-</div>
 
-<div id="crosshair"></div>
-<div id="ui">
-    <div id="hud">HP: 100 | AMMO: 30 | ENEMIES: <span id="ecount">0</span></div>
-</div>
+    <div id="ui-layer">
+        <div id="phone" class="desk-item" onclick="openMenu('phone')">📞 ТЕЛЕФОН</div>
+        <div id="map-tab" class="desk-item" onclick="openMenu('map')">🗺️ ПЛАН БАНКА</div>
+        <div id="tablet" class="desk-item" onclick="openMenu('tablet')">📹 ПЛАНШЕТ (CAM)</div>
+        <div id="action-btn" class="desk-item" onclick="toggleState()">ВСТАТЬ И ПАТРУЛИРОВАТЬ</div>
+    </div>
 
-<div id="mobile-controls">
-    <div></div><div class="btn" id="btn-w">W</div><div></div>
-    <div class="btn" id="btn-a">A</div><div class="btn" id="btn-s">S</div><div class="btn" id="btn-d">D</div>
-    <div class="btn" id="btn-f">🔦</div><div class="btn" id="btn-shoot">🔫</div><div class="btn" id="btn-5">5</div>
-</div>
-
-<canvas id="screen"></canvas>
+    <div id="overlay">
+        <button class="close-btn" onclick="closeMenu()">X ПРИКРЫТЬ</button>
+        <div id="overlay-content" style="height: 100%;"></div>
+    </div>
 
 <script>
-/** 
- * FBI: NIGHT SHIFT - Raycasting Engine 
- * Created for JS Pure Environment
- */
-
-const canvas = document.getElementById('screen');
+/** КОНФИГУРАЦИЯ ДВИЖКА **/
+const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const overlay = document.getElementById('overlay');
+const W = 640, H = 400;
+canvas.width = W; canvas.height = H;
 
-// --- ГЕЙМПЛЕЙНЫЕ НАСТРОЙКИ ---
 const mapSize = 16;
-const map = [
+const world = [
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,1,0,2,2,2,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1,
-    1,0,0,1,1,0,1,0,2,0,0,0,0,0,0,1,
-    1,0,0,1,1,0,1,0,0,0,0,0,3,3,0,1,
-    1,0,0,0,0,0,1,1,1,0,0,0,3,3,0,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,1,1,1,1,1,0,0,0,0,0,0,0,0,1,
-    1,0,1,0,0,0,1,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,1,0,0,0,1,1,1,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
+    1,0,0,2,2,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,2,2,0,0,0,1,1,1,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,3,1,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,0,1,0,0,0,0,1,
+    1,0,1,1,1,1,0,0,1,0,1,0,0,0,0,1,
+    1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,1,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,
+    1,0,0,0,0,0,0,0,1,0,0,0,1,0,0,1,
+    1,0,2,2,0,0,0,0,0,0,0,0,1,0,0,1,
+    1,0,2,2,0,0,0,0,0,0,0,0,1,0,0,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ];
 
-const player = {
-    x: 2.5, y: 2.5, dir: 0, 
-    hp: 100, ammo: 30,
-    flashlight: false,
-    speed: 0.05, rotSpeed: 0.04
-};
+let player = { x: 2.5, y: 2.5, dir: 0.5, v: 0, rot: 0, isSitting: true, hasGun: false };
+let sprites = []; // NPC
+let heistStarted = false;
 
-let enemies = [
-    {x: 10, y: 10, hp: 60, type: 'payday', frame: 0},
-    {x: 12, y: 4, hp: 80, type: 'payday', frame: 0},
-    {x: 5, y: 12, hp: 100, type: 'payday', frame: 0}
-];
-
-const keys = {};
-let gunFrame = 0;
-let isShooting = false;
-
-// --- ИНИЦИАЛИЗАЦИЯ ---
-function init() {
-    resize();
-    window.addEventListener('resize', resize);
-    document.addEventListener('keydown', e => { keys[e.code] = true; if(e.code==='KeyF') player.flashlight = !player.flashlight; if(e.code==='Digit5') callBackup(); });
-    document.addEventListener('keyup', e => keys[e.code] = false);
-    document.addEventListener('mousedown', shoot);
-    overlay.addEventListener('click', () => { 
-        overlay.style.display = 'none'; 
-        canvas.requestPointerLock();
-        gameLoop(); 
-    });
-    
-    document.addEventListener('mousemove', e => {
-        if (document.pointerLockElement === canvas) {
-            player.dir += e.movementX * 0.003;
-        }
+/** ИНИЦИАЛИЗАЦИЯ NPC (Посетители) **/
+for(let i=0; i<15; i++) {
+    sprites.push({
+        x: 5 + Math.random()*8, y: 5 + Math.random()*8, 
+        type: 'civilian', color: '#3aaceb', alive: true
     });
 }
 
-function resize() {
-    canvas.width = window.innerWidth / 2; // Рендерим в меньшем разрешении для стиля
-    canvas.height = window.innerHeight / 2;
-}
+/** РЕЙКАСТИНГ **/
+function render() {
+    // Пол и Потолок
+    ctx.fillStyle = "#eee"; // Потолок (светло)
+    ctx.fillRect(0, 0, W, H/2);
+    ctx.fillStyle = "#777"; // Пол
+    ctx.fillRect(0, H/2, W, H/2);
 
-// --- ЛОГИКА ---
-function shoot() {
-    if (player.ammo <= 0 || isShooting) return;
-    player.ammo--;
-    isShooting = true;
-    playSound(440, 0.1); // Писк вместо звука (для чистого JS без ассетов)
-    
-    // Проверка попадания (центр экрана)
-    const hitEnemy = enemies.find(en => {
-        const dx = en.x - player.x;
-        const dy = en.y - player.y;
-        const angleToEnemy = Math.atan2(dy, dx);
-        let diff = angleToEnemy - player.dir;
-        while (diff < -Math.PI) diff += Math.PI * 2;
-        while (diff > Math.PI) diff -= Math.PI * 2;
-        return Math.abs(diff) < 0.2 && Math.sqrt(dx*dx + dy*dy) < 8;
-    });
+    const fov = Math.PI / 3;
+    for(let i=0; i<W; i++) {
+        let angle = (player.dir - fov/2) + (i/W) * fov;
+        let dist = 0;
+        let x = player.x, y = player.y;
+        let dx = Math.cos(angle), dy = Math.sin(angle);
 
-    if (hitEnemy) {
-        hitEnemy.hp -= 35;
-        if (hitEnemy.hp <= 0) {
-            enemies = enemies.filter(e => e !== hitEnemy);
-        }
-    }
-}
-
-function callBackup() {
-    alert("FBI OPEN UP! Подмога в пути (Вы победили)");
-    location.reload();
-}
-
-function playSound(freq, duration) {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    osc.type = 'square';
-    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-    osc.connect(audioCtx.destination);
-    osc.start();
-    osc.stop(audioCtx.currentTime + duration);
-}
-
-// --- РЕНДЕРИНГ (RAYCASTING) ---
-function gameLoop() {
-    update();
-    draw();
-    requestAnimationFrame(gameLoop);
-}
-
-function update() {
-    let moveStep = 0;
-    if (keys['KeyW']) moveStep = player.speed;
-    if (keys['KeyS']) moveStep = -player.speed;
-    
-    if (moveStep !== 0) {
-        let newX = player.x + Math.cos(player.dir) * moveStep;
-        let newY = player.y + Math.sin(player.dir) * moveStep;
-        if (map[Math.floor(newY) * mapSize + Math.floor(newX)] === 0) {
-            player.x = newX;
-            player.y = newY;
-        }
-    }
-
-    if (keys['KeyA']) player.dir -= player.rotSpeed;
-    if (keys['KeyD']) player.dir += player.rotSpeed;
-
-    // Простая логика врагов
-    enemies.forEach(en => {
-        const dx = player.x - en.x;
-        const dy = player.y - en.y;
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist < 10 && dist > 0.5) {
-            en.x += (dx / dist) * 0.02;
-            en.y += (dy / dist) * 0.02;
-        }
-        if (dist < 1) player.hp -= 0.1;
-    });
-
-    if (player.hp <= 0) { alert("Вы погибли в перестрелке!"); location.reload(); }
-    document.getElementById('ecount').innerText = enemies.length;
-}
-
-function draw() {
-    const w = canvas.width;
-    const h = canvas.height;
-    
-    // Фон (Потолок и пол)
-    ctx.fillStyle = '#111'; ctx.fillRect(0, 0, w, h/2);
-    ctx.fillStyle = '#222'; ctx.fillRect(0, h/2, w, h/2);
-
-    const zBuffer = [];
-
-    // Стены
-    const FOV = Math.PI / 3;
-    for (let i = 0; i < w; i++) {
-        const rayDir = player.dir - FOV/2 + (i/w) * FOV;
-        let d = 0;
-        let hit = 0;
-        
-        const stepX = Math.cos(rayDir) * 0.02;
-        const stepY = Math.sin(rayDir) * 0.02;
-        
-        while (d < 15) {
-            d += 0.02;
-            let cx = Math.floor(player.x + Math.cos(rayDir) * d);
-            let cy = Math.floor(player.y + Math.sin(rayDir) * d);
-            if (map[cy * mapSize + cx] > 0) {
-                hit = map[cy * mapSize + cx];
+        while(dist < 20) {
+            dist += 0.1;
+            let ix = Math.floor(x + dx*dist), iy = Math.floor(y + dy*dist);
+            if(world[iy * mapSize + ix] > 0) {
+                let hit = world[iy * mapSize + ix];
+                let h = H / (dist * Math.cos(angle - player.dir));
+                let color = hit === 1 ? "#999" : (hit === 2 ? "#55a" : "#ffd700");
+                ctx.fillStyle = color;
+                ctx.fillRect(i, H/2 - h/2, 1, h);
                 break;
             }
         }
-
-        zBuffer[i] = d;
-        const lineH = h / (d * Math.cos(rayDir - player.dir));
-        
-        // Освещение от фонарика
-        let brightness = player.flashlight ? (1 - d/8) * 200 : (1 - d/5) * 100;
-        brightness = Math.max(20, brightness);
-        
-        ctx.fillStyle = hit === 3 ? `rgb(0, ${brightness/2}, ${brightness})` : `rgb(${brightness},${brightness},${brightness})`;
-        ctx.fillRect(i, h/2 - lineH/2, 1, lineH);
     }
 
-    // Спрайты врагов
-    enemies.forEach(en => {
-        const dx = en.x - player.x;
-        const dy = en.y - player.y;
+    // Отрисовка спрайтов (NPC)
+    sprites.forEach(s => {
+        let dx = s.x - player.x, dy = s.y - player.y;
+        let dist = Math.sqrt(dx*dx + dy*dy);
         let angle = Math.atan2(dy, dx) - player.dir;
-        while (angle < -Math.PI) angle += Math.PI * 2;
-        while (angle > Math.PI) angle -= Math.PI * 2;
-        
-        const dist = Math.sqrt(dx*dx + dy*dy);
-        if (dist > 0.2 && Math.abs(angle) < FOV) {
-            const screenX = (0.5 * (angle / (FOV/2)) + 0.5) * w;
-            const spriteH = h / dist;
-            
-            // Простая отрисовка "врага" (прямоугольник с маской)
-            if (dist < zBuffer[Math.floor(screenX)]) {
-                ctx.fillStyle = '#f00'; // Костюм
-                ctx.fillRect(screenX - spriteH/4, h/2 - spriteH/2, spriteH/2, spriteH);
-                ctx.fillStyle = '#fff'; // Маска
-                ctx.fillRect(screenX - spriteH/6, h/2 - spriteH/2.2, spriteH/3, spriteH/4);
-            }
+        if(angle < -Math.PI) angle += 2*Math.PI;
+        if(angle > Math.PI) angle -= 2*Math.PI;
+
+        if(Math.abs(angle) < fov) {
+            let h = H / dist;
+            let x = (angle / fov + 0.5) * W - h/2;
+            ctx.fillStyle = s.type === 'bandit' ? '#r00' : s.color;
+            ctx.fillRect(x, H/2 - h/4, h/2, h); // Упрощенный спрайт-человечек
         }
     });
 
-    // Оружие (Глок)
-    const gunX = w / 2 - 50 + Math.sin(Date.now()*0.01) * 2;
-    const gunY = h - 100 + (isShooting ? Math.random()*10 : 0);
-    ctx.fillStyle = '#333';
-    ctx.fillRect(gunX, gunY, 80, 120); // Тело пистолета
-    ctx.fillStyle = '#000';
-    ctx.fillRect(gunX + 20, gunY - 20, 40, 40); // Затвор
-    
-    if (isShooting) {
-        ctx.fillStyle = 'yellow';
-        ctx.beginPath();
-        ctx.arc(w/2, h/2 + 20, 20, 0, Math.PI*2);
-        ctx.fill();
-        gunFrame++;
-        if (gunFrame > 5) { isShooting = false; gunFrame = 0; }
+    // Руки / Оружие
+    if (player.isSitting) {
+        ctx.fillStyle = "#2a1506";
+        ctx.fillRect(0, H-80, W, 80); // Стол
+    } else {
+        ctx.fillStyle = "#222";
+        ctx.fillRect(W/2 + 40, H-120, 50, 120); // Пистолет
     }
 }
 
-init();
+/** ЛОГИКА ВЗАИМОДЕЙСТВИЯ **/
+function toggleState() {
+    player.isSitting = !player.isSitting;
+    const ui = document.getElementById('ui-layer');
+    const btn = document.getElementById('action-btn');
+    const cross = document.getElementById('crosshair');
 
+    if(!player.isSitting) {
+        ui.style.background = "none";
+        btn.innerText = "СЕСТЬ ЗА СТОЛ";
+        document.getElementById('status').innerText = "ПАТРУЛЬ";
+        cross.style.display = "block";
+    } else {
+        btn.innerText = "ВСТАТЬ И ПАТРУЛИРОВАТЬ";
+        document.getElementById('status').innerText = "ДЕЖУРСТВО";
+        cross.style.display = "none";
+    }
+}
+
+function openMenu(type) {
+    const ov = document.getElementById('overlay');
+    const content = document.getElementById('overlay-content');
+    ov.style.display = 'block';
+
+    if(type === 'tablet') {
+        content.innerHTML = `<h3>СИСТЕМА НАБЛЮДЕНИЯ</h3><div class="grid">
+            <div class="cam-box"><span class="cam-label">CAM 01: ГЛАВНЫЙ ВХОД</span> ${heistStarted ? '⚠️ ОБНАРУЖЕНЫ МАСКИ' : 'ПОТОК НОРМАЛЬНЫЙ'}</div>
+            <div class="cam-box"><span class="cam-label">CAM 02: КАССОВЫЙ ЗАЛ</span> СЕРВИС: ОК</div>
+            <div class="cam-box"><span class="cam-label">CAM 03: ХРАНИЛИЩЕ</span> СТАТУС: ЗАКРЫТО</div>
+            <div class="cam-box"><span class="cam-label">CAM 04: ЧЕРНЫЙ ВЫХОД</span> ПУСТО</div>
+        </div>`;
+    } else if(type === 'phone') {
+        content.innerHTML = `<h3>ТЕЛЕФОН GENSEC</h3>
+            <button onclick="startHeist()">ВЫЗВАТЬ ПОЛИЦИЮ (ТРЕВОГА)</button><br><br>
+            <button onclick="alert('Техподдержка: Перезагрузите роутер.')">ТЕХПОДДЕРЖКА</button><br><br>
+            <button onclick="alert('Жена: Не забудь купить хлеб после смены!')">ДОМ</button>`;
+    } else if(type === 'map') {
+        content.innerHTML = `<h3>ПЛАН ПОМЕЩЕНИЙ</h3><div style="background:#333; height:200px; border:1px dashed #fff; position:relative">
+            <div style="position:absolute; top:20px; left:20px">ХОЛЛ</div>
+            <div style="position:absolute; top:20px; right:20px">СЕЙФ</div>
+        </div>`;
+    }
+}
+
+function closeMenu() { document.getElementById('overlay').style.display = 'none'; }
+
+function startHeist() {
+    heistStarted = true;
+    document.getElementById('status').innerText = "ОГРАБЛЕНИЕ! ШТУРМ!";
+    for(let i=0; i<4; i++) {
+        sprites.push({ x: 13, y: 13, type: 'bandit', color: '#f00', alive: true });
+    }
+    closeMenu();
+}
+
+/** УПРАВЛЕНИЕ **/
+const keys = {};
+window.onkeydown = (e) => keys[e.code] = true;
+window.onkeyup = (e) => keys[e.code] = false;
+
+function update() {
+    if(!player.isSitting) {
+        if(keys['KeyW']) {
+            let nx = player.x + Math.cos(player.dir)*0.05, ny = player.y + Math.sin(player.dir)*0.05;
+            if(world[Math.floor(ny)*mapSize + Math.floor(nx)] === 0) { player.x = nx; player.y = ny; }
+        }
+        if(keys['KeyS']) {
+            let nx = player.x - Math.cos(player.dir)*0.05, ny = player.y - Math.sin(player.dir)*0.05;
+            if(world[Math.floor(ny)*mapSize + Math.floor(nx)] === 0) { player.x = nx; player.y = ny; }
+        }
+        if(keys['KeyA']) player.dir -= 0.04;
+        if(keys['KeyD']) player.dir += 0.04;
+    }
+    
+    // Простая логика бандитов
+    if(heistStarted) {
+        sprites.forEach(s => {
+            if(s.type === 'bandit') {
+                s.x -= 0.01; // Идут к сейфу
+            }
+        });
+    }
+}
+
+function loop() {
+    update();
+    render();
+    requestAnimationFrame(loop);
+}
+
+loop();
 </script>
 </body>
 </html>
