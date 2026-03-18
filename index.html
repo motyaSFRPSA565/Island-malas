@@ -3,232 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FBI: НОЧНАЯ СМЕНА | рейкастинг 3D</title>
+    <title>FBI: НОЧНАЯ СМЕНА (НАСТОЯЩИЙ 3D РЕЙКАСТИНГ)</title>
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #0a1015;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Courier New', monospace;
+            padding: 16px;
+        }
+        #game-wrapper {
+            background: #1c2f38;
+            border: 8px solid #3d606e;
+            border-radius: 40px;
+            padding: 24px;
+            box-shadow: 0 0 0 6px #1a333d;
+            max-width: 1300px;
+            width: 100%;
+        }
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            border: 6px solid #5f8b9c;
+            border-radius: 30px;
+            overflow: hidden;
+            background: #0f1f27;
+        }
+        #game-canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4/3;
+            background: #162b33;
             image-rendering: crisp-edges;
             image-rendering: pixelated;
         }
-        body {
-            margin: 0;
-            min-height: 100vh;
-            background: #0b1012;
-            display: flex;
-                justify-content: center;
-            align-items: center;
-            font-family: 'Courier New', Courier, monospace;
-        }
-        #game-container {
-            background: #1e2c33;
-            padding: 18px;
-            border-radius: 32px;
-            box-shadow: 0 0 0 6px #2f4f5e, inset 0 0 0 4px #4f7b8c;
-            max-width: 1300px;
-            width: fit-content;
-            margin: 16px;
-        }
-        .screen-panel {
-            background: #0f212a;
-            border: 6px solid #316277;
-            border-radius: 26px;
-            padding: 18px;
-            box-shadow: inset 0 0 30px #000000ee;
-        }
-        #display-canvas {
-            display: block;
-            width: 100%;
-            max-width: 1120px;
-            aspect-ratio: 4 / 3;
-            background: #1b2d36;
-            border-radius: 20px;
-            border: 5px solid #4a859c;
-            box-shadow: 0 0 0 4px #1e3f4b;
-            image-rendering: crisp-edges;
-        }
-        .status-bar {
-            background: #142e38;
-            padding: 10px 24px;
-            margin: 16px 0 12px 0;
-            border-radius: 60px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px 35px;
-            justify-content: center;
-            color: #d6f0ff;
-            text-shadow: 3px 3px 0 #08212b;
-            font-weight: bold;
-            font-size: 1.3rem;
-            border: 3px solid #3c8198;
-            box-shadow: inset 0 -4px 0 #174654;
-        }
-        .status-bar span {
-            background: #0d2d38;
-            padding: 8px 28px;
-            border-radius: 50px;
-            border: 2px solid #399bb8;
-            display: inline-flex;
-            align-items: center;
-            gap: 14px;
-            letter-spacing: 1px;
-        }
-        .control-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
+        .stats-panel {
+            background: #1e3843;
             margin-top: 20px;
+            padding: 16px 28px;
+            border-radius: 80px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px 50px;
+            justify-content: center;
+            border: 4px solid #498094;
+            box-shadow: inset 0 -4px 0 #1d404f;
+            color: #e7f6ff;
+            font-weight: bold;
+            font-size: 1.4rem;
+            text-shadow: 3px 3px 0 #0f252e;
+        }
+        .stat-item {
+            background: #0f2e3a;
+            padding: 12px 32px;
+            border-radius: 50px;
+            border: 2px solid #68b6d1;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .control-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: center;
+            margin-top: 25px;
         }
         .btn {
-            background: #2f5060;
+            background: #2f5668;
             border: none;
-            border-bottom: 6px solid #122f3b;
-            color: #ffffff;
+            border-bottom: 7px solid #12333f;
+            color: white;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1.2rem;
-            padding: 14px 24px;
-            border-radius: 50px;
+            font-size: 1.3rem;
+            padding: 18px 28px;
+            border-radius: 60px;
             letter-spacing: 2px;
-            text-shadow: 2px 2px 0 #102830;
-            box-shadow: 0 5px 0 #203f4b, inset 0 0 0 2px #68b5d0;
+            text-shadow: 2px 2px 0 #0f2d39;
+            box-shadow: 0 6px 0 #1d3e4b, inset 0 0 0 2px #89c2d9;
             cursor: pointer;
             transition: 0.05s linear;
-            min-width: 100px;
+            min-width: 130px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
         .btn:active {
-            transform: translateY(6px);
+            transform: translateY(7px);
             border-bottom-width: 2px;
-            background: #234957;
+            background: #234b5c;
         }
         .btn.red {
-            background: #8a3b47;
-            border-bottom-color: #451f27;
-            box-shadow: inset 0 0 0 2px #e58297;
-        }
-        .btn.blue {
-            background: #2b6a8c;
-            border-bottom-color: #123b4f;
+            background: #9e4555;
+            border-bottom-color: #562a32;
         }
         .btn.green {
-            background: #3f784b;
-            border-bottom-color: #1b4022;
+            background: #39855c;
+            border-bottom-color: #1f4a33;
         }
-        .mobile-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-            justify-content: center;
+        .btn.blue {
+            background: #336f96;
         }
-        @media (max-width: 700px) {
-            .btn { padding: 16px 14px; font-size: 1.1rem; }
-            .status-bar { font-size: 1.1rem; }
-        }
-        .hint {
-            color: #9cd9f0;
-            font-size: 1rem;
+        .mobile-note {
             text-align: center;
-            margin-top: 16px;
-            background: #0c2a33;
-            padding: 8px 20px;
-            border-radius: 40px;
-            border: 2px solid #479bb3;
+            color: #aad3e6;
+            margin-top: 20px;
+            font-size: 1.1rem;
+            background: #173a47;
+            padding: 12px;
+            border-radius: 50px;
+            border: 2px solid #5fa3bb;
         }
     </style>
 </head>
 <body>
-<div id="game-container" class="screen-panel">
-    <canvas id="display-canvas" width="1152" height="864"></canvas>
-
-    <div class="status-bar">
-        <span>🔦 ФОНАРЬ: <span id="flashlightStatus">ВКЛ</span></span>
-        <span>🔫 ПАТРОНЫ: <span id="ammoDisplay">30</span></span>
-        <span>🆘 ПОДМОГА: <span id="backupStatus">ГОТОВА</span></span>
-        <span>🌃 ЭТАЖ 40</span>
+<div id="game-wrapper">
+    <div id="canvas-container">
+        <canvas id="game-canvas" width="1024" height="768"></canvas>
+    </div>
+    
+    <div class="stats-panel">
+        <div class="stat-item">🔫 <span id="ammo-count">30</span></div>
+        <div class="stat-item">🔦 <span id="light-status">ВКЛ</span></div>
+        <div class="stat-item">👥 ВРАГОВ: <span id="enemy-count">6</span></div>
+        <div class="stat-item">🆘 <span id="backup-status">НЕ ВЫЗВАНА</span></div>
     </div>
 
-    <div class="control-panel">
-        <button class="btn blue" id="moveUpBtn">⬆️ ВПЕРЁД (W)</button>
-        <button class="btn blue" id="moveDownBtn">⬇️ НАЗАД (S)</button>
-        <button class="btn blue" id="rotateLeftBtn">↺ ВЛЕВО (A)</button>
-        <button class="btn blue" id="rotateRightBtn">↻ ВПРАВО (D)</button>
+    <div class="control-grid">
+        <button class="btn blue" id="btn-w">⬆️ W (вперёд)</button>
+        <button class="btn blue" id="btn-s">⬇️ S (назад)</button>
+        <button class="btn blue" id="btn-a">↺ A (влево)</button>
+        <button class="btn blue" id="btn-d">↻ D (вправо)</button>
+        <button class="btn red" id="btn-shoot">🔫 СТРЕЛЬБА</button>
+        <button class="btn green" id="btn-flashlight">🔦 ФОНАРИК</button>
+        <button class="btn" id="btn-backup">📞 ПОДМОГА</button>
+        <button class="btn" id="btn-coffee">☕ КОФЕ</button>
     </div>
-    <div class="control-panel">
-        <button class="btn red" id="shootBtn">🔫 СТРЕЛЯТЬ</button>
-        <button class="btn green" id="flashlightBtn">🔦 ФОНАРИК (ВКЛ/ВЫКЛ)</button>
-        <button class="btn" id="callBackupBtn">📞 ВЫЗВАТЬ ПОДМОГУ</button>
-        <button class="btn" id="coffeeBtn">☕ КОФЕ (ВНИМАНИЕ)</button>
-    </div>
-    <div class="hint">
-        👮 FBI: ночная смена | PAYDAY в масках | Драго за окном | Медведь с чайником
+    <div class="mobile-note">
+        👮‍♂️ НАСТОЯЩИЙ 3D РЕЙКАСТИНГ | 40-Й ЭТАЖ | PAYDAY В МАСКАХ | ДРАГО ЗА ОКНОМ
     </div>
 </div>
 
 <script>
 (function() {
-    const canvas = document.getElementById('display-canvas');
+    const canvas = document.getElementById('game-canvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
-
-    // ---------- СОСТОЯНИЕ ИГРЫ ----------
-    let ammo = 30;
-    let flashlight = true;
+    
+    // ==================== 3D ДВИЖОК ====================
+    // Карта офиса ФБР (15x15, больше деталей)
+    const map = [
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,2,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,2,2,2,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,2,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+    ];
+    
+    // позиция игрока
+    let player = {
+        x: 2.5,
+        y: 12.5,
+        angle: 1.57, // смотрит вверх карты
+        height: 0.5,
+        speed: 0.1
+    };
+    
+    // спрайты (враги, агенты, объекты)
+    let enemies = [];
+    let friendlies = [];
     let backupUsed = false;
     let backupActive = false;
+    let flashlight = true;
+    let ammo = 30;
     let gameOver = false;
-    let endingType = null;   // hero, backup, dead, surrendered, secret
-    let phase = 'patrol';     // patrol, infiltration, combat, backupPhase
-    let coffeeBoost = false;
+    let endingType = null;
+    let coffeeBoost = 0;
     
-    // координаты игрока (рейкастинг)
-    let player = {
-        x: 12.5,
-        y: 14.5,
-        angle: 1.8,
-        height: 0.5
-    };
-
-    // ---------- 3D КАРТА (офис ФБР 40 этаж) ----------
-    const map = [
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-    ];
-
-    // ---------- СПРАЙТЫ (ВРАГИ, АГЕНТЫ, ОБЪЕКТЫ) ----------
-    let enemies = []; // PAYDAY
-    let friendlies = []; // агенты подмоги
-    
-    // инициализация врагов (группа PAYDAY)
-    function spawnPayday() {
+    // генерация врагов (PAYDAY)
+    function spawnEnemies() {
+        const masks = ['клоун', 'театр', 'хоккей', 'череп', 'бал', 'демон'];
+        const suits = ['чёрный', 'синий', 'серый', 'бежевый'];
         for (let i = 0; i < 6; i++) {
-            let maskType = ['клоун', 'театр', 'хоккей', 'череп', 'бал', 'демон'][i % 6];
-            let suit = ['чёрный', 'синий', 'серый', 'бежевый'][Math.floor(Math.random() * 4)];
             enemies.push({
-                x: 4 + Math.random() * 10,
-                y: 3 + Math.random() * 8,
+                x: 6 + Math.random() * 5,
+                y: 3 + Math.random() * 5,
                 hp: 100,
                 active: true,
-                mask: maskType,
-                suit: suit,
-                angle: 0,
+                mask: masks[i % masks.length],
+                suit: suits[Math.floor(Math.random() * suits.length)],
                 type: 'payday'
             });
         }
@@ -238,235 +224,323 @@
     function spawnBackup() {
         for (let i = 0; i < 4; i++) {
             friendlies.push({
-                x: player.x + 2,
-                y: player.y + 1,
+                x: player.x + (Math.random() * 2 - 1),
+                y: player.y + (Math.random() * 2 - 1),
                 hp: 100,
                 active: true,
-                type: 'fbi',
-                angle: 0
+                type: 'fbi'
             });
         }
         backupActive = true;
     }
-
-    // вызывается через некоторое время после старта
+    
+    // спавним врагов через 3 секунды
     setTimeout(() => {
-        if (!gameOver && phase === 'patrol') {
-            phase = 'infiltration';
-            spawnPayday();
-        }
-    }, 8000);
-
-    // ---------- 3D РЕЙКАСТИНГ (С ТЕКСТУРАМИ) ----------
-    function render3D() {
-        const w = canvas.width, h = canvas.height;
-        ctx.fillStyle = '#0a141c'; // ночное небо
-        ctx.fillRect(0, 0, w, h/2);
-        ctx.fillStyle = '#2f404a'; // пол
-        ctx.fillRect(0, h/2, w, h/2);
-        
-        // окна (вид на город)
-        ctx.fillStyle = '#182b39';
-        for (let i = 0; i < 20; i++) {
-            ctx.fillRect(100 + i*70, 60, 50, 200);
-            ctx.fillStyle = '#aac7db';
-            ctx.font = '18px monospace';
-            ctx.fillText('🌃', 120 + i*70, 160);
-        }
-
-        // рейкастинг стен
-        for (let x = 0; x < w; x += 4) {
-            let rayAngle = player.angle - 0.5 + (x / w) * 1.0;
-            let distance = 0;
-            let hit = false;
-            let rayX = player.x, rayY = player.y;
-            let stepX = Math.cos(rayAngle), stepY = Math.sin(rayAngle);
-            
-            while (!hit && distance < 25) {
-                rayX += stepX * 0.1;
-                rayY += stepY * 0.1;
-                distance += 0.1;
-                let mapX = Math.floor(rayX);
-                let mapY = Math.floor(rayY);
-                if (mapY >= 0 && mapY < map.length && mapX >= 0 && mapX < map[0].length && map[mapY][mapX] !== 0) {
-                    hit = true;
-                }
-            }
-            
-            let wallHeight = Math.min(1500, h / (distance * 0.8 + 0.1));
-            let color = hit ? '#67879b' : '#3b525c';
-            if (!flashlight && distance > 5) color = '#1f313a'; // темно без фонаря
-            
-            ctx.fillStyle = color;
-            ctx.fillRect(x, h/2 - wallHeight/2, 5, wallHeight);
-            
-            // отблески фонаря
-            if (flashlight && distance < 8) {
-                ctx.fillStyle = '#ffe9c066';
-                ctx.fillRect(x, h/2 - wallHeight/2, 5, wallHeight);
-            }
-        }
-        
-        // отрисовка спрайтов (враги, агенты) в 3D
-        function drawSprite(obj, isEnemy) {
-            if (!obj.active) return;
-            let dx = obj.x - player.x;
-            let dy = obj.y - player.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist > 15) return;
-            let angleTo = Math.atan2(dy, dx);
-            let diff = angleTo - player.angle;
-            while (diff > Math.PI) diff -= 2*Math.PI;
-            while (diff < -Math.PI) diff += 2*Math.PI;
-            if (Math.abs(diff) < 0.8) {
-                let x = w/2 + diff * 300;
-                let size = Math.min(300, 150 / (dist + 0.1));
-                if (x > 0 && x < w) {
-                    // рисуем 3D-модель (пиксельную)
-                    if (isEnemy) {
-                        // костюм
-                        ctx.fillStyle = obj.suit === 'чёрный' ? '#222' : (obj.suit === 'синий' ? '#225588' : '#6f7f8f');
-                        ctx.fillRect(x - size/2, h/2 - size/2 - 10, size, size);
-                        // маска
-                        ctx.fillStyle = '#b33e3e';
-                        ctx.beginPath();
-                        ctx.arc(x, h/2 - size/2 - 20, size*0.25, 0, Math.PI*2);
-                        ctx.fill();
-                        // глаза
-                        ctx.fillStyle = '#f2ff80';
-                        ctx.beginPath();
-                        ctx.arc(x-5, h/2 - size/2 - 26, 4, 0, Math.PI*2);
-                        ctx.arc(x+5, h/2 - size/2 - 26, 4, 0, Math.PI*2);
-                        ctx.fill();
-                    } else {
-                        // агент ФБР
-                        ctx.fillStyle = '#2a6f9c';
-                        ctx.fillRect(x - size/2, h/2 - size/2 - 10, size, size);
-                        ctx.fillStyle = '#f0d498';
-                        ctx.fillRect(x-8, h/2 - size/2 - 30, 16, 12);
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = '16px monospace';
-                        ctx.fillText('FBI', x-15, h/2 - size/2 - 40);
-                    }
-                }
-            }
-        }
-        
-        enemies.forEach(e => drawSprite(e, true));
-        friendlies.forEach(f => drawSprite(f, false));
-        
-        // руки с пистолетом / фонариком
-        ctx.fillStyle = '#335577'; // рубашка
-        ctx.fillRect(w-350, h-200, 220, 150);
-        ctx.fillStyle = '#a55e3e'; // кобура
-        ctx.fillRect(w-200, h-150, 60, 40);
-        // глок
-        ctx.fillStyle = '#222222';
-        ctx.fillRect(w-180, h-170, 70, 20);
-        ctx.fillStyle = '#964B00';
-        ctx.fillRect(w-170, h-180, 20, 20); // рукоять
-        
-        // бейдж FBI
-        ctx.fillStyle = '#f5c542';
-        ctx.font = 'bold 24px monospace';
-        ctx.fillText('FBI', w-300, h-100);
-        
-        // фонарик (если включён)
-        if (flashlight) {
-            ctx.fillStyle = '#fff5c0';
-            ctx.beginPath();
-            ctx.moveTo(w-100, h-160);
-            ctx.lineTo(w-20, h-300);
-            ctx.lineTo(w-40, h-300);
-            ctx.fill();
-        }
-    }
-
-    // ---------- УПРАВЛЕНИЕ ----------
-    document.getElementById('moveUpBtn').onclick = () => { player.x += Math.cos(player.angle)*0.4; player.y += Math.sin(player.angle)*0.4; };
-    document.getElementById('moveDownBtn').onclick = () => { player.x -= Math.cos(player.angle)*0.4; player.y -= Math.sin(player.angle)*0.4; };
-    document.getElementById('rotateLeftBtn').onclick = () => { player.angle -= 0.15; };
-    document.getElementById('rotateRightBtn').onclick = () => { player.angle += 0.15; };
+        if (!gameOver) spawnEnemies();
+    }, 3000);
     
-    document.getElementById('flashlightBtn').onclick = () => {
-        flashlight = !flashlight;
-        document.getElementById('flashlightStatus').innerText = flashlight ? 'ВКЛ' : 'ВЫКЛ';
-    };
-    
-    document.getElementById('shootBtn').onclick = () => {
-        if (ammo <= 0 || gameOver) return;
-        ammo--;
-        // попадание во врага (первого активного)
-        for (let e of enemies) {
-            if (!e.active) continue;
-            let dx = e.x - player.x;
-            let dy = e.y - player.y;
-            let dist = Math.sqrt(dx*dx + dy*dy);
-            if (dist < 5) {
-                e.hp -= 34;
-                if (e.hp <= 0) e.active = false;
-            }
-            break;
-        }
-        document.getElementById('ammoDisplay').innerText = ammo;
-    };
-    
-    document.getElementById('callBackupBtn').onclick = () => {
-        if (backupUsed) { alert('Подмога уже вызвана'); return; }
-        backupUsed = true;
-        spawnBackup();
-        document.getElementById('backupStatus').innerText = 'В ПУТИ';
-        phase = 'backupPhase';
-    };
-    
-    document.getElementById('coffeeBtn').onclick = () => {
-        coffeeBoost = true;
-        setTimeout(() => { coffeeBoost = false; }, 8000);
-    };
-
-    // ---------- ПАСХАЛКИ И КОНЦОВКИ ----------
-    setInterval(() => {
-        if (gameOver) return;
-        // Драго за окном
-        if (Math.random() < 0.2) {
-            alert('👺 ДРАГО ПРОБЕГАЕТ ЗА ОКНОМ (40-й этаж!?) "Я ДОЛЖЕН!"');
-        }
-        // проверка концовок
-        if (enemies.filter(e => e.active).length === 0 && phase !== 'patrol') {
-            if (backupActive) endingType = 'backup';
-            else endingType = 'hero';
-            gameOver = true;
-        }
-        if (player.x < 2 && !gameOver) {
-            endingType = 'secret';
-            gameOver = true;
-        }
-    }, 5000);
-
-    // ---------- ОСНОВНОЙ ЦИКЛ ----------
+    // ==================== РЕЙКАСТИНГ ====================
     function render() {
         if (gameOver) {
             ctx.fillStyle = '#000000dd';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = '#ffcc99';
-            ctx.font = 'bold 56px monospace';
-            if (endingType === 'hero') ctx.fillText('ГЕРОЙ ФБР', 350, 400);
-            else if (endingType === 'backup') ctx.fillText('ПОДМОГА АРЕСТОВАЛА', 250, 400);
-            else if (endingType === 'dead') ctx.fillText('ПОГИБ', 500, 400);
-            else if (endingType === 'surrendered') ctx.fillText('СДАЛСЯ', 480, 400);
-            else if (endingType === 'secret') ctx.fillText('СЕКРЕТ: ВЕРТОЛЁТ', 350, 400);
+            ctx.font = 'bold 70px "Courier New"';
+            ctx.textAlign = 'center';
+            let msg = 'КОНЕЦ';
+            if (endingType === 'hero') msg = 'ГЕРОЙ ФБР';
+            if (endingType === 'backup') msg = 'ПОДМОГА';
+            if (endingType === 'dead') msg = 'ПОГИБ';
+            if (endingType === 'secret') msg = 'СЕКРЕТ!';
+            ctx.fillText(msg, canvas.width/2, canvas.height/2);
             return;
         }
-        render3D();
-        requestAnimationFrame(render);
+        
+        const w = canvas.width;
+        const h = canvas.height;
+        
+        // небо и пол (градиент)
+        const gradSky = ctx.createLinearGradient(0, 0, 0, h/2);
+        gradSky.addColorStop(0, '#0a1a24');
+        gradSky.addColorStop(1, '#1d3947');
+        ctx.fillStyle = gradSky;
+        ctx.fillRect(0, 0, w, h/2);
+        
+        // пол
+        ctx.fillStyle = '#3b5240';
+        ctx.fillRect(0, h/2, w, h/2);
+        
+        // окна с видом на город (в верхней части стен)
+        for (let i = 0; i < 12; i++) {
+            ctx.fillStyle = '#5d7f94';
+            ctx.fillRect(80 + i*95, 50, 60, 180);
+            ctx.fillStyle = '#e6dba0';
+            ctx.font = '24px monospace';
+            ctx.fillText('🌃', 95 + i*95, 150);
+        }
+        
+        // ===== РЕЙКАСТИНГ СТЕН =====
+        for (let sx = 0; sx < w; sx += 4) {
+            // угол луча
+            let rayAngle = player.angle - 0.5 + (sx / w) * 1.0;
+            
+            let distance = 0;
+            let hit = false;
+            let rayX = player.x;
+            let rayY = player.y;
+            let stepX = Math.cos(rayAngle) * 0.05;
+            let stepY = Math.sin(rayAngle) * 0.05;
+            
+            while (!hit && distance < 20) {
+                rayX += stepX;
+                rayY += stepY;
+                distance += 0.05;
+                
+                let mapX = Math.floor(rayX);
+                let mapY = Math.floor(rayY);
+                
+                if (mapY >= 0 && mapY < map.length && mapX >= 0 && mapX < map[0].length) {
+                    if (map[mapY][mapX] !== 0) {
+                        hit = true;
+                    }
+                } else {
+                    hit = true; // край карты
+                }
+            }
+            
+            // коррекция расстояния (рыбий глаз)
+            distance *= Math.cos(rayAngle - player.angle);
+            
+            // высота стены
+            let wallHeight = Math.min(2000, Math.floor(h / (distance + 0.1)));
+            
+            // текстура стены (простая)
+            let color = '#7f8c8d';
+            if (map[Math.floor(rayY)][Math.floor(rayX)] === 2) color = '#5d6d7e'; // компьютеры
+            
+            // затемнение по расстоянию
+            let shade = Math.max(0.3, 1.0 - distance * 0.07);
+            if (!flashlight && distance > 3) shade *= 0.5;
+            
+            ctx.fillStyle = `rgb(${parseInt(parseInt(color.slice(1,3),16)*shade)}, ${parseInt(parseInt(color.slice(3,5),16)*shade)}, ${parseInt(parseInt(color.slice(5,7),16)*shade)})`;
+            
+            let wallTop = h/2 - wallHeight/2;
+            ctx.fillRect(sx, wallTop, 5, wallHeight);
+        }
+        
+        // ===== СПРАЙТЫ (ВРАГИ, АГЕНТЫ) =====
+        function drawSprite(obj, type) {
+            if (!obj.active) return;
+            
+            // относительная позиция
+            let dx = obj.x - player.x;
+            let dy = obj.y - player.y;
+            
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 10) return;
+            
+            let angleTo = Math.atan2(dy, dx);
+            let angleDiff = angleTo - player.angle;
+            
+            // нормализация
+            while (angleDiff > Math.PI) angleDiff -= 2*Math.PI;
+            while (angleDiff < -Math.PI) angleDiff += 2*Math.PI;
+            
+            if (Math.abs(angleDiff) < 0.8) {
+                let x = w/2 + angleDiff * 300;
+                let size = Math.min(300, Math.floor(150 / (dist + 0.2)));
+                
+                if (x > 0 && x < w) {
+                    if (type === 'payday') {
+                        // костюм
+                        ctx.fillStyle = obj.suit === 'чёрный' ? '#222' : (obj.suit === 'синий' ? '#225588' : '#7a8a9a');
+                        ctx.fillRect(x - size/2, h/2 - size/2 - 15, size, size);
+                        
+                        // маска (уникальная форма)
+                        ctx.fillStyle = '#b33e3e';
+                        if (obj.mask === 'клоун') {
+                            ctx.beginPath();
+                            ctx.arc(x, h/2 - size/2 - 25, size*0.3, 0, Math.PI*2);
+                            ctx.fill();
+                        } else if (obj.mask === 'хоккей') {
+                            ctx.fillRect(x - size*0.3, h/2 - size/2 - 35, size*0.6, size*0.3);
+                        } else {
+                            ctx.beginPath();
+                            ctx.ellipse(x, h/2 - size/2 - 25, size*0.25, size*0.3, 0, 0, Math.PI*2);
+                            ctx.fill();
+                        }
+                        
+                        // глаза
+                        ctx.fillStyle = '#f2ff80';
+                        ctx.beginPath();
+                        ctx.arc(x-6, h/2 - size/2 - 30, 3, 0, Math.PI*2);
+                        ctx.arc(x+6, h/2 - size/2 - 30, 3, 0, Math.PI*2);
+                        ctx.fill();
+                    } else {
+                        // агент ФБР
+                        ctx.fillStyle = '#1f6390';
+                        ctx.fillRect(x - size/2, h/2 - size/2 - 15, size, size);
+                        ctx.fillStyle = '#f2c744';
+                        ctx.fillRect(x-12, h/2 - size/2 - 35, 24, 10);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 18px monospace';
+                        ctx.fillText('FBI', x-20, h/2 - size/2 - 45);
+                    }
+                }
+            }
+        }
+        
+        enemies.forEach(e => drawSprite(e, 'payday'));
+        friendlies.forEach(f => drawSprite(f, 'fbi'));
+        
+        // ===== РУКИ С ПИСТОЛЕТОМ И ФОНАРЁМ =====
+        // рукав рубашки
+        ctx.fillStyle = '#3b6b9c';
+        ctx.fillRect(w-300, h-180, 200, 150);
+        
+        // рука
+        ctx.fillStyle = '#dbb87c';
+        ctx.fillRect(w-240, h-200, 70, 40);
+        
+        // пистолет Глок
+        ctx.fillStyle = '#2f2f2f';
+        ctx.fillRect(w-200, h-210, 90, 25);
+        ctx.fillStyle = '#964B00';
+        ctx.fillRect(w-190, h-225, 25, 25);
+        
+        // бейдж FBI
+        ctx.fillStyle = '#f5c542';
+        ctx.font = 'bold 28px monospace';
+        ctx.fillText('FBI', w-280, h-120);
+        
+        // фонарик
+        if (flashlight) {
+            ctx.fillStyle = '#fffbe0';
+            ctx.beginPath();
+            ctx.moveTo(w-150, h-200);
+            ctx.lineTo(w-40, h-350);
+            ctx.lineTo(w-80, h-350);
+            ctx.fill();
+        }
+        
+        // медведь с чайником (в углу)
+        ctx.fillStyle = '#8b5a2b';
+        ctx.fillRect(50, h-150, 70, 90);
+        ctx.fillStyle = '#dbb87c';
+        ctx.font = '48px monospace';
+        ctx.fillText('🐻', 55, h-70);
+        ctx.fillStyle = '#aaa';
+        ctx.fillRect(80, h-180, 20, 25);
+        
+        // пасхалка Драго (изредка)
+        if (Math.random() < 0.005) {
+            ctx.fillStyle = '#ffd966';
+            ctx.font = '30px monospace';
+            ctx.fillText('👺 ДРАГО', 500, 200);
+        }
     }
     
-    render();
-
-    // обновление интерфейса
+    // ==================== УПРАВЛЕНИЕ ====================
+    document.getElementById('btn-w').addEventListener('click', () => {
+        let nx = player.x + Math.cos(player.angle) * player.speed;
+        let ny = player.y + Math.sin(player.angle) * player.speed;
+        if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
+            player.x = nx;
+            player.y = ny;
+        }
+    });
+    
+    document.getElementById('btn-s').addEventListener('click', () => {
+        let nx = player.x - Math.cos(player.angle) * player.speed;
+        let ny = player.y - Math.sin(player.angle) * player.speed;
+        if (map[Math.floor(ny)][Math.floor(nx)] === 0) {
+            player.x = nx;
+            player.y = ny;
+        }
+    });
+    
+    document.getElementById('btn-a').addEventListener('click', () => {
+        player.angle -= 0.15;
+    });
+    
+    document.getElementById('btn-d').addEventListener('click', () => {
+        player.angle += 0.15;
+    });
+    
+    document.getElementById('btn-shoot').addEventListener('click', () => {
+        if (ammo <= 0) return;
+        ammo--;
+        // попадание по ближайшему врагу
+        for (let e of enemies) {
+            if (!e.active) continue;
+            let dx = e.x - player.x;
+            let dy = e.y - player.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 4) {
+                e.hp -= 34;
+                if (e.hp <= 0) e.active = false;
+                break;
+            }
+        }
+        document.getElementById('ammo-count').innerText = ammo;
+    });
+    
+    document.getElementById('btn-flashlight').addEventListener('click', () => {
+        flashlight = !flashlight;
+        document.getElementById('light-status').innerText = flashlight ? 'ВКЛ' : 'ВЫКЛ';
+    });
+    
+    document.getElementById('btn-backup').addEventListener('click', () => {
+        if (!backupUsed) {
+            backupUsed = true;
+            spawnBackup();
+            document.getElementById('backup-status').innerText = 'В ПУТИ';
+        }
+    });
+    
+    document.getElementById('btn-coffee').addEventListener('click', () => {
+        coffeeBoost = 50;
+        setTimeout(() => coffeeBoost = 0, 8000);
+    });
+    
+    // проверка концовок
     setInterval(() => {
-        document.getElementById('ammoDisplay').innerText = ammo;
-    }, 100);
+        if (gameOver) return;
+        
+        let aliveEnemies = enemies.filter(e => e.active).length;
+        document.getElementById('enemy-count').innerText = aliveEnemies;
+        
+        if (aliveEnemies === 0 && enemies.length > 0) {
+            if (backupActive) endingType = 'backup';
+            else endingType = 'hero';
+            gameOver = true;
+        }
+        
+        // смерть игрока (упрощённо)
+        for (let e of enemies) {
+            if (!e.active) continue;
+            let dx = e.x - player.x;
+            let dy = e.y - player.y;
+            if (Math.abs(dx) < 1.5 && Math.abs(dy) < 1.5) {
+                endingType = 'dead';
+                gameOver = true;
+                break;
+            }
+        }
+        
+        // секрет
+        if (player.x < 2 && player.y < 2) {
+            endingType = 'secret';
+            gameOver = true;
+        }
+    }, 500);
+    
+    // главный цикл
+    function gameLoop() {
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+    gameLoop();
 })();
 </script>
 </body>
