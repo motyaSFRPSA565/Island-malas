@@ -1,86 +1,109 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SAN FIERRO: TOTAL WARFARE (RETRO)</title>
+    <title>SAN FIERRO: TOTAL WARFARE</title>
     <style>
-        body { margin: 0; background: #222; overflow: hidden; font-family: monospace; }
-        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        #ui { position: absolute; bottom: 20px; left: 20px; color: #0f0; font-size: 24px; text-shadow: 2px 2px #000; }
-        #cross { position: absolute; top: 50%; left: 50%; color: #0f0; transform: translate(-50%, -50%); font-size: 30px; }
-        #msg { position: absolute; top: 10px; width: 100%; text-align: center; color: yellow; font-size: 20px; }
+        body { margin: 0; background: #004466; overflow: hidden; font-family: 'Courier New', monospace; color: #0f0; }
+        canvas { display: block; background: #333; margin: auto; border: 4px solid #555; }
+        #ui { position: absolute; top: 10px; left: 10px; pointer-events: none; background: rgba(0,0,0,0.6); padding: 10px; }
+        #menu { position: absolute; inset: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        button { padding: 15px 30px; font-size: 20px; background: #008800; color: white; border: none; cursor: pointer; margin: 10px; }
+        button:hover { background: #00ff00; color: black; }
     </style>
 </head>
 <body>
-    <div id="msg">WASD - Движение | MOUSE - Поворот | CLICK - Огонь</div>
-    <div id="ui">HP: 100 | AMMO: 30 | $: 800</div>
-    <div id="cross">+</div>
-    <canvas id="game"></canvas>
+
+<div id="menu">
+    <h1 style="color: #f00;">SAN FIERRO: TOTAL WARFARE</h1>
+    <p>ВЫБЕРИ СТОРОНУ:</p>
+    <button onclick="init('PAYDAY')">PAYDAY (ТЕРРОРИСТЫ)</button>
+    <button onclick="init('SWAT')" style="background: #0055ff;">SWAT (СПЕЦНАЗ)</button>
+    <p style="font-size: 12px;">WASD - Ходить | ЛКМ - Стрелять | B - Магазин</p>
+</div>
+
+<div id="ui">
+    КОМАНДА: <span id="team">-</span> | $: <span id="money">800</span> | HP: <span id="hp">100</span><br>
+    ЦЕЛЬ: <span id="task">ВЫБЕРИТЕ КОМАНДУ</span>
+</div>
+
+<canvas id="game"></canvas>
 
 <script>
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
+let team = '', player = {x: 400, y: 300, hp: 100, money: 800}, bullets = [], bots = [], keys = {};
 
-// Карта моста (1 - стена/ящик, 2 - опора, 0 - пусто)
-const map = [
-    [1,1,1,1,1,1,1,1],
-    [1,0,0,0,0,0,0,1],
-    [1,0,1,0,0,2,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,0,0,2,0,1,0,1],
-    [1,0,0,0,0,0,0,1],
-    [1,0,1,0,0,2,0,1],
-    [1,1,1,1,1,1,1,1]
-];
-
-let player = { x: 2, y: 2, dir: 0, rot: 0 };
-let keys = {};
-
-// Управление
-window.onkeydown = e => keys[e.code] = true;
-window.onkeyup = e => keys[e.code] = false;
-canvas.onclick = () => canvas.requestPointerLock();
-document.onmousemove = e => { if(document.pointerLockElement) player.rot -= e.movementX * 0.005; };
-
-function draw() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
+function init(chosenTeam) {
+    team = chosenTeam;
+    document.getElementById('menu').style.display = 'none';
+    document.getElementById('team').innerText = team;
+    document.getElementById('task').innerText = team === 'PAYDAY' ? 'ВЗОРВАТЬ 3 ОПОРЫ' : 'ЗАЩИТИТЬ МОСТ';
     
-    // Движение
-    if(keys['KeyW']) { player.x += Math.cos(player.rot) * 0.05; player.y += Math.sin(player.rot) * 0.05; }
-    if(keys['KeyS']) { player.x -= Math.cos(player.rot) * 0.05; player.y -= Math.sin(player.rot) * 0.05; }
-
-    // Отрисовка неба и пола
-    ctx.fillStyle = "#5588aa"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
-    ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
-
-    // Рейкастинг (отрисовка стен)
-    const res = 300;
-    for(let i = 0; i < res; i++) {
-        let angle = player.rot - 0.5 + (i / res);
-        let tx = player.x, ty = player.y;
-        let dist = 0;
-        let hit = 0;
-
-        while(dist < 15) {
-            dist += 0.05;
-            tx = player.x + Math.cos(angle) * dist;
-            ty = player.y + Math.sin(angle) * dist;
-            if(map[Math.floor(ty)] && map[Math.floor(tx)] > 0) {
-                hit = map[Math.floor(ty)][Math.floor(tx)];
-                break;
-            }
-        }
-
-        let h = canvas.height / (dist * Math.cos(angle - player.rot));
-        ctx.fillStyle = hit === 2 ? "#d00" : "#666"; // Опоры красные, стены серые
-        ctx.fillRect(i * (canvas.width/res), (canvas.height - h)/2, canvas.width/res + 1, h);
+    // Спавним ботов врагов
+    for(let i=0; i<7; i++) {
+        bots.push({
+            x: Math.random() * 800, 
+            y: team === 'PAYDAY' ? 100 : 500, 
+            color: team === 'PAYDAY' ? 'blue' : 'red',
+            hp: 100
+        });
     }
-    
-    requestAnimationFrame(draw);
+    loop();
 }
 
-draw();
-console.log("ДРАГО: Я ДОЛЖЕН!");
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
+window.onmousedown = e => {
+    bullets.push({x: player.x, y: player.y, tx: e.clientX - canvas.offsetLeft, ty: e.clientY - canvas.offsetTop});
+};
+
+function loop() {
+    canvas.width = 800; canvas.height = 600;
+    
+    // 1. РИСУЕМ МОСТ
+    ctx.fillStyle = '#004466'; ctx.fillRect(0,0,800,600); // Вода
+    ctx.fillStyle = '#444'; ctx.fillRect(150, 0, 500, 600); // Полотно моста
+    ctx.strokeStyle = '#666'; ctx.lineWidth = 5;
+    for(let i=0; i<600; i+=40) { ctx.strokeRect(150, i, 500, 2); } // Шпалы
+
+    // 2. ИГРОК
+    if(keys['KeyW']) player.y -= 3; if(keys['KeyS']) player.y += 3;
+    if(keys['KeyA']) player.x -= 3; if(keys['KeyD']) player.x += 3;
+    ctx.fillStyle = team === 'PAYDAY' ? 'red' : 'blue';
+    ctx.beginPath(); ctx.arc(player.x, player.y, 15, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'white'; ctx.fillText("ВЫ", player.x-10, player.y-20);
+
+    // 3. ПУЛИ
+    bullets.forEach((b, i) => {
+        let angle = Math.atan2(b.ty - b.y, b.tx - b.x);
+        b.x += Math.cos(angle) * 10; b.y += Math.sin(angle) * 10;
+        ctx.fillStyle = 'yellow'; ctx.fillRect(b.x, b.y, 5, 5);
+        
+        // Попадание в ботов
+        bots.forEach((bot, bi) => {
+            if(Math.hypot(b.x-bot.x, b.y-bot.y) < 20) {
+                bot.hp -= 20; bullets.splice(i, 1);
+                if(bot.hp <= 0) { bots.splice(bi, 1); player.money += 300; }
+            }
+        });
+    });
+
+    // 4. БОТЫ
+    bots.forEach(bot => {
+        ctx.fillStyle = bot.color;
+        ctx.beginPath(); ctx.arc(bot.x, bot.y, 15, 0, Math.PI*2); ctx.fill();
+        // Простой ИИ (идут к центру)
+        bot.y += (player.y > bot.y ? 1 : -1);
+    });
+
+    // ОБНОВЛЕНИЕ UI
+    document.getElementById('money').innerText = player.money;
+    
+    // Пасхалка: Драго
+    if(Math.random() < 0.01) console.log("Я ДОЛЖЕН!");
+
+    requestAnimationFrame(loop);
+}
 </script>
 </body>
 </html>
