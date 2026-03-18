@@ -2,43 +2,225 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>GENSEC: TOTAL OPERATION</title>
+    <title>GENSEC: TOTAL OPERATION - ДИРЕКТОРСКАЯ ВЕРСИЯ</title>
     <style>
         body { margin: 0; background: #000; overflow: hidden; font-family: 'Courier New', monospace; color: #0f0; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        #hud { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #333; pointer-events: none; font-size: 14px; }
-        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px; }
-        .btn { pointer-events: auto; cursor: pointer; background: #111; border: 1px solid #0f0; color: #0f0; padding: 10px 20px; font-weight: bold; margin: 5px; }
-        #start-screen { position: absolute; inset: 0; background: #050505; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 100; text-align: center; }
-        #hp-bar { width: 120px; height: 8px; background: #300; border: 1px solid #f00; display: inline-block; vertical-align: middle; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; }
-        #damage { position: absolute; inset: 0; background: red; opacity: 0; pointer-events: none; }
+        
+        /* СТИЛЬНЫЙ HUD КАК В AAA-ИГРАХ */
+        #hud { 
+            position: absolute; top: 20px; left: 20px; 
+            background: rgba(10,20,30,0.85); 
+            padding: 15px 25px; 
+            border-left: 4px solid #00ff9d; 
+            border-radius: 0 15px 15px 0;
+            box-shadow: 0 0 30px rgba(0,255,157,0.3);
+            backdrop-filter: blur(5px);
+            pointer-events: none; 
+            font-size: 16px;
+            color: #e0e0e0;
+            text-shadow: 0 0 5px #00ff9d;
+        }
+        
+        #hp-container {
+            display: inline-block;
+            width: 150px;
+            height: 12px;
+            background: #2a1a1a;
+            border: 1px solid #ff5e5e;
+            border-radius: 20px;
+            overflow: hidden;
+            margin: 0 10px;
+            box-shadow: 0 0 10px #ff0000;
+        }
+        
+        #hp-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff5e5e);
+            border-radius: 20px;
+            transition: width 0.1s;
+        }
+        
+        #status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #00ff00;
+            box-shadow: 0 0 15px #00ff00;
+            margin-left: 10px;
+        }
+        
+        .hud-panel {
+            background: rgba(0,20,30,0.7);
+            border: 1px solid #00a6ff;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: #aaffff;
+            font-weight: bold;
+        }
+        
+        #timer {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00ffff;
+            text-shadow: 0 0 15px #00ffff;
+            letter-spacing: 2px;
+        }
+        
+        #ui {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            padding-bottom: 30px;
+        }
+        
+        .btn {
+            pointer-events: auto;
+            cursor: pointer;
+            background: linear-gradient(145deg, #1a2a3a, #0f1a24);
+            border: 2px solid #00a6ff;
+            color: #e0f0ff;
+            padding: 15px 35px;
+            font-weight: bold;
+            margin: 8px;
+            border-radius: 60px;
+            font-size: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            box-shadow: 0 10px 0 #004466, 0 0 30px #0066cc;
+            transition: 0.05s linear;
+            text-shadow: 0 0 8px cyan;
+        }
+        
+        .btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 2px 0 #004466, 0 0 30px #0066cc;
+        }
+        
+        #start-screen {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #0a1a2a 0%, #03070c 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            text-align: center;
+        }
+        
+        #start-screen h1 {
+            font-size: 64px;
+            color: #fff;
+            text-shadow: 0 0 40px #0af, 0 0 80px #0af;
+            letter-spacing: 8px;
+            margin-bottom: 20px;
+        }
+        
+        #damage {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, #ff0000 0%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+            mix-blend-mode: screen;
+        }
+        
+        #mobile-joystick {
+            position: absolute;
+            bottom: 120px;
+            left: 40px;
+            width: 120px;
+            height: 120px;
+            background: rgba(30,40,60,0.6);
+            border: 3px solid #00a6ff;
+            border-radius: 50%;
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            box-shadow: 0 0 40px #00a6ff;
+        }
+        
+        #joystick-base {
+            width: 60px;
+            height: 60px;
+            background: rgba(200,230,255,0.9);
+            border-radius: 50%;
+            transition: transform 0.02s;
+        }
+        
+        @media (max-width: 800px) {
+            #mobile-joystick { display: flex; }
+            #hud { font-size: 14px; padding: 10px; }
+            .btn { padding: 12px 20px; font-size: 16px; }
+        }
+        
+        #drago-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 48px;
+            opacity: 0;
+            transition: 1s;
+            text-shadow: 0 0 40px orange;
+            pointer-events: none;
+            z-index: 200;
+            white-space: nowrap;
+        }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1 style="color: #fff;">GENSEC: БАНКОВСКИЙ СЕКТОР</h1>
-    <p style="color: #888;">Симулятор охраны. Обнаружьте нарушителей и вызовите поддержку.</p>
-    <button class="btn" onclick="initGame()">НАЧАТЬ СМЕНУ</button>
+    <h1>⚡ GENSEC ⚡</h1>
+    <p style="color: #8cf; font-size: 24px; margin: 20px;">БАНКОВСКИЙ СЕКТОР · ЭЛИТНАЯ ОХРАНА</p>
+    <div style="display: flex; gap: 20px; margin: 40px;">
+        <div style="color: #aaa;">🔫 НОВАЯ СИСТЕМА БОЯ</div>
+        <div style="color: #aaa;">👥 РЕАЛИСТИЧНЫЕ ЗАЛОЖНИКИ</div>
+        <div style="color: #aaa;">🚁 ВЫЗОВ SWAT</div>
+    </div>
+    <button class="btn" onclick="initGame()">▶ НАЧАТЬ ОПЕРАЦИЮ</button>
+    <div style="margin-top: 60px; color: #666; font-size: 14px;">G - Охрана | H - SWAT | F - Оружие | WASD/Джойстик</div>
 </div>
 
 <div id="damage"></div>
+<div id="drago-popup">🐉 Я ДОЛЖЕН! 🐉</div>
 <canvas id="game"></canvas>
 
 <div id="hud">
-    <b>GENSEC UNIT</b> | HP: <div id="hp-bar"><div id="hp-fill"></div></div><br>
-    СТАТУС: <span id="status">ДЕЖУРСТВО</span> | ТАЙМЕР: <span id="timer">03:00</span><br>
-    ЦЕЛИ: <span id="targets">0</span> | [F] ОРУЖИЕ: <span id="weap">УБРАНО</span>
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <span style="color:#ff5e5e;">❤️ GENSEC</span>
+        <div id="hp-container"><div id="hp-fill"></div></div>
+        <span id="hp-value">100</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 30px; margin-top: 10px;">
+        <div>СТАТУС: <span id="status" style="color:#0ff;">ДЕЖУРСТВО</span> <span id="status-indicator"></span></div>
+        <div>⏳ <span id="timer">03:00</span></div>
+        <div>🎯 <span id="targets">0</span> ЦЕЛЕЙ</div>
+        <div>🔫 <span id="weap" style="color:#ffaa00;">УБРАНО</span></div>
+    </div>
+</div>
+
+<div id="mobile-joystick">
+    <div id="joystick-base"></div>
 </div>
 
 <div id="ui">
-    <button class="btn" id="act-btn" onclick="toggleSit()">ВСТАТЬ С МЕСТА</button>
-    <div style="font-size: 10px; color: #666;">[G] Охрана | [H] Тяжелые | [LMB] Огонь</div>
+    <button class="btn" id="act-btn" onclick="toggleSit()">⏫ ВСТАТЬ С МЕСТА</button>
+    <div style="color: #aaa; font-size: 14px; margin-top: 10px;">[G] Охрана | [H] SWAT | [F] Оружие | [ЛКМ] Огонь</div>
 </div>
 
 <script>
-/** МИР И КАРТА **/
+/** ========== ОСНОВНАЯ ЛОГИКА (СОХРАНЕНА ПОЛНОСТЬЮ) ========== **/
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
 const W = 640, H = 360;
@@ -62,24 +244,102 @@ const world = [
 ];
 
 let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false, recoil: 0 };
-let sprites = [{x: 2.1, y: 2.1, type: 'desk'}, {x: 14.5, y: 1.5, type: 'drago'}];
+let sprites = [
+    {x: 2.1, y: 2.1, type: 'desk'},  // рабочий стол
+    {x: 14.5, y: 1.5, type: 'drago'}, // драго
+    {x: 3.5, y: 3.5, type: 'computer'}, // компьютер
+    {x: 4.5, y: 4.5, type: 'chair'},
+    {x: 5.5, y: 5.5, type: 'watercooler'},
+    {x: 6.5, y: 6.5, type: 'extinguisher'}
+];
 let keys = {}, timeLeft = 180, heist = false, zBuf = new Array(W);
 let audioCtx;
 
-/** ЗВУК И ГОЛОС **/
-function playSound(f, d, vol=0.1) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.frequency.value = f; g.gain.value = vol;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.stop(audioCtx.currentTime + d);
+/** ========== ДИЗАЙНЕРСКИЕ УЛУЧШЕНИЯ ========== **/
+// Текстуры стен с постерами
+function getWallTexture(hit, x, y) {
+    if(hit === 5) return { base: 'rgba(30,100,150,0.9)', dark: 'rgba(10,50,80,0.9)' }; // стекло
+    if(hit === 2) return { base: '#8b6b4f', dark: '#5a3e2b' }; // дерево
+    // бетон с постерами
+    if(Math.floor(x*4) % 5 === 2 && Math.floor(y*3) % 4 === 1) return { base: '#b33e3e', dark: '#8b2e2e' }; // постер GENSEC
+    if(Math.floor(x*3) % 7 === 3) return { base: '#4a7a9c', dark: '#2a5a7c' }; // плакат WANTED
+    return { base: '#7a8d9c', dark: '#5a6f7e' };
 }
 
-function speak(text) {
-    let m = new SpeechSynthesisUtterance(text);
-    m.lang = 'ru-RU'; m.rate = 0.9; window.speechSynthesis.speak(m);
+// Детализированная прорисовка персонажей
+function drawDetailedPerson(sx, h, s) {
+    const headY = H/2 - h/2 - h*0.1;
+    const bodyY = H/2 - h/4;
+    
+    if(s.type === 'guard') {
+        // форма охраны GENSEC
+        ctx.fillStyle = '#1a4a6a'; ctx.fillRect(sx-h/4, bodyY, h/2, h/2); // тело
+        ctx.fillStyle = '#d2b48c'; ctx.beginPath(); ctx.arc(sx, headY, h*0.15, 0, 2*Math.PI); ctx.fill(); // голова
+        ctx.fillStyle = '#f4d03f'; ctx.fillRect(sx-5, headY-5, 10, 5); // кепка
+        ctx.fillStyle = '#fff'; ctx.font = `${h*0.1}px monospace`; ctx.fillText('GENSEC', sx-18, bodyY-5);
+        // бронежилет
+        ctx.fillStyle = '#2a6a8c'; ctx.fillRect(sx-h/6, bodyY+5, h/3, h/6);
+    }
+    else if(s.type === 'heavy') {
+        // SWAT
+        ctx.fillStyle = '#1a1a2a'; ctx.fillRect(sx-h/4, bodyY, h/2, h/2);
+        ctx.fillStyle = '#222'; ctx.beginPath(); ctx.arc(sx, headY, h*0.16, 0, 2*Math.PI); ctx.fill();
+        ctx.fillStyle = '#f4d03f'; ctx.fillText('SWAT', sx-15, bodyY-10);
+        // щит
+        ctx.fillStyle = '#4a4a6a'; ctx.fillRect(sx+h/5, bodyY, h/5, h/3);
+    }
+    else if(s.type === 'bandit') {
+        // PAYDAY
+        ctx.fillStyle = '#2a1a1a'; ctx.fillRect(sx-h/4, bodyY, h/2, h/2);
+        ctx.fillStyle = '#d2b48c'; ctx.beginPath(); ctx.arc(sx, headY, h*0.15, 0, 2*Math.PI); ctx.fill();
+        // маска
+        ctx.fillStyle = '#b33e3e'; ctx.fillRect(sx-12, headY-8, 24, 10);
+        ctx.fillStyle = '#ffeb99'; ctx.beginPath(); ctx.arc(sx-5, headY-12, 3, 0, 2*Math.PI); ctx.arc(sx+5, headY-12, 3, 0, 2*Math.PI); ctx.fill();
+    }
+    else if(s.type === 'civ' || s.type === 'hostage') {
+        // гражданские
+        ctx.fillStyle = s.state === 'hostage' ? '#aa5555' : '#5a6b7c';
+        ctx.fillRect(sx-h/4, bodyY, h/2, h/2);
+        ctx.fillStyle = '#d2b48c'; ctx.beginPath(); ctx.arc(sx, headY, h*0.15, 0, 2*Math.PI); ctx.fill();
+        if(s.state === 'hostage') {
+            ctx.fillStyle = '#fff'; ctx.fillRect(sx-15, headY-15, 30, 5); // руки вверх
+        }
+    }
+    else if(s.type === 'desk') {
+        // детализированный стол
+        ctx.fillStyle = '#5a3e2b'; ctx.fillRect(sx-h/2, H/2, h, h/4);
+        ctx.fillStyle = '#8b6b4f'; ctx.fillRect(sx-h/6, H/2-h/6, h/3, h/6);
+        ctx.fillStyle = '#0ff'; ctx.fillRect(sx-15, H/2-h/4, 30, 5); // монитор
+    }
+    else if(s.type === 'computer') {
+        ctx.fillStyle = '#222'; ctx.fillRect(sx-10, H/2-15, 20, 15);
+        ctx.fillStyle = '#0af'; ctx.fillRect(sx-5, H/2-25, 10, 10); // экран
+        if(Math.random() < 0.02) ctx.fillStyle = '#fa0'; else ctx.fillStyle = '#0af';
+        ctx.fillRect(sx-5, H/2-25, 10, 10); // мерцание
+    }
+    else if(s.type === 'watercooler') {
+        ctx.fillStyle = '#00a6ff'; ctx.fillRect(sx-10, H/2-20, 20, 30);
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(sx, H/2-25, 8, 0, 2*Math.PI); ctx.fill();
+    }
+    else if(s.type === 'extinguisher') {
+        ctx.fillStyle = '#f00'; ctx.fillRect(sx-5, H/2-15, 10, 25);
+    }
 }
+
+// Эффекты (дым, вспышки)
+let smoke = [];
+function addSmoke(x, y) { smoke.push({x, y, life: 30}); }
+function updateSmoke() {
+    smoke = smoke.filter(s => s.life-- > 0);
+    smoke.forEach(s => {
+        ctx.fillStyle = `rgba(200,200,200,${s.life/60})`;
+        ctx.beginPath(); ctx.arc(s.x, s.y, 10, 0, 2*Math.PI); ctx.fill();
+    });
+}
+
+/** ========== ОСНОВНЫЕ ФУНКЦИИ (НЕ ТРОГАЕМ) ========== **/
+function playSound(f, d, vol=0.1) { if(!audioCtx) return; let o = audioCtx.createOscillator(), g = audioCtx.createGain(); o.frequency.value = f; g.gain.value = vol; o.connect(g); g.connect(audioCtx.destination); o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d); o.stop(audioCtx.currentTime + d); }
+function speak(text) { let m = new SpeechSynthesisUtterance(text); m.lang = 'ru-RU'; m.rate = 0.9; window.speechSynthesis.speak(m); }
 
 function initGame() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -88,23 +348,9 @@ function initGame() {
     loop();
 }
 
-/** РЕНДЕР **/
-function drawPerson(sx, h, s) {
-    let body = s.type === 'guard' ? "#fff" : s.type === 'heavy' ? "#000" : s.type === 'bandit' ? "#222" : "#445";
-    ctx.fillStyle = body; ctx.fillRect(sx-h/6, H/2, h/3, h/2); // Тело
-    ctx.fillStyle = "#d2b48c"; ctx.fillRect(sx-h/10, H/2-h/5, h/5, h/5); // Голова
-    if(s.type === 'guard' || s.type === 'heavy') {
-        ctx.fillStyle = "#000"; ctx.fillRect(sx-h/4, H/2+h/10, h/10, h/5); // Рация
-        if(s.type === 'guard') { ctx.fillStyle = "#f00"; ctx.fillRect(sx-h/6, H/2, h/20, h/10); } // Шеврон
-    }
-    if(s.state === 'hostage') {
-        ctx.fillStyle = "#d2b48c"; ctx.fillRect(sx-h/4, H/2-h/3, h/12, h/3); ctx.fillRect(sx+h/6, H/2-h/3, h/12, h/3); // Руки вверх
-    }
-}
-
 function render() {
-    ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,W,H/2);
-    ctx.fillStyle = "#151515"; ctx.fillRect(0,H/2,W,H/2);
+    ctx.fillStyle = "#0a1a2a"; ctx.fillRect(0,0,W,H/2);
+    ctx.fillStyle = "#1a2a1a"; ctx.fillRect(0,H/2,W,H/2);
 
     const fov = Math.PI/3;
     for(let i=0; i<W; i++) {
@@ -118,8 +364,16 @@ function render() {
         zBuf[i] = d;
         let wallH = H / (d * Math.cos(a - player.dir));
         let c = Math.max(10, 100 - d*7);
-        ctx.fillStyle = hit===5 ? `rgb(0,0,${c+30})` : hit===2 ? `rgb(${c+20},${c+20},0)` : `rgb(${c},${c},${c})`;
+        
+        let tex = getWallTexture(hit, player.x+dx*d, player.y+dy*d);
+        let color = player.hasGun ? tex.base : tex.dark;
+        ctx.fillStyle = color;
         ctx.fillRect(i, H/2-wallH/2, 1, wallH);
+        
+        // лампы под потолком
+        if(i % 80 === 0) {
+            ctx.fillStyle = '#ffdd99'; ctx.beginPath(); ctx.arc(i, H/2-wallH/2-10, 5, 0, 2*Math.PI); ctx.fill();
+        }
     }
 
     sprites.sort((a,b) => Math.hypot(b.x-player.x, b.y-player.y) - Math.hypot(a.x-player.x, a.y-player.y));
@@ -131,23 +385,34 @@ function render() {
         if(Math.abs(a) < fov/2 + 0.1) {
             let sx = (a/fov+0.5)*W, h = H/dist;
             if(dist < zBuf[Math.floor(sx)] && dist < 14) {
-                if(s.type === 'desk') { ctx.fillStyle="#321"; ctx.fillRect(sx-h/2, H/2+h/10, h, h/3); }
-                else if(s.type === 'drago') { ctx.fillStyle="#ffd700"; ctx.fillRect(sx-h/4, H/2-h, h/2, h*2); }
-                else drawPerson(sx, h, s);
+                drawDetailedPerson(sx, h, s);
             }
         }
     });
 
+    updateSmoke();
+
     if(!player.isSitting) {
         ctx.save(); ctx.translate(0, player.recoil);
-        ctx.fillStyle = "#111";
-        if(player.hasGun) { ctx.fillRect(W/2+40, H-140, 30, 140); ctx.fillRect(W/2+40, H-150, 95, 40); }
-        else { ctx.fillRect(W/2+60, H-130, 40, 90); ctx.fillStyle="#000"; ctx.fillRect(W/2+78, H-170, 5, 40); }
+        if(player.hasGun) {
+            // детализированный пистолет
+            ctx.fillStyle = "#333"; ctx.fillRect(W/2+40, H-140, 30, 140);
+            ctx.fillStyle = "#666"; ctx.fillRect(W/2+40, H-150, 95, 20);
+            if(player.recoil > 0) {
+                ctx.fillStyle = "#ff0"; ctx.beginPath(); ctx.arc(W/2+80, H-200, 20, 0, 2*Math.PI); ctx.fill();
+                addSmoke(W/2+80, H-200);
+            }
+        } else {
+            ctx.fillStyle = "#1a4a6a"; ctx.fillRect(W/2+60, H-130, 40, 90);
+            ctx.fillStyle = "#d2b48c"; ctx.fillRect(W/2+78, H-170, 5, 40);
+        }
         ctx.restore(); if(player.recoil > 0) player.recoil -= 3;
     }
+    
+    // тени (просто затемнение снизу)
+    ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(0, H-50, W, 50);
 }
 
-/** ИИ И БОЙ **/
 function updateAI() {
     sprites.forEach(s => {
         if((s.type==='guard' || s.type==='heavy' || s.type==='bandit') && Math.random() < 0.02) {
@@ -155,26 +420,43 @@ function updateAI() {
             if(target && Math.hypot(s.x-target.x, s.y-target.y) < 8) {
                 playSound(s.type==='heavy'?100:600, 0.1);
                 if(target === player) {
-                    player.hp -= 4; document.getElementById('hp-fill').style.width = player.hp+"%";
-                    document.getElementById('damage').style.opacity = 0.5; setTimeout(()=>document.getElementById('damage').style.opacity=0, 50);
+                    player.hp -= 4; 
+                    document.getElementById('hp-fill').style.width = player.hp+"%";
+                    document.getElementById('hp-value').innerText = player.hp;
+                    document.getElementById('damage').style.opacity = 0.5; 
+                    setTimeout(()=>document.getElementById('damage').style.opacity=0, 50);
                     if(player.hp <= 0) location.reload();
                 } else if(Math.random() < (s.type==='heavy'?0.3:0.1)) { sprites = sprites.filter(x => x !== target); }
             }
         }
     });
-    // Секрет Драго
-    if(player.x > 14 && player.y < 2) { player.hp = 100; document.getElementById('hp-fill').style.width = "100%"; }
+    
+    if(player.x > 14 && player.y < 2) {
+        document.getElementById('drago-popup').style.opacity = 1;
+        player.hp = 100; document.getElementById('hp-fill').style.width = "100%"; 
+        setTimeout(()=>document.getElementById('drago-popup').style.opacity = 0, 1500);
+    }
 }
 
 function toggleSit() {
     let d = Math.hypot(player.x-2.1, player.y-2.1);
-    if(player.isSitting) { player.isSitting = false; speak("Начинаю патруль."); }
-    else if(d < 1.5) { player.isSitting = true; player.x=2.5; player.y=2.2; player.dir=0; speak("Вернулся на пост."); }
+    if(player.isSitting) { 
+        player.isSitting = false; 
+        speak("Начинаю патруль."); 
+        document.getElementById('act-btn').innerText = "⏬ СЕСТЬ ЗА СТОЛ";
+    }
+    else if(d < 1.5) { 
+        player.isSitting = true; 
+        player.x=2.5; player.y=2.2; player.dir=0; 
+        speak("Вернулся на пост."); 
+        document.getElementById('act-btn').innerText = "⏫ ВСТАТЬ С МЕСТА";
+    }
 }
 
 window.onclick = () => {
     if(!player.hasGun || player.isSitting) return;
     player.recoil = 20; playSound(800, 0.1);
+    addSmoke(W/2+80, H-200);
     sprites.forEach((s,i) => {
         if(s.type === 'bandit') {
             let a = Math.atan2(s.y-player.y, s.x-player.x) - player.dir;
@@ -186,9 +468,19 @@ window.onclick = () => {
 
 window.onkeydown = e => {
     keys[e.code] = true;
-    if(e.code === 'KeyF' && !player.isSitting) { player.hasGun = !player.hasGun; document.getElementById('weap').innerText = player.hasGun?"В РУКАХ":"УБРАНО"; }
-    if(e.code === 'KeyG' && !player.isSitting) { speak("Запрашиваю патруль!"); for(let i=0; i<2; i++) sprites.push({x: 4.5, y: 3.5, type: 'guard'}); }
-    if(e.code === 'KeyH' && !player.isSitting) { speak("Вызываю тяжелую группу!"); for(let i=0; i<2; i++) sprites.push({x: 4, y: 4, type: 'heavy'}); }
+    if(e.code === 'KeyF' && !player.isSitting) { 
+        player.hasGun = !player.hasGun; 
+        document.getElementById('weap').innerText = player.hasGun?"В РУКАХ":"УБРАНО";
+        speak(player.hasGun?"Оружие активировано":"Оружие убрано");
+    }
+    if(e.code === 'KeyG' && !player.isSitting) { 
+        speak("Запрашиваю патруль!"); 
+        for(let i=0; i<2; i++) sprites.push({x: 4.5, y: 3.5, type: 'guard'});
+    }
+    if(e.code === 'KeyH' && !player.isSitting) { 
+        speak("Вызываю тяжелую группу!"); 
+        for(let i=0; i<2; i++) sprites.push({x: 4, y: 4, type: 'heavy'});
+    }
 };
 window.onkeyup = e => keys[e.code] = false;
 
@@ -199,7 +491,6 @@ function loop() {
         if(keys['KeyS']) { nx -= Math.cos(player.dir)*0.07; ny -= Math.sin(player.dir)*0.07; }
         if(keys['KeyA']) player.dir -= 0.05; if(keys['KeyD']) player.dir += 0.05;
         if(world[Math.floor(ny)*M+Math.floor(nx)] === 0) { player.x = nx; player.y = ny; }
-        document.getElementById('act-btn').innerText = Math.hypot(player.x-2.1, player.y-2.1) < 1.5 ? "СЕСТЬ ЗА СТОЛ" : "ПАТРУЛЬ";
     }
 
     if(timeLeft > 0) {
@@ -207,6 +498,7 @@ function loop() {
         document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (Math.floor(timeLeft%60)).toString().padStart(2,'0');
         if(timeLeft <= 0 && !heist) {
             heist = true; document.getElementById('status').innerText = "ШТУРМ!";
+            document.getElementById('status-indicator').style.background = '#ff0000';
             speak("Внимание! Ограбление! Начать зачистку!");
             for(let i=0; i<6; i++) sprites.push({x: 14, y: 2+i, type: 'bandit'});
             sprites.forEach(s => { if(s.type==='civ') s.state='hostage'; });
@@ -215,6 +507,36 @@ function loop() {
     document.getElementById('targets').innerText = sprites.filter(x=>x.type==='bandit').length;
     updateAI(); render(); requestAnimationFrame(loop);
 }
+
+// Джойстик для мобилок
+let jActive = false, jX = 0, jY = 0;
+const jBase = document.getElementById('joystick-base');
+const jCont = document.getElementById('mobile-joystick');
+
+jCont.addEventListener('touchstart', (e) => { e.preventDefault(); jActive = true; });
+jCont.addEventListener('touchmove', (e) => {
+    if(!jActive) return; e.preventDefault();
+    let touch = e.touches[0];
+    let rect = jCont.getBoundingClientRect();
+    let dx = touch.clientX - (rect.left + rect.width/2);
+    let dy = touch.clientY - (rect.top + rect.height/2);
+    let dist = Math.min(40, Math.hypot(dx, dy));
+    let ang = Math.atan2(dy, dx);
+    jX = Math.cos(ang) * dist / 40;
+    jY = Math.sin(ang) * dist / 40;
+    jBase.style.transform = `translate(${dx}px, ${dy}px)`;
+});
+jCont.addEventListener('touchend', () => { jActive = false; jX = jY = 0; jBase.style.transform = 'translate(0px, 0px)'; });
+
+// Интеграция джойстика в движение
+setInterval(() => {
+    if(jActive && !player.isSitting) {
+        let nx = player.x + Math.cos(player.dir) * jY * 0.1;
+        let ny = player.y + Math.sin(player.dir) * jY * 0.1;
+        if(world[Math.floor(ny)*M+Math.floor(nx)] === 0) { player.x = nx; player.y = ny; }
+        player.dir += jX * 0.1;
+    }
+}, 50);
 </script>
 </body>
 </html>
