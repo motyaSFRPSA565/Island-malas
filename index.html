@@ -3,174 +3,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GENSEC: ОХРАНА БАНКА | Рейкастинг 3D</title>
+    <title>FBI: НОЧНАЯ СМЕНА | рейкастинг 3D</title>
     <style>
         * {
             box-sizing: border-box;
             user-select: none;
-            image-rendering: pixelated;
             image-rendering: crisp-edges;
+            image-rendering: pixelated;
         }
         body {
             margin: 0;
             min-height: 100vh;
-            background: #0c1419;
+            background: #0b1012;
             display: flex;
-            justify-content: center;
+                justify-content: center;
             align-items: center;
             font-family: 'Courier New', Courier, monospace;
         }
         #game-container {
-            background: #1a2c33;
-            padding: 16px;
-            border-radius: 28px;
-            box-shadow: 0 0 0 6px #2f4a54, inset 0 0 0 3px #4b727e;
-            max-width: 1200px;
+            background: #1e2c33;
+            padding: 18px;
+            border-radius: 32px;
+            box-shadow: 0 0 0 6px #2f4f5e, inset 0 0 0 4px #4f7b8c;
+            max-width: 1300px;
             width: fit-content;
-            margin: 20px;
+            margin: 16px;
         }
         .screen-panel {
-            background: #0f1f26;
-            border: 6px solid #34555f;
-            border-radius: 24px;
-            padding: 16px;
-            box-shadow: inset 0 0 30px #000000dd;
+            background: #0f212a;
+            border: 6px solid #316277;
+            border-radius: 26px;
+            padding: 18px;
+            box-shadow: inset 0 0 30px #000000ee;
         }
         #display-canvas {
             display: block;
             width: 100%;
-            max-width: 1024px;
+            max-width: 1120px;
             aspect-ratio: 4 / 3;
-            background: #1e2f36;
-            border-radius: 16px;
-            border: 4px solid #578a9c;
-            box-shadow: 0 0 0 3px #1f3b44;
+            background: #1b2d36;
+            border-radius: 20px;
+            border: 5px solid #4a859c;
+            box-shadow: 0 0 0 4px #1e3f4b;
             image-rendering: crisp-edges;
         }
         .status-bar {
-            background: #15272e;
-            padding: 10px 20px;
-            margin: 14px 0 10px 0;
+            background: #142e38;
+            padding: 10px 24px;
+            margin: 16px 0 12px 0;
             border-radius: 60px;
             display: flex;
             flex-wrap: wrap;
-            gap: 18px 30px;
+            gap: 20px 35px;
             justify-content: center;
-            color: #cbf0ff;
-            text-shadow: 3px 3px 0 #0a1a20;
+            color: #d6f0ff;
+            text-shadow: 3px 3px 0 #08212b;
             font-weight: bold;
             font-size: 1.3rem;
-            border: 3px solid #386f80;
-            box-shadow: inset 0 -3px 0 #1f424d;
+            border: 3px solid #3c8198;
+            box-shadow: inset 0 -4px 0 #174654;
         }
         .status-bar span {
-            background: #0f2a33;
-            padding: 8px 24px;
-            border-radius: 40px;
-            border: 2px solid #2f859c;
+            background: #0d2d38;
+            padding: 8px 28px;
+            border-radius: 50px;
+            border: 2px solid #399bb8;
             display: inline-flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             letter-spacing: 1px;
         }
         .control-panel {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
-            margin-top: 18px;
+            margin-top: 20px;
         }
         .btn {
-            background: #284651;
+            background: #2f5060;
             border: none;
-            border-bottom: 5px solid #0f272f;
-            color: #ecf9ff;
+            border-bottom: 6px solid #122f3b;
+            color: #ffffff;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            font-size: 1.1rem;
-            padding: 12px 20px;
-            border-radius: 40px;
-            letter-spacing: 1.5px;
-            text-shadow: 2px 2px 0 #102229;
-            box-shadow: 0 4px 0 #1e3b45, inset 0 0 0 2px #569eb3;
+            font-size: 1.2rem;
+            padding: 14px 24px;
+            border-radius: 50px;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px 0 #102830;
+            box-shadow: 0 5px 0 #203f4b, inset 0 0 0 2px #68b5d0;
             cursor: pointer;
             transition: 0.05s linear;
-            min-width: 90px;
+            min-width: 100px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
         }
         .btn:active {
-            transform: translateY(5px);
+            transform: translateY(6px);
             border-bottom-width: 2px;
-            background: #1f3f4b;
+            background: #234957;
         }
         .btn.red {
-            background: #772f3b;
-            border-bottom-color: #3d1920;
-            box-shadow: inset 0 0 0 2px #d16f82;
+            background: #8a3b47;
+            border-bottom-color: #451f27;
+            box-shadow: inset 0 0 0 2px #e58297;
+        }
+        .btn.blue {
+            background: #2b6a8c;
+            border-bottom-color: #123b4f;
         }
         .btn.green {
-            background: #2b6a4c;
-            border-bottom-color: #13382a;
-        }
-        .phase-tag {
-            background: #00000090;
-            color: #ffbf69;
-            padding: 6px 22px;
-            border-radius: 50px;
-            border: 2px solid #ffa62b;
+            background: #3f784b;
+            border-bottom-color: #1b4022;
         }
         .mobile-row {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 14px;
             justify-content: center;
         }
-        @media (max-width: 650px) {
-            .btn { padding: 14px 12px; font-size: 1rem; }
-            .status-bar { font-size: 1rem; }
+        @media (max-width: 700px) {
+            .btn { padding: 16px 14px; font-size: 1.1rem; }
+            .status-bar { font-size: 1.1rem; }
         }
         .hint {
-            color: #7fc1d6;
-            font-size: 0.9rem;
+            color: #9cd9f0;
+            font-size: 1rem;
             text-align: center;
-            margin-top: 14px;
-            background: #08212b;
-            padding: 5px;
-            border-radius: 30px;
+            margin-top: 16px;
+            background: #0c2a33;
+            padding: 8px 20px;
+            border-radius: 40px;
+            border: 2px solid #479bb3;
         }
     </style>
 </head>
 <body>
 <div id="game-container" class="screen-panel">
-    <canvas id="display-canvas" width="1024" height="768"></canvas>
+    <canvas id="display-canvas" width="1152" height="864"></canvas>
 
     <div class="status-bar">
-        <span>🕒 <span id="clockDisplay">22:00</span></span>
+        <span>🔦 ФОНАРЬ: <span id="flashlightStatus">ВКЛ</span></span>
         <span>🔫 ПАТРОНЫ: <span id="ammoDisplay">30</span></span>
-        <span>📹 РЕЖИМ: <span id="modeDisplay">КАМЕРЫ</span></span>
-        <span>🚔 ВЫЗОВ: <span id="policeStatus">НЕ ГОТОВ</span></span>
+        <span>🆘 ПОДМОГА: <span id="backupStatus">ГОТОВА</span></span>
+        <span>🌃 ЭТАЖ 40</span>
     </div>
 
     <div class="control-panel">
-        <button class="btn" id="camPrev">◀ КАМЕРА</button>
-        <button class="btn" id="camNext">КАМЕРА ▶</button>
-        <button class="btn green" id="callPoliceBtn">📞 ПОЛИЦИЯ (ВЫЗОВ)</button>
-        <button class="btn" id="switchModeBtn">🔄 ВИД КАМЕРЫ/3D</button>
-        <button class="btn red" id="shootBtn">🔫 ВЫСТРЕЛ (БОЙ)</button>
+        <button class="btn blue" id="moveUpBtn">⬆️ ВПЕРЁД (W)</button>
+        <button class="btn blue" id="moveDownBtn">⬇️ НАЗАД (S)</button>
+        <button class="btn blue" id="rotateLeftBtn">↺ ВЛЕВО (A)</button>
+        <button class="btn blue" id="rotateRightBtn">↻ ВПРАВО (D)</button>
     </div>
     <div class="control-panel">
-        <button class="btn" id="phoneBtn">📞 НАЧАЛЬНИК</button>
-        <button class="btn" id="mapBtn">🗺️ ПЛАНИРОВКА</button>
-        <button class="btn" id="newsBtn">📰 ГАЗЕТА</button>
-        <button class="btn" id="coffeeBtn">☕ КОФЕ</button>
-        <button class="btn red" id="door1Btn">🚪 ДВЕРЬ 1</button>
-        <button class="btn red" id="door2Btn">🚪 ДВЕРЬ 2</button>
-        <button class="btn red" id="door3Btn">🚪 ДВЕРЬ 3</button>
+        <button class="btn red" id="shootBtn">🔫 СТРЕЛЯТЬ</button>
+        <button class="btn green" id="flashlightBtn">🔦 ФОНАРИК (ВКЛ/ВЫКЛ)</button>
+        <button class="btn" id="callBackupBtn">📞 ВЫЗВАТЬ ПОДМОГУ</button>
+        <button class="btn" id="coffeeBtn">☕ КОФЕ (ВНИМАНИЕ)</button>
     </div>
-    <div class="hint">🐻 Медведь с чайником | 👺 Драго: "Я ДОЛЖЕН!" | Пиксельные спрайты, рейкастинг 3D</div>
+    <div class="hint">
+        👮 FBI: ночная смена | PAYDAY в масках | Драго за окном | Медведь с чайником
+    </div>
 </div>
 
 <script>
@@ -179,389 +175,298 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    // ================== СОСТОЯНИЕ ИГРЫ ==================
-    let gameTime = 22 * 60; // 22:00 в минутах
-    let phase = 'preparation'; // preparation, robbery, combat
-    let mode = 'cameras';      // cameras или combat3d
+    // ---------- СОСТОЯНИЕ ИГРЫ ----------
     let ammo = 30;
-    let maxAmmo = 30;
+    let flashlight = true;
+    let backupUsed = false;
+    let backupActive = false;
     let gameOver = false;
-    let endingType = null;
-    let cameraIndex = 1;       // 1..6
-    let doors = [true, true, true]; // закрыты
-    let policeCalled = false;
-    let policeAvailable = false;  // можно вызывать только после 23:00
-    let coffeeBonus = false;
-    let viewingItem = null;     // phone, map, news
-    let lastDrago = 0;
+    let endingType = null;   // hero, backup, dead, surrendered, secret
+    let phase = 'patrol';     // patrol, infiltration, combat, backupPhase
+    let coffeeBoost = false;
     
-    // Население банка (гражданские, банкиры) — для камер
-    let npcs = [];
-    for (let i = 0; i < 8; i++) {
-        npcs.push({
-            type: Math.random() > 0.5 ? 'banker' : 'civil',
-            x: 200 + Math.random() * 600,
-            y: 150 + Math.random() * 400,
-            vx: (Math.random()-0.5)*0.8,
-            vy: (Math.random()-0.5)*0.8,
-            sprite: Math.random() > 0.5 ? '👔' : '🧥'
-        });
-    }
-    
-    // Бандиты (PAYDAY)
-    let bandits = [];
-    
-    // полицейские машины (для концовки)
-    let policeCars = 0;
+    // координаты игрока (рейкастинг)
+    let player = {
+        x: 12.5,
+        y: 14.5,
+        angle: 1.8,
+        height: 0.5
+    };
 
-    // ================== 3D РЕЙКАСТИНГ ==================
+    // ---------- 3D КАРТА (офис ФБР 40 этаж) ----------
     const map = [
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,0,0,0,1,1,1,1,0,0,0,0,0,0,0,1],
-        [1,0,0,0,1,0,0,1,0,0,0,0,0,0,0,1],
-        [1,0,0,0,1,0,0,1,0,0,0,2,2,2,0,1],
-        [1,0,0,0,1,1,1,1,0,0,0,2,0,2,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,2,0,2,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,2,2,2,0,1],
-        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
-        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,2,0,0,2,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,2,2,2,2,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+        [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     ];
+
+    // ---------- СПРАЙТЫ (ВРАГИ, АГЕНТЫ, ОБЪЕКТЫ) ----------
+    let enemies = []; // PAYDAY
+    let friendlies = []; // агенты подмоги
     
-    // позиция игрока в 3D мире (комната охраны)
-    let player = { x: 2.5, y: 9.5, dir: 0, angle: 0 };
-
-    // спрайты персонажей (SVG-стиль, рисуем path)
-    function drawBanditSprite(ctx, x, y, size, maskColor = '#d63e3e') {
-        // клоунская маска как в PAYDAY
-        ctx.fillStyle = '#000';
-        ctx.beginPath();
-        ctx.arc(x, y-5, size*0.5, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = maskColor;
-        ctx.beginPath();
-        ctx.ellipse(x-4, y-10, 5, 8, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.ellipse(x+4, y-10, 5, 8, 0, 0, Math.PI*2);
-        ctx.fill();
-        ctx.fillStyle = '#f0d0b0';
-        ctx.beginPath();
-        ctx.arc(x, y+3, size*0.25, 0, Math.PI*2);
-        ctx.fill();
-    }
-
-    // ================== СИСТЕМА ВРЕМЕНИ ==================
-    function updateTime() {
-        if (gameOver) return;
-        if (phase === 'preparation' && gameTime < 23*60) {
-            gameTime += 0.2; // быстрее для демо
-            if (gameTime >= 23*60) {
-                phase = 'robbery';
-                policeAvailable = true;
-                // порождаем бандитов
-                for (let i=0; i<4; i++) {
-                    bandits.push({ x: 5.5, y: 2.5, hp: 100, active: true, mask: true, type: 'payday' });
-                }
-            }
-        } else if (phase === 'robbery') {
-            gameTime += 0.05;
-        }
-        
-        // часы
-        let hours = Math.floor(gameTime / 60);
-        let mins = Math.floor(gameTime % 60);
-        document.getElementById('clockDisplay').innerText = `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}`;
-        
-        // полиция доступна после 23:00
-        if (gameTime >= 23*60) {
-            document.getElementById('policeStatus').innerText = 'МОЖНО ВЫЗВАТЬ';
+    // инициализация врагов (группа PAYDAY)
+    function spawnPayday() {
+        for (let i = 0; i < 6; i++) {
+            let maskType = ['клоун', 'театр', 'хоккей', 'череп', 'бал', 'демон'][i % 6];
+            let suit = ['чёрный', 'синий', 'серый', 'бежевый'][Math.floor(Math.random() * 4)];
+            enemies.push({
+                x: 4 + Math.random() * 10,
+                y: 3 + Math.random() * 8,
+                hp: 100,
+                active: true,
+                mask: maskType,
+                suit: suit,
+                angle: 0,
+                type: 'payday'
+            });
         }
     }
-
-    // ================== ВЫСТРЕЛ ==================
-    function shootInCombat() {
-        if (mode !== 'combat3d' || ammo <= 0 || gameOver) return;
-        ammo--;
-        // проверка попадания в ближайшего бандита (простая)
-        for (let b of bandits) {
-            if (!b.active) continue;
-            if (Math.random() < 0.5) { // шанс попадания
-                b.hp -= 34;
-                if (b.hp <= 0) {
-                    b.active = false;
-                }
-            }
-            break; // стреляем только в первого
+    
+    // агенты ФБР
+    function spawnBackup() {
+        for (let i = 0; i < 4; i++) {
+            friendlies.push({
+                x: player.x + 2,
+                y: player.y + 1,
+                hp: 100,
+                active: true,
+                type: 'fbi',
+                angle: 0
+            });
         }
+        backupActive = true;
     }
 
-    // ================== ВЫЗОВ ПОЛИЦИИ ==================
-    function callPolice() {
-        if (!policeAvailable) {
-            alert('Полиция ещё не готова (только после 23:00)');
-            return;
+    // вызывается через некоторое время после старта
+    setTimeout(() => {
+        if (!gameOver && phase === 'patrol') {
+            phase = 'infiltration';
+            spawnPayday();
         }
-        if (policeCalled) {
-            alert('Полиция уже вызвана');
-            return;
-        }
-        policeCalled = true;
-        if (phase === 'preparation') {
-            endingType = 'allseeing';
-            gameOver = true;
-        } else {
-            // концовка "Полиция приехала"
-            setTimeout(() => {
-                if (!gameOver) {
-                    endingType = 'police';
-                    gameOver = true;
-                }
-            }, 3000);
-        }
-    }
+    }, 8000);
 
-    // ================== ОСНОВНОЙ РЕНДЕР ==================
-    function render() {
-        ctx.clearRect(0, 0, 1024, 768);
-
-        if (mode === 'cameras') {
-            // ВИД КАМЕР (ПИКСЕЛЬНЫЙ ПЛАН С ЛЮДЬМИ)
-            ctx.fillStyle = '#1a3a42';
-            ctx.fillRect(40, 40, 944, 688);
-            
-            // сетка
-            ctx.strokeStyle = '#2e7f94';
-            ctx.lineWidth = 2;
-            for (let i=0; i<8; i++) {
-                ctx.beginPath();
-                ctx.moveTo(40 + i*118, 40);
-                ctx.lineTo(40 + i*118, 728);
-                ctx.strokeStyle = '#1a6a7a';
-                ctx.stroke();
-            }
-            for (let i=0; i<6; i++) {
-                ctx.beginPath();
-                ctx.moveTo(40, 40 + i*115);
-                ctx.lineTo(984, 40 + i*115);
-                ctx.strokeStyle = '#1a6a7a';
-                ctx.stroke();
-            }
-
-            // рисуем стены/зоны
-            ctx.fillStyle = '#3f6852';
-            ctx.fillRect(150, 120, 300, 180); // холл
-            ctx.fillStyle = '#896d4f';
-            ctx.fillRect(520, 120, 280, 150); // оперзал
-            ctx.fillStyle = '#2f6068';
-            ctx.fillRect(700, 340, 200, 180); // хранилище
-            ctx.fillStyle = '#4f5555';
-            ctx.fillRect(60, 500, 260, 160);  // комната охраны
-
-            // надписи
-            ctx.font = 'bold 20px "Courier New"';
-            ctx.fillStyle = '#d4f2ff';
-            ctx.fillText('ХОЛЛ', 200, 190);
-            ctx.fillText('КАССЫ', 590, 190);
-            ctx.fillText('ХРАН', 760, 410);
-            ctx.fillText('ОХРАНА', 120, 580);
-
-            // NPC (гражданские, банкиры) — пиксельные спрайты
-            for (let n of npcs) {
-                if (n.x < 0 || n.x > 1000) continue;
-                ctx.font = '32px "Courier New", monospace';
-                if (n.type === 'banker') {
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillText('👔', n.x-10, n.y-10); // банкир
-                } else {
-                    ctx.fillStyle = '#aac9dd';
-                    ctx.fillText('🧑', n.x-10, n.y-10); // гражданский
-                }
-            }
-
-            // бандиты (красные маски)
-            for (let b of bandits) {
-                if (!b.active) continue;
-                drawBanditSprite(ctx, b.x*30+100, b.y*40+200, 18);
-            }
-
-            // медведь с чайником
-            ctx.fillStyle = '#8b5a2b';
-            ctx.fillRect(850, 620, 70, 80);
-            ctx.fillStyle = '#dbb87c';
-            ctx.font = '48px monospace';
-            ctx.fillText('🐻', 855, 690);
-            ctx.fillStyle = '#aaaaaa';
-            ctx.fillRect(880, 600, 25, 20); // чайник
-
-        } else {
-            // РЕЖИМ 3D (РЕЙКАСТИНГ) ОТ ПЕРВОГО ЛИЦА
-            render3D();
-        }
-
-        // руки в 3D режиме
-        if (mode === 'combat3d' && !gameOver) {
-            ctx.fillStyle = '#3f6f3f';
-            ctx.fillRect(700, 530, 200, 150);
-            ctx.fillStyle = '#b18b5b';
-            ctx.beginPath();
-            ctx.moveTo(750, 550);
-            ctx.lineTo(850, 520);
-            ctx.lineTo(870, 590);
-            ctx.fill();
-            // пистолет
-            ctx.fillStyle = '#3d3d3d';
-            ctx.fillRect(820, 530, 40, 20);
-            ctx.fillRect(830, 510, 15, 30);
-        }
-
-        // предметы на столе
-        if (viewingItem === 'phone') {
-            ctx.fillStyle = '#2f3640';
-            ctx.fillRect(300, 200, 400, 300);
-            ctx.fillStyle = '#b3ffaa';
-            ctx.font = '32px monospace';
-            ctx.fillText('НАЧ: как смена?', 350, 320);
-            ctx.fillText('ничего подозрит.', 340, 400);
-        }
-        if (viewingItem === 'map') {
-            ctx.fillStyle = '#5d6745';
-            ctx.fillRect(300, 200, 400, 300);
-            ctx.fillStyle = '#fedb9f';
-            ctx.font = '32px monospace';
-            ctx.fillText('ПЛАН БАНКА', 360, 280);
-            ctx.fillText('ПУТИ PAYDAY', 350, 380);
-        }
-        if (viewingItem === 'news') {
-            ctx.fillStyle = '#e0dbc8';
-            ctx.fillRect(300, 200, 400, 300);
-            ctx.fillStyle = '#1f1f1f';
-            ctx.font = '26px monospace';
-            ctx.fillText('PAYDAY ГОТОВЯТ', 330, 280);
-            ctx.fillText('НАЛЁТ НА GENSEC', 310, 360);
-        }
-
-        // концовки
-        if (endingType) {
-            ctx.fillStyle = '#000000dd';
-            ctx.fillRect(0, 0, 1024, 768);
-            ctx.fillStyle = '#ffcc99';
-            ctx.font = '64px monospace';
-            if (endingType === 'hero') ctx.fillText('ГЕРОЙ', 350, 350);
-            if (endingType === 'police') ctx.fillText('ПОЛИЦИЯ ПРИБЫЛА', 200, 350);
-            if (endingType === 'allseeing') ctx.fillText('ВСЕВИДЯЩИЙ', 300, 350);
-            if (endingType === 'surrendered') ctx.fillText('СДАЛСЯ', 400, 350);
-        }
-    }
-
-    // ===== РЕЙКАСТИНГ 3D =====
+    // ---------- 3D РЕЙКАСТИНГ (С ТЕКСТУРАМИ) ----------
     function render3D() {
-        const w = 1024, h = 768;
+        const w = canvas.width, h = canvas.height;
+        ctx.fillStyle = '#0a141c'; // ночное небо
+        ctx.fillRect(0, 0, w, h/2);
+        ctx.fillStyle = '#2f404a'; // пол
+        ctx.fillRect(0, h/2, w, h/2);
+        
+        // окна (вид на город)
+        ctx.fillStyle = '#182b39';
+        for (let i = 0; i < 20; i++) {
+            ctx.fillRect(100 + i*70, 60, 50, 200);
+            ctx.fillStyle = '#aac7db';
+            ctx.font = '18px monospace';
+            ctx.fillText('🌃', 120 + i*70, 160);
+        }
+
+        // рейкастинг стен
         for (let x = 0; x < w; x += 4) {
-            let angle = player.angle - 0.4 + (x / w) * 0.8;
-            let dist = 0;
+            let rayAngle = player.angle - 0.5 + (x / w) * 1.0;
+            let distance = 0;
             let hit = false;
-            let side = 0;
             let rayX = player.x, rayY = player.y;
-            let stepX = Math.cos(angle), stepY = Math.sin(angle);
-            while (!hit && dist < 20) {
+            let stepX = Math.cos(rayAngle), stepY = Math.sin(rayAngle);
+            
+            while (!hit && distance < 25) {
                 rayX += stepX * 0.1;
                 rayY += stepY * 0.1;
-                dist += 0.1;
-                let mapX = Math.floor(rayX), mapY = Math.floor(rayY);
-                if (mapY >= 0 && mapY < map.length && mapX >=0 && mapX < map[0].length && map[mapY][mapX] !== 0) {
+                distance += 0.1;
+                let mapX = Math.floor(rayX);
+                let mapY = Math.floor(rayY);
+                if (mapY >= 0 && mapY < map.length && mapX >= 0 && mapX < map[0].length && map[mapY][mapX] !== 0) {
                     hit = true;
                 }
             }
-            let wallHeight = Math.min(2000, h / (dist + 0.2));
-            let color = '#7a6a5a';
-            if (hit) color = '#8b7d6b';
+            
+            let wallHeight = Math.min(1500, h / (distance * 0.8 + 0.1));
+            let color = hit ? '#67879b' : '#3b525c';
+            if (!flashlight && distance > 5) color = '#1f313a'; // темно без фонаря
+            
             ctx.fillStyle = color;
-            ctx.fillRect(x, h/2 - wallHeight/2, 4, wallHeight);
+            ctx.fillRect(x, h/2 - wallHeight/2, 5, wallHeight);
+            
+            // отблески фонаря
+            if (flashlight && distance < 8) {
+                ctx.fillStyle = '#ffe9c066';
+                ctx.fillRect(x, h/2 - wallHeight/2, 5, wallHeight);
+            }
         }
-        // спрайты бандитов в 3D
-        for (let b of bandits) {
-            if (!b.active) continue;
-            let dx = b.x - player.x;
-            let dy = b.y - player.y;
-            let dist = Math.sqrt(dx*dx+dy*dy);
-            if (dist < 8) {
-                let angleTo = Math.atan2(dy, dx);
-                let diff = angleTo - player.angle;
-                let x = 512 + diff * 300;
-                if (x > 0 && x < 1024) {
-                    let size = 150 / dist;
-                    drawBanditSprite(ctx, x, 400, size*0.6);
+        
+        // отрисовка спрайтов (враги, агенты) в 3D
+        function drawSprite(obj, isEnemy) {
+            if (!obj.active) return;
+            let dx = obj.x - player.x;
+            let dy = obj.y - player.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist > 15) return;
+            let angleTo = Math.atan2(dy, dx);
+            let diff = angleTo - player.angle;
+            while (diff > Math.PI) diff -= 2*Math.PI;
+            while (diff < -Math.PI) diff += 2*Math.PI;
+            if (Math.abs(diff) < 0.8) {
+                let x = w/2 + diff * 300;
+                let size = Math.min(300, 150 / (dist + 0.1));
+                if (x > 0 && x < w) {
+                    // рисуем 3D-модель (пиксельную)
+                    if (isEnemy) {
+                        // костюм
+                        ctx.fillStyle = obj.suit === 'чёрный' ? '#222' : (obj.suit === 'синий' ? '#225588' : '#6f7f8f');
+                        ctx.fillRect(x - size/2, h/2 - size/2 - 10, size, size);
+                        // маска
+                        ctx.fillStyle = '#b33e3e';
+                        ctx.beginPath();
+                        ctx.arc(x, h/2 - size/2 - 20, size*0.25, 0, Math.PI*2);
+                        ctx.fill();
+                        // глаза
+                        ctx.fillStyle = '#f2ff80';
+                        ctx.beginPath();
+                        ctx.arc(x-5, h/2 - size/2 - 26, 4, 0, Math.PI*2);
+                        ctx.arc(x+5, h/2 - size/2 - 26, 4, 0, Math.PI*2);
+                        ctx.fill();
+                    } else {
+                        // агент ФБР
+                        ctx.fillStyle = '#2a6f9c';
+                        ctx.fillRect(x - size/2, h/2 - size/2 - 10, size, size);
+                        ctx.fillStyle = '#f0d498';
+                        ctx.fillRect(x-8, h/2 - size/2 - 30, 16, 12);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = '16px monospace';
+                        ctx.fillText('FBI', x-15, h/2 - size/2 - 40);
+                    }
                 }
             }
         }
+        
+        enemies.forEach(e => drawSprite(e, true));
+        friendlies.forEach(f => drawSprite(f, false));
+        
+        // руки с пистолетом / фонариком
+        ctx.fillStyle = '#335577'; // рубашка
+        ctx.fillRect(w-350, h-200, 220, 150);
+        ctx.fillStyle = '#a55e3e'; // кобура
+        ctx.fillRect(w-200, h-150, 60, 40);
+        // глок
+        ctx.fillStyle = '#222222';
+        ctx.fillRect(w-180, h-170, 70, 20);
+        ctx.fillStyle = '#964B00';
+        ctx.fillRect(w-170, h-180, 20, 20); // рукоять
+        
+        // бейдж FBI
+        ctx.fillStyle = '#f5c542';
+        ctx.font = 'bold 24px monospace';
+        ctx.fillText('FBI', w-300, h-100);
+        
+        // фонарик (если включён)
+        if (flashlight) {
+            ctx.fillStyle = '#fff5c0';
+            ctx.beginPath();
+            ctx.moveTo(w-100, h-160);
+            ctx.lineTo(w-20, h-300);
+            ctx.lineTo(w-40, h-300);
+            ctx.fill();
+        }
     }
 
-    // ================== УПРАВЛЕНИЕ ==================
-    document.getElementById('camPrev').onclick = () => { cameraIndex = cameraIndex > 1 ? cameraIndex-1 : 6; };
-    document.getElementById('camNext').onclick = () => { cameraIndex = cameraIndex < 6 ? cameraIndex+1 : 1; };
-    document.getElementById('switchModeBtn').onclick = () => {
-        mode = mode === 'cameras' ? 'combat3d' : 'cameras';
-        document.getElementById('modeDisplay').innerText = mode === 'cameras' ? 'КАМЕРЫ' : '3D БОЙ';
+    // ---------- УПРАВЛЕНИЕ ----------
+    document.getElementById('moveUpBtn').onclick = () => { player.x += Math.cos(player.angle)*0.4; player.y += Math.sin(player.angle)*0.4; };
+    document.getElementById('moveDownBtn').onclick = () => { player.x -= Math.cos(player.angle)*0.4; player.y -= Math.sin(player.angle)*0.4; };
+    document.getElementById('rotateLeftBtn').onclick = () => { player.angle -= 0.15; };
+    document.getElementById('rotateRightBtn').onclick = () => { player.angle += 0.15; };
+    
+    document.getElementById('flashlightBtn').onclick = () => {
+        flashlight = !flashlight;
+        document.getElementById('flashlightStatus').innerText = flashlight ? 'ВКЛ' : 'ВЫКЛ';
     };
-    document.getElementById('callPoliceBtn').onclick = callPolice;
-    document.getElementById('shootBtn').onclick = shootInCombat;
-    document.getElementById('phoneBtn').onclick = () => {
-        viewingItem = 'phone';
-        setTimeout(()=>{ viewingItem = null; }, 2000);
-        alert('Начальник: "Следи за камерами, парень!"');
-    };
-    document.getElementById('mapBtn').onclick = () => {
-        viewingItem = 'map';
-        setTimeout(()=>{ viewingItem = null; }, 2000);
-    };
-    document.getElementById('newsBtn').onclick = () => {
-        viewingItem = 'news';
-        setTimeout(()=>{ viewingItem = null; }, 2000);
-    };
-    document.getElementById('coffeeBtn').onclick = () => {
-        coffeeBonus = true;
-        setTimeout(()=>{ coffeeBonus = false; }, 10000);
-    };
-    document.getElementById('door1Btn').onclick = () => { doors[0] = !doors[0]; };
-    document.getElementById('door2Btn').onclick = () => { doors[1] = !doors[1]; };
-    document.getElementById('door3Btn').onclick = () => { doors[2] = !doors[2]; };
-
-    // обновление времени
-    setInterval(() => {
-        if (!gameOver) updateTime();
-        document.getElementById('ammoDisplay').innerText = ammo;
-    }, 200);
-
-    // драго
-    setInterval(() => {
-        if (Math.random() < 0.3 && !gameOver) {
-            alert('👺 ДРАГО: "Я ДОЛЖЕН!" (издалека)');
+    
+    document.getElementById('shootBtn').onclick = () => {
+        if (ammo <= 0 || gameOver) return;
+        ammo--;
+        // попадание во врага (первого активного)
+        for (let e of enemies) {
+            if (!e.active) continue;
+            let dx = e.x - player.x;
+            let dy = e.y - player.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 5) {
+                e.hp -= 34;
+                if (e.hp <= 0) e.active = false;
+            }
+            break;
         }
-    }, 15000);
+        document.getElementById('ammoDisplay').innerText = ammo;
+    };
+    
+    document.getElementById('callBackupBtn').onclick = () => {
+        if (backupUsed) { alert('Подмога уже вызвана'); return; }
+        backupUsed = true;
+        spawnBackup();
+        document.getElementById('backupStatus').innerText = 'В ПУТИ';
+        phase = 'backupPhase';
+    };
+    
+    document.getElementById('coffeeBtn').onclick = () => {
+        coffeeBoost = true;
+        setTimeout(() => { coffeeBoost = false; }, 8000);
+    };
 
-    // логика концовок
+    // ---------- ПАСХАЛКИ И КОНЦОВКИ ----------
     setInterval(() => {
         if (gameOver) return;
-        // герой: все бандиты мертвы
-        if (phase === 'combat' && bandits.filter(b=>b.active).length === 0) {
-            endingType = 'hero';
+        // Драго за окном
+        if (Math.random() < 0.2) {
+            alert('👺 ДРАГО ПРОБЕГАЕТ ЗА ОКНОМ (40-й этаж!?) "Я ДОЛЖЕН!"');
+        }
+        // проверка концовок
+        if (enemies.filter(e => e.active).length === 0 && phase !== 'patrol') {
+            if (backupActive) endingType = 'backup';
+            else endingType = 'hero';
             gameOver = true;
         }
-        // сдался: двери открыты и бандиты близко
-        if (!doors[0] && !doors[1] && !doors[2] && bandits.some(b=>b.active)) {
-            endingType = 'surrendered';
+        if (player.x < 2 && !gameOver) {
+            endingType = 'secret';
             gameOver = true;
         }
-    }, 1000);
+    }, 5000);
 
-    gameLoop();
-    function gameLoop() {
-        render();
-        requestAnimationFrame(gameLoop);
+    // ---------- ОСНОВНОЙ ЦИКЛ ----------
+    function render() {
+        if (gameOver) {
+            ctx.fillStyle = '#000000dd';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffcc99';
+            ctx.font = 'bold 56px monospace';
+            if (endingType === 'hero') ctx.fillText('ГЕРОЙ ФБР', 350, 400);
+            else if (endingType === 'backup') ctx.fillText('ПОДМОГА АРЕСТОВАЛА', 250, 400);
+            else if (endingType === 'dead') ctx.fillText('ПОГИБ', 500, 400);
+            else if (endingType === 'surrendered') ctx.fillText('СДАЛСЯ', 480, 400);
+            else if (endingType === 'secret') ctx.fillText('СЕКРЕТ: ВЕРТОЛЁТ', 350, 400);
+            return;
+        }
+        render3D();
+        requestAnimationFrame(render);
     }
+    
+    render();
+
+    // обновление интерфейса
+    setInterval(() => {
+        document.getElementById('ammoDisplay').innerText = ammo;
+    }, 100);
 })();
 </script>
 </body>
