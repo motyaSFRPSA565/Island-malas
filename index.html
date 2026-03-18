@@ -2,201 +2,1026 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>SAN FIERRO: BRIDGE - TEAM SELECT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SAN FIERRO: МОСТ - SWAT vs PAYDAY</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
-                display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; }
-        .btn { padding: 20px 40px; margin: 10px; font-size: 24px; cursor: pointer; border: none; border-radius: 5px; transition: 0.3s; }
-        .swat-btn { background: #1e3a8a; color: white; }
-        .payday-btn { background: #4b5563; color: white; }
-        .btn:hover { transform: scale(1.1); opacity: 0.8; }
-        #ui { position: absolute; top: 20px; left: 20px; color: #00ff00; pointer-events: none; display: none; text-shadow: 2px 2px 2px black; }
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #0f0; transform: translate(-50%, -50%); display: none; }
-        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; }
+        * {
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #info {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 10px;
+            border-radius: 5px;
+            z-index: 100;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        
+        #timer {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 5px 15px;
+            border-radius: 5px;
+            z-index: 100;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+        }
+        
+        #team-select {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.95);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            z-index: 1000;
+            text-align: center;
+            border: 2px solid #ffaa00;
+            width: 80%;
+            max-width: 400px;
+        }
+        
+        .team-btn {
+            padding: 20px 30px;
+            margin: 10px;
+            font-size: 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            width: 80%;
+            max-width: 300px;
+            touch-action: manipulation;
+        }
+        
+        #swat-btn {
+            background: #0066cc;
+            color: white;
+        }
+        
+        #payday-btn {
+            background: #cc6600;
+            color: white;
+        }
+        
+        #health-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 20px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid white;
+            border-radius: 10px;
+            overflow: hidden;
+            z-index: 100;
+            pointer-events: none;
+        }
+        
+        #health-fill {
+            width: 100%;
+            height: 100%;
+            background: #ff0000;
+        }
+        
+        #ammo {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 2px black;
+            z-index: 100;
+            pointer-events: none;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 15px;
+            border-radius: 20px;
+        }
+        
+        #controls-pc {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 100;
+        }
+        
+        /* Мобильное управление */
+        #mobile-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 250px;
+            display: none;
+            z-index: 200;
+            pointer-events: none;
+            touch-action: none;
+        }
+        
+        #joystick-left {
+            position: absolute;
+            bottom: 30px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border: 3px solid rgba(255,255,255,0.5);
+            border-radius: 60px;
+            pointer-events: auto;
+            touch-action: none;
+        }
+        
+        #joystick-left-thumb {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 25px;
+            top: 35px;
+            left: 35px;
+            pointer-events: none;
+        }
+        
+        #joystick-right {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(5px);
+            border: 3px solid rgba(255,255,255,0.5);
+            border-radius: 60px;
+            pointer-events: auto;
+            touch-action: none;
+        }
+        
+        #joystick-right-thumb {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 25px;
+            top: 35px;
+            left: 35px;
+            pointer-events: none;
+        }
+        
+        .action-button {
+            position: absolute;
+            width: 70px;
+            height: 70px;
+            border-radius: 35px;
+            background: rgba(255,255,255,0.25);
+            backdrop-filter: blur(5px);
+            border: 2px solid rgba(255,255,255,0.8);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: auto;
+            touch-action: manipulation;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+        
+        #btn-shoot {
+            bottom: 180px;
+            right: 30px;
+            background: rgba(255,50,50,0.4);
+            border-color: #ff3333;
+        }
+        
+        #btn-jump {
+            bottom: 180px;
+            right: 120px;
+        }
+        
+        #btn-reload {
+            bottom: 180px;
+            right: 210px;
+        }
+        
+        #btn-crouch {
+            bottom: 90px;
+            right: 120px;
+        }
+        
+        #mobile-debug {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: yellow;
+            background: rgba(0,0,0,0.7);
+            padding: 5px;
+            border-radius: 5px;
+            z-index: 300;
+            font-size: 16px;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: block;
+            }
+            #controls-pc {
+                display: none;
+            }
+            #mobile-debug {
+                display: block;
+            }
+            .team-btn {
+                font-size: 20px;
+                padding: 15px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <div id="menu">
-        <h1>SAN FIERRO: МОСТ</h1>
-        <p>Выберите сторону конфликта:</p>
-        <button class="btn swat-btn" onclick="startGame('SWAT')">ВСТУПИТЬ В SWAT (Синие)</button>
-        <button class="btn payday-btn" onclick="startGame('PAYDAY')">ВСТУПИТЬ В PAYDAY (Серые)</button>
+    <div id="team-select">
+        <h2>🌉 SAN FIERRO: МОСТ</h2>
+        <p style="font-size: 16px; margin-bottom: 20px;">SWAT (Зелёные наплечники) vs PAYDAY (Маски)</p>
+        <button class="team-btn" id="swat-btn">👮 SWAT</button>
+        <button class="team-btn" id="payday-btn">🎭 PAYDAY</button>
+        <p style="margin-top: 20px; font-size: 14px; color: #aaa;">На мобильных устройствах используйте джойстики</p>
     </div>
 
-    <div id="ui">
-        <h2 id="team-name">КОМАНДА: ---</h2>
-        <p>ЦЕЛЬ: Уничтожьте вражеский отряд!</p>
-        <p id="msg" style="font-weight: bold; font-size: 1.2em;"></p>
+    <div id="info">🚁 SAN FIERRO: МОСТ | Битва над водой</div>
+    <div id="timer">05:00</div>
+    
+    <div id="health-bar"><div id="health-fill"></div></div>
+    <div id="ammo">30/90</div>
+
+    <div id="controls-pc">
+        WASD - движение | Мышь - поворот | ЛКМ - стрельба | R - перезарядка
     </div>
-    <div id="crosshair"></div>
-    <div id="flash"></div>
-
-    <script type="importmap">
-        { "imports": { "three": "https://unpkg.com" } }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-
-        let playerTeam = '';
-        const enemies = [];
-        const allies = [];
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+    
+    <!-- Мобильное управление -->
+    <div id="mobile-controls">
+        <div id="joystick-left">
+            <div id="joystick-left-thumb"></div>
+        </div>
         
-        // --- ГЕНЕРАЦИЯ ПЕРСОНАЖА ---
-        function createSoldier(team) {
-            const group = new THREE.Group();
-            const isSwat = team === 'SWAT';
-            const color = isSwat ? 0x1e3a8a : 0x333333; // Синий vs Серый
-            
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 0.4), new THREE.MeshLambertMaterial({color: color}));
-            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({color: 0x222222}));
-            head.position.y = 0.8;
-            
-            // Маска или шлем
-            const visor = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.05), new THREE.MeshPhongMaterial({color: isSwat ? 0x00ccff : 0xffffff}));
-            visor.position.set(0, 0.85, 0.2);
-            
-            group.add(body, head, visor);
-            group.userData.team = team;
-            return group;
-        }
+        <div id="joystick-right">
+            <div id="joystick-right-thumb"></div>
+        </div>
+        
+        <div class="action-button" id="btn-shoot">🔫</div>
+        <div class="action-button" id="btn-jump">🏃</div>
+        <div class="action-button" id="btn-reload">↻</div>
+        <div class="action-button" id="btn-crouch">⬇️</div>
+    </div>
+    
+    <div id="mobile-debug">Мобильный режим активен</div>
 
-        function createM4() {
-            const group = new THREE.Group();
-            const mat = new THREE.MeshLambertMaterial({ color: 0x111111 });
-            const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.5), mat);
-            const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.25), mat);
-            body.position.z = 0.2;
-            group.add(barrel, body);
-            return group;
-        }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <script>
+        class SanFierroBridge {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                document.body.appendChild(this.renderer.domElement);
 
-        // --- ИНИЦИАЛИЗАЦИЯ МИРА ---
-        function initWorld() {
-            scene.background = new THREE.Color(0x87ceeb);
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            document.body.appendChild(renderer.domElement);
-
-            const sun = new THREE.DirectionalLight(0xffffff, 1);
-            sun.position.set(50, 100, 50);
-            scene.add(sun, new THREE.AmbientLight(0x606060));
-
-            // Мост
-            const bridge = new THREE.Mesh(new THREE.BoxGeometry(15, 2, 800), new THREE.MeshLambertMaterial({color: 0x444444}));
-            scene.add(bridge);
-
-            // Оружие игрока
-            const gun = createM4();
-            camera.add(gun);
-            gun.position.set(0.3, -0.25, -0.4);
-            scene.add(camera);
-        }
-
-        // --- ЗАПУСК ИГРЫ ---
-        window.startGame = function(team) {
-            playerTeam = team;
-            document.getElementById('menu').style.display = 'none';
-            document.getElementById('ui').style.display = 'block';
-            document.getElementById('crosshair').style.display = 'block';
-            document.getElementById('team-name').innerText = "КОМАНДА: " + team;
-            
-            initWorld();
-            spawnTeams();
-            animate();
-        }
-
-        function spawnTeams() {
-            const enemyTeam = playerTeam === 'SWAT' ? 'PAYDAY' : 'SWAT';
-            
-            // Спавним 5 союзников (ботов)
-            for(let i = 0; i < 5; i++) {
-                const ally = createSoldier(playerTeam);
-                ally.position.set(Math.random()*6 - 3, 1.5, -20 - (i*5));
-                scene.add(ally);
-                allies.push(ally);
+                this.bridgeHeight = 20;
+                this.waterLevel = 0;
+                
+                this.playerHeight = 2;
+                this.team = null;
+                this.health = 100;
+                this.ammo = 30;
+                this.maxAmmo = 90;
+                this.gameTime = 300;
+                
+                // Управление
+                this.moveState = { forward: false, backward: false, left: false, right: false };
+                this.lookState = { x: 0, y: 0 };
+                this.isMobile = window.innerWidth <= 768;
+                
+                // Джойстики
+                this.leftJoystick = { active: false, x: 0, y: 0 };
+                this.rightJoystick = { active: false, x: 0, y: 0 };
+                
+                // Создаём мир
+                this.setupLights();
+                this.createSky();
+                this.createWater();
+                this.createGround();
+                this.createBridge();
+                this.createSupportPillars();
+                this.createTrain();
+                this.createRockCliff();
+                this.createHelicopters();
+                this.createNPCs();
+                
+                this.camera.position.y = this.playerHeight + this.bridgeHeight;
+                
+                this.setupEventListeners();
+                this.setupMobileControls();
+                this.animate();
             }
 
-            // Спавним 6 врагов (ботов)
-            for(let i = 0; i < 6; i++) {
-                const enemy = createSoldier(enemyTeam);
-                enemy.position.set(Math.random()*10 - 5, 1.5, 40 + (i*8));
-                scene.add(enemy);
-                enemies.push(enemy);
+            setupLights() {
+                const ambientLight = new THREE.AmbientLight(0x404060);
+                this.scene.add(ambientLight);
+
+                const sunLight = new THREE.DirectionalLight(0xffaa88, 1.2);
+                sunLight.position.set(50, 100, 50);
+                sunLight.castShadow = true;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                this.scene.add(sunLight);
+
+                const underLight = new THREE.PointLight(0x4466ff, 0.8, 200);
+                underLight.position.set(0, 10, 0);
+                this.scene.add(underLight);
             }
 
-            // Позиция игрока
-            camera.position.set(0, 2, -10);
-        }
-
-        // --- МЕХАНИКА СТРЕЛЬБЫ ---
-        const raycaster = new THREE.Raycaster();
-        window.onclick = () => {
-            if(document.pointerLockElement) {
-                shoot();
-            } else {
-                document.body.requestPointerLock();
+            createSky() {
+                const skyGeometry = new THREE.SphereGeometry(500, 60, 40);
+                const skyMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x1a2b3c,
+                    side: THREE.BackSide
+                });
+                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+                this.scene.add(sky);
             }
-        };
 
-        function shoot() {
-            document.getElementById('flash').style.opacity = "1";
-            setTimeout(() => document.getElementById('flash').style.opacity = "0", 30);
+            createWater() {
+                const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+                const waterMaterial = new THREE.MeshStandardMaterial({ 
+                    color: 0x2288ff, 
+                    transparent: true, 
+                    opacity: 0.7,
+                    emissive: 0x113366
+                });
+                const water = new THREE.Mesh(waterGeometry, waterMaterial);
+                water.rotation.x = -Math.PI / 2;
+                water.position.y = this.waterLevel;
+                water.receiveShadow = true;
+                this.scene.add(water);
+            }
 
-            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
-            const intersects = raycaster.intersectObjects(scene.children, true);
+            createGround() {
+                const seabedGeometry = new THREE.PlaneGeometry(1000, 1000);
+                const seabedMaterial = new THREE.MeshStandardMaterial({ color: 0x2a5a3a });
+                const seabed = new THREE.Mesh(seabedGeometry, seabedMaterial);
+                seabed.rotation.x = -Math.PI / 2;
+                seabed.position.y = -10;
+                seabed.receiveShadow = true;
+                this.scene.add(seabed);
+            }
 
-            if(intersects.length > 0) {
-                let obj = intersects[0].object;
-                while(obj.parent && !obj.userData.team) obj = obj.parent;
+            createSupportPillars() {
+                const pillarMat = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.7 });
+                
+                for (let i = -8; i <= 8; i++) {
+                    const leftPillar = new THREE.Mesh(
+                        new THREE.CylinderGeometry(2, 3, this.bridgeHeight + 5, 8),
+                        pillarMat
+                    );
+                    leftPillar.position.set(i * 15 - 8, (this.bridgeHeight - 5) / 2, i * 10);
+                    leftPillar.castShadow = true;
+                    leftPillar.receiveShadow = true;
+                    this.scene.add(leftPillar);
 
-                if(obj.userData.team) {
-                    if(obj.userData.team === playerTeam) {
-                        msg("ОГОНЬ ПО СВОИМ!", "red");
-                    } else {
-                        scene.remove(obj);
-                        const idx = enemies.indexOf(obj);
-                        if(idx > -1) enemies.splice(idx, 1);
-                        msg("ВРАГ УБИТ!", "#00ff00");
-                    }
+                    const rightPillar = new THREE.Mesh(
+                        new THREE.CylinderGeometry(2, 3, this.bridgeHeight + 5, 8),
+                        pillarMat
+                    );
+                    rightPillar.position.set(i * 15 + 8, (this.bridgeHeight - 5) / 2, i * 10);
+                    rightPillar.castShadow = true;
+                    rightPillar.receiveShadow = true;
+                    this.scene.add(rightPillar);
                 }
             }
-        }
 
-        function msg(text, color) {
-            const m = document.getElementById('msg');
-            m.innerText = text;
-            m.style.color = color;
-        }
+            createBridge() {
+                const bridgeGroup = new THREE.Group();
+                const metalMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8 });
+                const woodMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
+                const roadMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+                
+                for (let i = -8; i <= 8; i++) {
+                    const segmentY = this.bridgeHeight;
+                    
+                    const segment = new THREE.Mesh(
+                        new THREE.BoxGeometry(15, 1, 20),
+                        roadMat
+                    );
+                    segment.position.set(i * 15, segmentY + 0.5, i * 10);
+                    segment.castShadow = true;
+                    segment.receiveShadow = true;
+                    bridgeGroup.add(segment);
 
-        // --- ДВИЖЕНИЕ ---
-        const keys = {};
-        window.onkeydown = (e) => keys[e.code] = true;
-        window.onkeyup = (e) => keys[e.code] = false;
+                    const railLeft = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.4, 0.8, 20),
+                        metalMat
+                    );
+                    railLeft.position.set(i * 15 - 5, segmentY + 1.2, i * 10);
+                    railLeft.castShadow = true;
+                    bridgeGroup.add(railLeft);
 
-        function animate() {
-            requestAnimationFrame(animate);
-            const speed = 0.15;
-            if(keys['KeyW']) camera.translateZ(-speed);
-            if(keys['KeyS']) camera.translateZ(speed);
-            if(keys['KeyA']) camera.translateX(-speed);
-            if(keys['KeyD']) camera.translateX(speed);
-            camera.position.y = 2.2;
+                    const railRight = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.4, 0.8, 20),
+                        metalMat
+                    );
+                    railRight.position.set(i * 15 + 5, segmentY + 1.2, i * 10);
+                    railRight.castShadow = true;
+                    bridgeGroup.add(railRight);
 
-            renderer.render(scene, camera);
-        }
-
-        window.onmousemove = (e) => {
-            if(document.pointerLockElement) {
-                camera.rotation.y -= e.movementX * 0.002;
-                camera.rotation.x -= e.movementY * 0.002;
-                camera.rotation.order = 'YXZ';
+                    for (let j = -4; j <= 4; j++) {
+                        const sleeper = new THREE.Mesh(
+                            new THREE.BoxGeometry(10, 0.3, 1.2),
+                            woodMat
+                        );
+                        sleeper.position.set(i * 15, segmentY + 0.8, i * 10 + j * 2);
+                        sleeper.castShadow = true;
+                        sleeper.receiveShadow = true;
+                        bridgeGroup.add(sleeper);
+                    }
+                }
+                this.scene.add(bridgeGroup);
             }
+
+            createTrain() {
+                const trainGroup = new THREE.Group();
+                
+                const locoMat = new THREE.MeshStandardMaterial({ color: 0x3366cc });
+                const locoBody = new THREE.Mesh(new THREE.BoxGeometry(4, 4, 8), locoMat);
+                locoBody.position.set(0, this.bridgeHeight + 2, -120);
+                locoBody.castShadow = true;
+                locoBody.receiveShadow = true;
+                trainGroup.add(locoBody);
+
+                const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+                for (let i = -1; i <= 1; i+=2) {
+                    for (let j = -1; j <= 1; j+=2) {
+                        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.4, 16), wheelMat);
+                        wheel.rotation.z = Math.PI/2;
+                        wheel.position.set(i * 1.8, this.bridgeHeight + 0.5, -120 + j * 2.5);
+                        wheel.castShadow = true;
+                        trainGroup.add(wheel);
+                    }
+                }
+
+                for (let i = 1; i <= 4; i++) {
+                    const wagon = new THREE.Mesh(
+                        new THREE.BoxGeometry(4, 3, 10),
+                        new THREE.MeshStandardMaterial({ color: 0x44aa44 })
+                    );
+                    wagon.position.set(0, this.bridgeHeight + 1.5, -120 - i * 11);
+                    wagon.castShadow = true;
+                    wagon.receiveShadow = true;
+                    trainGroup.add(wagon);
+                }
+
+                this.scene.add(trainGroup);
+                this.train = trainGroup;
+            }
+
+            createRockCliff() {
+                const rockGroup = new THREE.Group();
+                
+                const rockMat = new THREE.MeshStandardMaterial({ color: 0x6a6a6a });
+                const rock = new THREE.Mesh(new THREE.DodecahedronGeometry(20), rockMat);
+                rock.position.set(-120, 5, 120);
+                rock.scale.set(3, 1.5, 2);
+                rock.castShadow = true;
+                rock.receiveShadow = true;
+                rockGroup.add(rock);
+
+                for (let i = 0; i < 8; i++) {
+                    const cover = new THREE.Mesh(
+                        new THREE.BoxGeometry(3, 2, 3),
+                        new THREE.MeshStandardMaterial({ color: 0x7a7a7a })
+                    );
+                    cover.position.set(
+                        -120 + Math.random() * 30 - 15,
+                        7 + Math.random() * 5,
+                        120 + Math.random() * 30 - 15
+                    );
+                    cover.castShadow = true;
+                    cover.receiveShadow = true;
+                    rockGroup.add(cover);
+                }
+
+                this.scene.add(rockGroup);
+            }
+
+            createHelicopters() {
+                const heliGroup = new THREE.Group();
+                
+                const heli1 = this.createHelicopter();
+                heli1.position.set(70, this.bridgeHeight + 30, -50);
+                heli1.rotation.y = Math.PI;
+                heliGroup.add(heli1);
+
+                const heli2 = this.createHelicopter();
+                heli2.position.set(90, this.bridgeHeight + 30, -30);
+                heli2.rotation.y = Math.PI;
+                heliGroup.add(heli2);
+
+                this.scene.add(heliGroup);
+                this.helicopters = heliGroup;
+            }
+
+            createHelicopter() {
+                const group = new THREE.Group();
+                
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(1.5, 1.5, 6, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x2a3a4a })
+                );
+                body.rotation.x = Math.PI/2;
+                body.castShadow = true;
+                group.add(body);
+
+                const cockpit = new THREE.Mesh(
+                    new THREE.SphereGeometry(1),
+                    new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.5 })
+                );
+                cockpit.position.set(0, 0.5, 2);
+                cockpit.scale.set(1.2, 0.8, 0.8);
+                cockpit.castShadow = true;
+                group.add(cockpit);
+
+                const rotor = new THREE.Mesh(
+                    new THREE.BoxGeometry(6, 0.2, 0.8),
+                    new THREE.MeshStandardMaterial({ color: 0x888888 })
+                );
+                rotor.position.set(0, 2, 0);
+                rotor.castShadow = true;
+                group.add(rotor);
+
+                return group;
+            }
+
+            createNPCs() {
+                this.npcs = [];
+                
+                for (let i = 0; i < 3; i++) {
+                    const npc = this.createSWATNPC(40 + i * 10, this.bridgeHeight + 1, -20 + i * 10, i === 1);
+                    this.scene.add(npc);
+                    this.npcs.push({ mesh: npc, team: 'swat', health: 100 });
+                }
+
+                for (let i = 0; i < 3; i++) {
+                    const npc = this.createPAYDAYNPC(-110 + i * 10, 10 + i * 2, 110 + i * 5, i === 1);
+                    this.scene.add(npc);
+                    this.npcs.push({ mesh: npc, team: 'payday', health: 100 });
+                }
+            }
+
+            createSWATNPC(x, y, z, isHeavy) {
+                const group = new THREE.Group();
+                
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.4, 0.4, 1.8),
+                    new THREE.MeshStandardMaterial({ color: 0x1a3a6a })
+                );
+                body.position.y = 0.9;
+                body.castShadow = true;
+                group.add(body);
+
+                const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x2a9a2a });
+                const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.25), shoulderMat);
+                leftShoulder.position.set(-0.5, 1.5, 0);
+                leftShoulder.castShadow = true;
+                group.add(leftShoulder);
+                
+                const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.25), shoulderMat);
+                rightShoulder.position.set(0.5, 1.5, 0);
+                rightShoulder.castShadow = true;
+                group.add(rightShoulder);
+
+                const head = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.3),
+                    new THREE.MeshStandardMaterial({ color: 0xffccaa })
+                );
+                head.position.y = 1.8;
+                head.castShadow = true;
+                group.add(head);
+
+                const weapon = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.2, 1.2),
+                    new THREE.MeshStandardMaterial({ color: 0x222222 })
+                );
+                weapon.position.set(0.5, 1.2, 0.5);
+                weapon.rotation.z = 0.2;
+                weapon.castShadow = true;
+                group.add(weapon);
+
+                if (isHeavy) {
+                    group.scale.set(1.3, 1.3, 1.3);
+                }
+
+                group.position.set(x, y, z);
+                return group;
+            }
+
+            createPAYDAYNPC(x, y, z, isHeavy) {
+                const group = new THREE.Group();
+                
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.4, 0.4, 1.8),
+                    new THREE.MeshStandardMaterial({ color: 0x222222 })
+                );
+                body.position.y = 0.9;
+                body.castShadow = true;
+                group.add(body);
+
+                const mask = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.35),
+                    new THREE.MeshStandardMaterial({ color: 0xffaa00 })
+                );
+                mask.position.y = 1.8;
+                mask.scale.set(1, 0.9, 0.7);
+                mask.castShadow = true;
+                group.add(mask);
+
+                const weapon = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.2, 1.2),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
+                );
+                weapon.position.set(0.5, 1.2, 0.5);
+                weapon.rotation.z = 0.2;
+                weapon.castShadow = true;
+                group.add(weapon);
+
+                if (isHeavy) {
+                    group.scale.set(1.3, 1.3, 1.3);
+                }
+
+                group.position.set(x, y, z);
+                return group;
+            }
+
+            createWeaponModel() {
+                const weaponGroup = new THREE.Group();
+                
+                const body = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.3, 1.5),
+                    new THREE.MeshStandardMaterial({ color: 0x222222 })
+                );
+                body.position.set(0.3, -0.2, -0.8);
+                body.castShadow = true;
+                weaponGroup.add(body);
+                
+                const grip = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.25, 0.4, 0.25),
+                    new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                );
+                grip.position.set(0.3, -0.4, -0.3);
+                grip.castShadow = true;
+                weaponGroup.add(grip);
+                
+                const barrel = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.1, 0.1, 1),
+                    new THREE.MeshStandardMaterial({ color: 0x444444 })
+                );
+                barrel.rotation.x = Math.PI/2;
+                barrel.position.set(0.3, -0.2, -1.4);
+                barrel.castShadow = true;
+                weaponGroup.add(barrel);
+                
+                this.camera.add(weaponGroup);
+            }
+
+            setupMobileControls() {
+                if (!this.isMobile) return;
+
+                const leftJoystick = document.getElementById('joystick-left');
+                const leftThumb = document.getElementById('joystick-left-thumb');
+                const rightJoystick = document.getElementById('joystick-right');
+                const rightThumb = document.getElementById('joystick-right-thumb');
+
+                // Левый джойстик (движение)
+                leftJoystick.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.leftJoystick.active = true;
+                });
+
+                leftJoystick.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = leftJoystick.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    let x = (touch.clientX - centerX) / (rect.width / 2);
+                    let y = (touch.clientY - centerY) / (rect.height / 2);
+                    
+                    // Ограничиваем
+                    const distance = Math.sqrt(x*x + y*y);
+                    if (distance > 1) {
+                        x /= distance;
+                        y /= distance;
+                    }
+                    
+                    this.leftJoystick.x = x;
+                    this.leftJoystick.y = y;
+                    
+                    leftThumb.style.left = (35 + x * 35) + 'px';
+                    leftThumb.style.top = (35 + y * 35) + 'px';
+                    
+                    // Обновляем движение
+                    this.moveState.forward = y < -0.2;
+                    this.moveState.backward = y > 0.2;
+                    this.moveState.left = x < -0.2;
+                    this.moveState.right = x > 0.2;
+                });
+
+                leftJoystick.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.leftJoystick.active = false;
+                    this.leftJoystick.x = 0;
+                    this.leftJoystick.y = 0;
+                    leftThumb.style.left = '35px';
+                    leftThumb.style.top = '35px';
+                    
+                    this.moveState.forward = false;
+                    this.moveState.backward = false;
+                    this.moveState.left = false;
+                    this.moveState.right = false;
+                });
+
+                // Правый джойстик (поворот камеры)
+                rightJoystick.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.rightJoystick.active = true;
+                });
+
+                rightJoystick.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    const rect = rightJoystick.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    
+                    let x = (touch.clientX - centerX) / (rect.width / 2);
+                    let y = (touch.clientY - centerY) / (rect.height / 2);
+                    
+                    const distance = Math.sqrt(x*x + y*y);
+                    if (distance > 1) {
+                        x /= distance;
+                        y /= distance;
+                    }
+                    
+                    this.rightJoystick.x = x;
+                    this.rightJoystick.y = y;
+                    
+                    rightThumb.style.left = (35 + x * 35) + 'px';
+                    rightThumb.style.top = (35 + y * 35) + 'px';
+                    
+                    // Поворачиваем камеру
+                    this.camera.rotation.y -= x * 0.02;
+                    this.camera.rotation.x -= y * 0.02;
+                    this.camera.rotation.x = Math.max(-0.8, Math.min(0.8, this.camera.rotation.x));
+                });
+
+                rightJoystick.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.rightJoystick.active = false;
+                    this.rightJoystick.x = 0;
+                    this.rightJoystick.y = 0;
+                    rightThumb.style.left = '35px';
+                    rightThumb.style.top = '35px';
+                });
+
+                // Кнопки действий
+                document.getElementById('btn-shoot').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.shoot();
+                });
+
+                document.getElementById('btn-jump').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.jump();
+                });
+
+                document.getElementById('btn-reload').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    this.reload();
+                });
+
+                document.getElementById('btn-crouch').addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    // Приседание
+                    if (this.camera.position.y > this.playerHeight + this.bridgeHeight - 0.5) {
+                        this.camera.position.y -= 0.8;
+                    }
+                });
+
+                document.getElementById('btn-crouch').addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    this.camera.position.y = this.playerHeight + this.bridgeHeight;
+                });
+            }
+
+            setupEventListeners() {
+                document.getElementById('swat-btn').addEventListener('click', () => {
+                    this.joinTeam('swat');
+                });
+                
+                document.getElementById('payday-btn').addEventListener('click', () => {
+                    this.joinTeam('payday');
+                });
+
+                // Только для PC
+                if (!this.isMobile) {
+                    document.addEventListener('keydown', (e) => {
+                        if (!this.team) return;
+                        switch(e.code) {
+                            case 'KeyW': this.moveState.forward = true; break;
+                            case 'KeyS': this.moveState.backward = true; break;
+                            case 'KeyA': this.moveState.left = true; break;
+                            case 'KeyD': this.moveState.right = true; break;
+                            case 'KeyR': this.reload(); break;
+                            case 'Space': this.jump(); break;
+                        }
+                    });
+
+                    document.addEventListener('keyup', (e) => {
+                        switch(e.code) {
+                            case 'KeyW': this.moveState.forward = false; break;
+                            case 'KeyS': this.moveState.backward = false; break;
+                            case 'KeyA': this.moveState.left = false; break;
+                            case 'KeyD': this.moveState.right = false; break;
+                        }
+                    });
+
+                    document.addEventListener('click', () => {
+                        if (this.team) {
+                            document.body.requestPointerLock();
+                            this.shoot();
+                        }
+                    });
+
+                    document.addEventListener('mousemove', (e) => {
+                        if (this.team && document.pointerLockElement) {
+                            this.camera.rotation.y -= e.movementX * 0.002;
+                            this.camera.rotation.x -= e.movementY * 0.002;
+                            this.camera.rotation.x = Math.max(-0.8, Math.min(0.8, this.camera.rotation.x));
+                        }
+                    });
+                }
+
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                    
+                    // Обновляем флаг мобильности
+                    this.isMobile = window.innerWidth <= 768;
+                });
+            }
+
+            joinTeam(team) {
+                this.team = team;
+                document.getElementById('team-select').style.display = 'none';
+                
+                if (team === 'swat') {
+                    this.camera.position.set(50, this.playerHeight + this.bridgeHeight, -30);
+                } else {
+                    this.camera.position.set(-110, 15, 110);
+                }
+                
+                this.createWeaponModel();
+                this.startGameTimer();
+            }
+
+            jump() {
+                if (this.camera.position.y === this.playerHeight + this.bridgeHeight) {
+                    this.camera.position.y += 2;
+                    setTimeout(() => {
+                        this.camera.position.y = this.playerHeight + this.bridgeHeight;
+                    }, 300);
+                }
+            }
+
+            shoot() {
+                if (this.ammo > 0) {
+                    this.ammo--;
+                    document.getElementById('ammo').innerHTML = `${this.ammo}/${this.maxAmmo}`;
+                    
+                    const flash = new THREE.PointLight(0xffaa00, 2, 10);
+                    flash.position.copy(this.camera.position);
+                    flash.position.add(new THREE.Vector3(0, 0, -2).applyQuaternion(this.camera.quaternion));
+                    this.scene.add(flash);
+                    setTimeout(() => this.scene.remove(flash), 50);
+
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.set(this.camera.position, new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion));
+                    
+                    this.npcs.forEach((npc, index) => {
+                        if (npc.team !== this.team) {
+                            const intersects = raycaster.intersectObject(npc.mesh, true);
+                            if (intersects.length > 0) {
+                                npc.health -= 34;
+                                if (npc.health <= 0) {
+                                    this.scene.remove(npc.mesh);
+                                    this.npcs.splice(index, 1);
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+
+            reload() {
+                this.ammo = 30;
+                document.getElementById('ammo').innerHTML = `${this.ammo}/${this.maxAmmo}`;
+            }
+
+            startGameTimer() {
+                setInterval(() => {
+                    if (this.gameTime > 0) {
+                        this.gameTime--;
+                        
+                        const mins = Math.floor(this.gameTime / 60);
+                        const secs = this.gameTime % 60;
+                        document.getElementById('timer').innerHTML = 
+                            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                        
+                        if (this.train) {
+                            this.train.position.z += 0.15;
+                        }
+                        
+                        if (this.helicopters) {
+                            this.helicopters.children.forEach(heli => {
+                                if (heli.children[2]) heli.children[2].rotation.y += 0.1;
+                            });
+                        }
+                    }
+                }, 1000);
+            }
+
+            update() {
+                if (this.team) {
+                    const speed = this.isMobile ? 0.1 : 0.15;
+                    const direction = new THREE.Vector3();
+                    
+                    if (this.moveState.forward) direction.z -= speed;
+                    if (this.moveState.backward) direction.z += speed;
+                    if (this.moveState.left) direction.x -= speed;
+                    if (this.moveState.right) direction.x += speed;
+                    
+                    direction.applyQuaternion(this.camera.quaternion);
+                    direction.y = 0;
+                    
+                    this.camera.position.add(direction);
+                    
+                    document.getElementById('health-fill').style.width = this.health + '%';
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                this.update();
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+
+        window.onload = () => {
+            new SanFierroBridge();
         };
     </script>
 </body>
-    </html>
+</html>
