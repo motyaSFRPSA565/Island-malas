@@ -1,174 +1,189 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>SAN FIERRO: TOTAL WARFARE</title>
+    <title>SAN FIERRO: CS 1.6 STYLE</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #87ceeb; font-family: sans-serif; }
-        #ui { position: absolute; top: 20px; left: 20px; color: #fff; text-shadow: 2px 2px #000; pointer-events: none; }
-        #crosshair { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border: 2px solid white; transform: translate(-50%, -50%); border-radius: 50%; }
-        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 100; }
-        button { padding: 15px 40px; font-size: 20px; cursor: pointer; background: #d00; color: #fff; border: none; margin: 10px; border-radius: 5px; }
-        #info { position: absolute; bottom: 10px; width: 100%; text-align: center; color: #aaa; font-size: 12px; }
+        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #000; }
+        #hud { position: absolute; bottom: 20px; left: 20px; color: #00ff00; font-size: 24px; pointer-events: none; text-shadow: 2px 2px #000; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 14px; height: 14px; border: 2px solid #0f0; transform: translate(-50%, -50%); pointer-events: none; }
+        #menu { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,60,0,0.8); padding: 30px; border: 3px solid #0f0; color: #0f0; text-align: center; }
+        button { background: #004400; color: #0f0; border: 2px solid #0f0; padding: 10px 20px; cursor: pointer; font-family: inherit; font-weight: bold; margin: 5px; }
+        button:hover { background: #00ff00; color: #000; }
+        #shop { display: none; position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.7); padding: 10px; color: gold; border: 1px solid gold; }
     </style>
 </head>
 <body>
 
-<div id="ui">
-    <div style="font-size: 24px;">💰 $<span id="money">800</span> | HP: <span id="hp">100</span></div>
-    <div>STREAK: <span id="streak">0</span> | TEAM: <b id="teamText">-</b></div>
-    <div id="mission" style="margin-top: 10px; color: yellow;">ЗАДАЧА: ВЫБЕРИТЕ СТОРОНУ</div>
-</div>
+<div id="hud">HP: 100 | AP: 100 | $: 800 <br> WEAPON: GLOCK-18</div>
 <div id="crosshair"></div>
+<div id="shop">B - SHOP: [1] AK-47 [2] M4A1 [3] AWP</div>
 
 <div id="menu">
-    <h1 style="color: #f00; letter-spacing: 5px;">SAN FIERRO: TOTAL WARFARE</h1>
-    <p>PAYDAY (TERROR) vs SWAT (SPECIAL OPS)</p>
-    <button onclick="joinGame('PAYDAY')">ИГРАТЬ ЗА PAYDAY (Взорвать мост)</button>
-    <button onclick="joinGame('SWAT')" style="background: #0055ff;">ИГРАТЬ ЗА SWAT (Защитить)</button>
-    <div style="margin-top: 20px;">Управление: WASD + Мышь | Пробел - Прыжок</div>
+    <h1>SAN FIERRO: TOTAL WARFARE</h1>
+    <p>ВЫБЕРИТЕ КОМАНДУ</p>
+    <button onclick="startGame('T')">[1] TERRORISTS (PAYDAY)</button>
+    <button onclick="startGame('CT')">[2] Counter-Terrorists (SWAT)</button>
 </div>
-
-<div id="info">Пасхалки: Драго бегает в консоли | Фото Майка Маласа на опоре</div>
 
 <script src="https://cdnjs.cloudflare.com"></script>
 
 <script>
 let scene, camera, renderer, team = "";
-let players = [], bullets = [];
-let keys = {};
+let players = [], bullets = [], bots = [];
+let move = { f: false, b: false, l: false, r: false };
+let clock = new THREE.Clock();
 
 function init() {
-    // 1. СЦЕНА И КАМЕРА
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x87ceeb);
-    scene.fog = new THREE.Fog(0x87ceeb, 100, 800);
+    scene.background = new THREE.Color(0x5588aa); // Олдскульное небо
+    scene.fog = new THREE.Fog(0x5588aa, 10, 400);
 
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 2000);
+    camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     
-    renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer = new THREE.WebGLRenderer({ antialias: false }); // Пиксельность как в 1.6
     renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(renderer.domElement);
 
-    const light = new THREE.DirectionalLight(0xffffff, 1);
-    light.position.set(50, 100, 50);
+    const light = new THREE.HemisphereLight(0xffffff, 0x444444, 1);
     scene.add(light);
-    scene.add(new THREE.AmbientLight(0x404040));
 
-    // 2. ОКРУЖЕНИЕ (МОСТ И ЗАЛИВ)
-    createWorld();
-
-    // 3. ЦИКЛ ИГРЫ
+    createMap();
     animate();
 }
 
-function createWorld() {
+function createMap() {
     // Вода
-    const water = new THREE.Mesh(new THREE.PlaneGeometry(2000, 2000), new THREE.MeshPhongMaterial({color: 0x004466}));
-    water.rotation.x = -Math.PI / 2;
-    water.position.y = -20;
+    const water = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial({color: 0x224466}));
+    water.rotation.x = -Math.PI/2; water.position.y = -15;
     scene.add(water);
 
-    // Мост (Полотно)
-    const bridge = new THREE.Mesh(new THREE.BoxGeometry(30, 4, 1200), new THREE.MeshPhongMaterial({color: 0x222222}));
+    // Мост
+    const bridge = new THREE.Mesh(new THREE.BoxGeometry(20, 2, 800), new THREE.MeshLambertMaterial({color: 0x333333}));
     scene.add(bridge);
 
     // Рельсы
-    const rail1 = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 1200), new THREE.MeshPhongMaterial({color: 0x888888}));
-    rail1.position.set(-5, 2.1, 0);
-    scene.add(rail1);
-    const rail2 = rail1.clone(); rail2.position.set(-8, 2.1, 0);
-    scene.add(rail2);
+    for(let i = -400; i < 400; i+=2) {
+        const sleeper = new THREE.Mesh(new THREE.BoxGeometry(6, 0.2, 0.8), new THREE.MeshBasicMaterial({color: 0x221100}));
+        sleeper.position.set(0, 1.1, i);
+        scene.add(sleeper);
+    }
 
-    // Опоры (3 точки для бомбы)
-    for(let i = -1; i <= 1; i++) {
-        const pillar = new THREE.Mesh(new THREE.BoxGeometry(40, 60, 20), new THREE.MeshPhongMaterial({color: 0x444444}));
-        pillar.position.set(0, -30, i * 300);
-        scene.add(pillar);
-        
-        // Пасхалка: Фото Майка Маласа (символично - белый куб)
-        if(i === 0) {
-            const malas = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 0.1), new THREE.MeshBasicMaterial({color: 0xffffff}));
-            malas.position.set(0, 10, i * 300 + 10.1);
-            scene.add(malas);
-        }
+    // Укрытия (Ящики)
+    for(let i = 0; i < 20; i++) {
+        const box = new THREE.Mesh(new THREE.BoxGeometry(3, 3, 3), new THREE.MeshLambertMaterial({color: 0x664422}));
+        box.position.set(Math.random()*10-5, 2.5, Math.random()*600-300);
+        scene.add(box);
     }
 
     // Снайперская скала
-    const rock = new THREE.Mesh(new THREE.ConeGeometry(40, 100, 6), new THREE.MeshPhongMaterial({color: 0x554433}));
-    rock.position.set(80, 10, 0);
+    const rock = new THREE.Mesh(new THREE.BoxGeometry(40, 50, 40), new THREE.MeshLambertMaterial({color: 0x444444}));
+    rock.position.set(50, 10, 0);
     scene.add(rock);
-
-    // Красные фермы моста
-    for(let j = -600; j < 600; j += 80) {
-        const frame = new THREE.Mesh(new THREE.BoxGeometry(32, 40, 2), new THREE.MeshPhongMaterial({color: 0xaa0000}));
-        frame.position.set(0, 20, j);
-        scene.add(frame);
-    }
 }
 
-function createPlayerModel(isTerror) {
-    const group = new THREE.Group();
-    // Тело
-    const body = new THREE.Mesh(new THREE.BoxGeometry(1, 2, 0.5), new THREE.MeshPhongMaterial({color: isTerror ? 0x333333 : 0x000066}));
-    group.add(body);
-    // Голова / Маска
-    const mask = new THREE.Mesh(new THREE.SphereGeometry(0.4, 16, 16), new THREE.MeshPhongMaterial({color: isTerror ? 0xffffff : 0x222222}));
-    mask.position.y = 1.3;
-    group.add(mask);
-    return group;
+function spawnBot(teamType, zPos) {
+    const botGeo = new THREE.BoxGeometry(1.5, 3, 1);
+    const botMat = new THREE.MeshLambertMaterial({color: teamType === 'T' ? 0xff0000 : 0x0000ff});
+    const bot = new THREE.Mesh(botGeo, botMat);
+    bot.position.set(Math.random()*10-5, 2.5, zPos);
+    bot.userData = { health: 100, team: teamType, lastShot: 0 };
+    scene.add(bot);
+    bots.push(bot);
 }
 
-function joinGame(chosenTeam) {
+function startGame(chosenTeam) {
     team = chosenTeam;
     document.getElementById('menu').style.display = 'none';
-    document.getElementById('teamText').innerText = team;
-    document.getElementById('mission').innerText = team === "PAYDAY" ? "ЦЕЛЬ: ВЗОРВАТЬ 3 ОПОРЫ" : "ЦЕЛЬ: ЗАЩИТИТЬ МОСТ";
-    
     document.body.requestPointerLock();
     
-    // Спавн
-    camera.position.y = 2;
-    camera.position.z = team === "PAYDAY" ? -550 : 550;
-    if(team === "SWAT") camera.lookAt(0, 2, 0);
-    
-    // Создаем врагов (ботов для примера 8 на 8)
-    for(let i = 0; i < 8; i++) {
-        let bot = createPlayerModel(team === "SWAT");
-        bot.position.set(Math.random()*20-10, 1, team === "SWAT" ? -400 : 400);
-        scene.add(bot);
-    }
+    camera.position.set(0, 4, team === 'T' ? -380 : 380);
+    if(team === 'CT') camera.rotation.y = Math.PI;
+
+    // Спавним 4 бота союзника и 5 врагов
+    for(let i = 0; i < 4; i++) spawnBot(team, camera.position.z + (Math.random()*20-10));
+    for(let i = 0; i < 5; i++) spawnBot(team === 'T' ? 'CT' : 'T', team === 'T' ? 300 : -300);
 }
 
 // Управление
-window.onkeydown = (e) => keys[e.code] = true;
-window.onkeyup = (e) => keys[e.code] = false;
-window.onmousemove = (e) => {
+document.addEventListener('keydown', e => {
+    if(e.code === 'KeyW') move.f = true;
+    if(e.code === 'KeyS') move.b = true;
+    if(e.code === 'KeyA') move.l = true;
+    if(e.code === 'KeyD') move.r = true;
+    if(e.code === 'KeyB') document.getElementById('shop').style.display = 'block';
+});
+document.addEventListener('keyup', e => {
+    if(e.code === 'KeyW') move.f = false;
+    if(e.code === 'KeyS') move.b = false;
+    if(e.code === 'KeyA') move.l = false;
+    if(e.code === 'KeyD') move.r = false;
+});
+
+document.addEventListener('mousemove', e => {
     if(document.pointerLockElement) {
-        camera.rotation.y -= e.movementX * 0.002;
+        camera.rotation.y -= e.movementX * 0.003;
     }
-};
+});
+
+document.addEventListener('mousedown', () => {
+    if(document.pointerLockElement) shoot();
+});
+
+function shoot() {
+    const bullet = new THREE.Mesh(new THREE.SphereGeometry(0.1), new THREE.MeshBasicMaterial({color: 0xffff00}));
+    bullet.position.copy(camera.position);
+    const dir = new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+    bullet.userData = { dir: dir, life: 100 };
+    bullets.push(bullet);
+    scene.add(bullet);
+}
 
 function animate() {
     requestAnimationFrame(animate);
-    
+    const delta = clock.getDelta();
+
     if(team !== "") {
-        const speed = 0.4;
-        if(keys['KeyW']) camera.translateZ(-speed);
-        if(keys['KeyS']) camera.translateZ(speed);
-        if(keys['KeyA']) camera.translateX(-speed);
-        if(keys['KeyD']) camera.translateX(speed);
-        camera.position.y = 2; // Фиксация на мосту
+        // Движение игрока
+        if(move.f) camera.translateZ(-0.5);
+        if(move.b) camera.translateZ(0.5);
+        if(move.l) camera.translateX(-0.3);
+        if(move.r) camera.translateX(0.3);
+        camera.position.y = 4;
+
+        // Логика пуль
+        bullets.forEach((b, i) => {
+            b.position.addScaledVector(b.userData.dir, 2);
+            b.userData.life--;
+            if(b.userData.life <= 0) {
+                scene.remove(b);
+                bullets.splice(i, 1);
+            }
+            // Попадание в ботов
+            bots.forEach((bot, bi) => {
+                if(b.position.distanceTo(bot.position) < 2) {
+                    bot.userData.health -= 50;
+                    if(bot.userData.health <= 0) {
+                        scene.remove(bot);
+                        bots.splice(bi, 1);
+                        console.log("KILLED!");
+                    }
+                }
+            });
+        });
+
+        // Логика ботов (двигаются и стреляют)
+        bots.forEach(bot => {
+            bot.lookAt(camera.position);
+            bot.translateZ(0.05); // Боты идут к тебе
+        });
     }
 
     renderer.render(scene, camera);
 }
 
 init();
-
-// ПАСХАЛКА В КОНСОЛИ
-console.log("%cЯ ДОЛЖЕН! - Драго бежит за тобой!", "background: red; color: white; font-size: 25px; font-weight: bold;");
-console.log("Медведь с чайником спрятан под мостом...");
+console.log("ДРАГО КРИЧИТ: Я ДОЛЖЕН!");
 </script>
 </body>
 </html>
