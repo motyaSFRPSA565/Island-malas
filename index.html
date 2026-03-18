@@ -2,1246 +2,201 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SAN FIERRO: МОСТ - SWAT vs PAYDAY</title>
+    <title>SAN FIERRO: BRIDGE - TEAM SELECT</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            font-family: 'Arial', sans-serif;
-        }
-        #info {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 100;
-            pointer-events: none;
-            text-shadow: 1px 1px 2px black;
-        }
-        #timer {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 100;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-        #objectives {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 100;
-            max-width: 300px;
-            pointer-events: none;
-        }
-        #objectives h3 {
-            margin: 0 0 10px 0;
-            color: #ffaa00;
-        }
-        #objectives ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-        #team-select {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.95);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            z-index: 1000;
-            text-align: center;
-            border: 3px solid #ffaa00;
-            box-shadow: 0 0 30px rgba(255,170,0,0.3);
-            min-width: 400px;
-        }
-        #team-select h2 {
-            margin-top: 0;
-            color: #ffaa00;
-            font-size: 32px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-        .team-btn {
-            padding: 20px 40px;
-            margin: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .team-btn:hover {
-            transform: scale(1.1);
-            box-shadow: 0 0 20px currentColor;
-        }
-        #swat-btn {
-            background: linear-gradient(135deg, #0066cc, #003366);
-            color: white;
-            border: 2px solid #00aaff;
-        }
-        #payday-btn {
-            background: linear-gradient(135deg, #cc6600, #663300);
-            color: white;
-            border: 2px solid #ffaa00;
-        }
-        #auto-select {
-            margin-top: 20px;
-            color: #888;
-            font-size: 16px;
-        }
-        #controls {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: white;
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
-            font-size: 12px;
-        }
-        #health-bar {
-            position: absolute;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 300px;
-            height: 30px;
-            background: rgba(0,0,0,0.7);
-            border: 2px solid white;
-            border-radius: 15px;
-            overflow: hidden;
-            z-index: 100;
-        }
-        #health-fill {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff0000, #ff6600);
-            transition: width 0.3s;
-        }
-        #ammo {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-shadow: 2px 2px 2px black;
-            z-index: 100;
-        }
-        #debug {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            color: yellow;
-            background: rgba(0,0,0,0.7);
-            padding: 5px;
-            font-size: 12px;
-            z-index: 1000;
-        }
-        #kill-feed {
-            position: absolute;
-            top: 80px;
-            right: 20px;
-            color: white;
-            background: rgba(0,0,0,0.7);
-            padding: 10px;
-            border-radius: 5px;
-            z-index: 100;
-            max-height: 200px;
-            overflow-y: auto;
-            font-size: 14px;
-        }
-        .kill-message {
-            padding: 3px;
-            border-bottom: 1px solid #444;
-        }
-        .swat-kill { color: #66ccff; }
-        .payday-kill { color: #ffaa66; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        #menu { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
+                display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; }
+        .btn { padding: 20px 40px; margin: 10px; font-size: 24px; cursor: pointer; border: none; border-radius: 5px; transition: 0.3s; }
+        .swat-btn { background: #1e3a8a; color: white; }
+        .payday-btn { background: #4b5563; color: white; }
+        .btn:hover { transform: scale(1.1); opacity: 0.8; }
+        #ui { position: absolute; top: 20px; left: 20px; color: #00ff00; pointer-events: none; display: none; text-shadow: 2px 2px 2px black; }
+        #crosshair { position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; border: 2px solid #0f0; transform: translate(-50%, -50%); display: none; }
+        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; }
     </style>
 </head>
 <body>
-    <div id="team-select">
-        <h2>🔫 SAN FIERRO: МОСТ</h2>
-        <p style="font-size: 18px; margin-bottom: 30px;">SWAT (КТ) vs PAYDAY (Террористы)</p>
+
+    <div id="menu">
+        <h1>SAN FIERRO: МОСТ</h1>
+        <p>Выберите сторону конфликта:</p>
+        <button class="btn swat-btn" onclick="startGame('SWAT')">ВСТУПИТЬ В SWAT (Синие)</button>
+        <button class="btn payday-btn" onclick="startGame('PAYDAY')">ВСТУПИТЬ В PAYDAY (Серые)</button>
+    </div>
+
+    <div id="ui">
+        <h2 id="team-name">КОМАНДА: ---</h2>
+        <p>ЦЕЛЬ: Уничтожьте вражеский отряд!</p>
+        <p id="msg" style="font-weight: bold; font-size: 1.2em;"></p>
+    </div>
+    <div id="crosshair"></div>
+    <div id="flash"></div>
+
+    <script type="importmap">
+        { "imports": { "three": "https://unpkg.com" } }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        let playerTeam = '';
+        const enemies = [];
+        const allies = [];
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
         
-        <div style="display: flex; justify-content: center; gap: 20px; margin-bottom: 30px;">
-            <div style="text-align: center;">
-                <div style="width: 100px; height: 100px; background: #0066cc; border-radius: 50%; margin: 0 auto 10px; border: 3px solid #00aaff;"></div>
-                <div style="font-weight: bold; color: #66ccff;">SWAT</div>
-                <div style="font-size: 12px; color: #aaa;">Зелёные наплечники</div>
-            </div>
-            <div style="text-align: center;">
-                <div style="width: 100px; height: 100px; background: #cc6600; border-radius: 50%; margin: 0 auto 10px; border: 3px solid #ffaa00;"></div>
-                <div style="font-weight: bold; color: #ffaa66;">PAYDAY</div>
-                <div style="font-size: 12px; color: #aaa;">Клоунские маски</div>
-            </div>
-        </div>
+        // --- ГЕНЕРАЦИЯ ПЕРСОНАЖА ---
+        function createSoldier(team) {
+            const group = new THREE.Group();
+            const isSwat = team === 'SWAT';
+            const color = isSwat ? 0x1e3a8a : 0x333333; // Синий vs Серый
+            
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.7, 1.2, 0.4), new THREE.MeshLambertMaterial({color: color}));
+            const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), new THREE.MeshLambertMaterial({color: 0x222222}));
+            head.position.y = 0.8;
+            
+            // Маска или шлем
+            const visor = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.1, 0.05), new THREE.MeshPhongMaterial({color: isSwat ? 0x00ccff : 0xffffff}));
+            visor.position.set(0, 0.85, 0.2);
+            
+            group.add(body, head, visor);
+            group.userData.team = team;
+            return group;
+        }
 
-        <button class="team-btn" id="swat-btn">👮 ВСТУПИТЬ ЗА SWAT</button>
-        <button class="team-btn" id="payday-btn">🎭 ВСТУПИТЬ ЗА PAYDAY</button>
-        
-        <div id="auto-select">Автоматический выбор через 10с...</div>
-        <div style="margin-top: 20px; font-size: 14px; color: #888;">
-            Игроков в сети: <span id="player-count">0</span>/16
-        </div>
-    </div>
+        function createM4() {
+            const group = new THREE.Group();
+            const mat = new THREE.MeshLambertMaterial({ color: 0x111111 });
+            const barrel = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.04, 0.5), mat);
+            const body = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.12, 0.25), mat);
+            body.position.z = 0.2;
+            group.add(barrel, body);
+            return group;
+        }
 
-    <div id="info">🚁 SAN FIERRO: МОСТ | SWAT (Зелёные наплечники) vs PAYDAY (Маски)</div>
-    <div id="timer">⏰ 05:00</div>
-    
-    <div id="health-bar"><div id="health-fill"></div></div>
-    <div id="ammo">🔫 30/90</div>
-    
-    <div id="objectives">
-        <h3 id="team-objective">⚡ ЗАДАЧИ</h3>
-        <ul id="objective-list">
-            <li>Выберите сторону для начала игры</li>
-        </ul>
-    </div>
+        // --- ИНИЦИАЛИЗАЦИЯ МИРА ---
+        function initWorld() {
+            scene.background = new THREE.Color(0x87ceeb);
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
 
-    <div id="kill-feed"></div>
+            const sun = new THREE.DirectionalLight(0xffffff, 1);
+            sun.position.set(50, 100, 50);
+            scene.add(sun, new THREE.AmbientLight(0x606060));
 
-    <div id="controls">
-        <b>Управление:</b><br>
-        WASD - движение<br>
-        Мышь - поворот<br>
-        ЛКМ - стрельба<br>
-        R - перезарядка<br>
-        Пробел - прыжок
-    </div>
+            // Мост
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(15, 2, 800), new THREE.MeshLambertMaterial({color: 0x444444}));
+            scene.add(bridge);
 
-    <div id="debug">Статус: Ожидание выбора команды...</div>
+            // Оружие игрока
+            const gun = createM4();
+            camera.add(gun);
+            gun.position.set(0.3, -0.25, -0.4);
+            scene.add(camera);
+        }
 
-    <!-- Подключаем Three.js -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    
-    <script>
-        // Главный класс игры
-        class SanFierroBridge {
-            constructor() {
-                this.scene = new THREE.Scene();
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.shadowMap.enabled = true;
-                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                document.body.appendChild(this.renderer.domElement);
+        // --- ЗАПУСК ИГРЫ ---
+        window.startGame = function(team) {
+            playerTeam = team;
+            document.getElementById('menu').style.display = 'none';
+            document.getElementById('ui').style.display = 'block';
+            document.getElementById('crosshair').style.display = 'block';
+            document.getElementById('team-name').innerText = "КОМАНДА: " + team;
+            
+            initWorld();
+            spawnTeams();
+            animate();
+        }
 
-                // Основные переменные
-                this.team = null;
-                this.players = [];
-                this.enemies = [];
-                this.localPlayer = null;
-                this.health = 100;
-                this.ammo = 30;
-                this.maxAmmo = 90;
-                this.score = 0;
-                this.gameTime = 300;
-                this.moveState = {
-                    forward: false,
-                    backward: false,
-                    left: false,
-                    right: false
-                };
-                this.mouseSensitivity = 0.002;
-                
-                // Инициализация
-                this.setupLights();
-                this.createWorld();
-                this.setupEventListeners();
-                
-                // Запуск рендера
-                this.animate();
-                
-                // Таймер авто-выбора команды
-                this.autoSelectTimer = 10;
-                setInterval(() => {
-                    if (this.autoSelectTimer > 0 && !this.team) {
-                        this.autoSelectTimer--;
-                        document.getElementById('auto-select').innerHTML = 
-                            `Автоматический выбор через ${this.autoSelectTimer}с...`;
-                        
-                        if (this.autoSelectTimer === 0) {
-                            this.joinTeam(Math.random() < 0.5 ? 'swat' : 'payday');
-                        }
-                    }
-                }, 1000);
+        function spawnTeams() {
+            const enemyTeam = playerTeam === 'SWAT' ? 'PAYDAY' : 'SWAT';
+            
+            // Спавним 5 союзников (ботов)
+            for(let i = 0; i < 5; i++) {
+                const ally = createSoldier(playerTeam);
+                ally.position.set(Math.random()*6 - 3, 1.5, -20 - (i*5));
+                scene.add(ally);
+                allies.push(ally);
             }
 
-            setupLights() {
-                // Атмосферное освещение как в PAYDAY
-                const ambientLight = new THREE.AmbientLight(0x404060);
-                this.scene.add(ambientLight);
-
-                // Закатное солнце
-                const sunLight = new THREE.DirectionalLight(0xffaa66, 1.2);
-                sunLight.position.set(50, 100, 50);
-                sunLight.castShadow = true;
-                sunLight.shadow.mapSize.width = 2048;
-                sunLight.shadow.mapSize.height = 2048;
-                sunLight.shadow.camera.near = 0.5;
-                sunLight.shadow.camera.far = 500;
-                this.scene.add(sunLight);
-
-                // Дополнительный свет для моста
-                const bridgeLight = new THREE.PointLight(0x4466ff, 0.8, 200);
-                bridgeLight.position.set(0, 30, 0);
-                this.scene.add(bridgeLight);
-                
-                // Фонари на мосту
-                for (let i = -4; i <= 4; i+=2) {
-                    const lampLight = new THREE.PointLight(0xffaa33, 0.5, 50);
-                    lampLight.position.set(i * 20, 15, i * 15);
-                    this.scene.add(lampLight);
-                }
+            // Спавним 6 врагов (ботов)
+            for(let i = 0; i < 6; i++) {
+                const enemy = createSoldier(enemyTeam);
+                enemy.position.set(Math.random()*10 - 5, 1.5, 40 + (i*8));
+                scene.add(enemy);
+                enemies.push(enemy);
             }
 
-            createWorld() {
-                // Небо с градиентом
-                const skyGeometry = new THREE.SphereGeometry(500, 60, 40);
-                const skyMaterial = new THREE.MeshBasicMaterial({
-                    color: 0x1a2b3c,
-                    side: THREE.BackSide
-                });
-                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
-                this.scene.add(sky);
+            // Позиция игрока
+            camera.position.set(0, 2, -10);
+        }
 
-                // Вода
-                const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
-                const waterMaterial = new THREE.MeshStandardMaterial({
-                    color: 0x2a4a6a,
-                    emissive: 0x112233,
-                    transparent: true,
-                    opacity: 0.8
-                });
-                const water = new THREE.Mesh(waterGeometry, waterMaterial);
-                water.rotation.x = -Math.PI / 2;
-                water.position.y = -5;
-                water.receiveShadow = true;
-                this.scene.add(water);
-
-                // Скала для PAYDAY
-                this.createRockCliff();
-                
-                // Мост
-                this.createBridge();
-                
-                // Поезд
-                this.createTrain();
-                
-                // Вертолёты Blackhawk
-                this.createHelicopters();
-                
-                // Укрытия
-                this.createCover();
-                
-                // Туман
-                this.scene.fog = new THREE.FogExp2(0x1a2b3c, 0.002);
+        // --- МЕХАНИКА СТРЕЛЬБЫ ---
+        const raycaster = new THREE.Raycaster();
+        window.onclick = () => {
+            if(document.pointerLockElement) {
+                shoot();
+            } else {
+                document.body.requestPointerLock();
             }
+        };
 
-            createBridge() {
-                const bridgeGroup = new THREE.Group();
+        function shoot() {
+            document.getElementById('flash').style.opacity = "1";
+            setTimeout(() => document.getElementById('flash').style.opacity = "0", 30);
 
-                // Материалы
-                const roadMat = new THREE.MeshStandardMaterial({ color: 0x888888, roughness: 0.7 });
-                const metalMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa, metalness: 0.8, roughness: 0.3 });
-                const woodMat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.9 });
-                
-                // Основное полотно
-                for (let i = -5; i <= 5; i++) {
-                    // Сегмент дороги
-                    const segment = new THREE.Mesh(
-                        new THREE.BoxGeometry(12, 0.5, 30),
-                        roadMat
-                    );
-                    segment.position.set(i * 12, 5, i * 15);
-                    segment.castShadow = true;
-                    segment.receiveShadow = true;
-                    bridgeGroup.add(segment);
+            raycaster.setFromCamera(new THREE.Vector2(0,0), camera);
+            const intersects = raycaster.intersectObjects(scene.children, true);
 
-                    // Рельсы
-                    const railLeft = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.3, 0.5, 30),
-                        metalMat
-                    );
-                    railLeft.position.set(i * 12 - 4, 5.5, i * 15);
-                    railLeft.castShadow = true;
-                    bridgeGroup.add(railLeft);
+            if(intersects.length > 0) {
+                let obj = intersects[0].object;
+                while(obj.parent && !obj.userData.team) obj = obj.parent;
 
-                    const railRight = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.3, 0.5, 30),
-                        metalMat
-                    );
-                    railRight.position.set(i * 12 + 4, 5.5, i * 15);
-                    railRight.castShadow = true;
-                    bridgeGroup.add(railRight);
-
-                    // Шпалы
-                    for (let j = -5; j <= 5; j++) {
-                        const sleeper = new THREE.Mesh(
-                            new THREE.BoxGeometry(8, 0.2, 0.8),
-                            woodMat
-                        );
-                        sleeper.position.set(i * 12, 5.3, i * 15 + j * 3);
-                        sleeper.castShadow = true;
-                        sleeper.receiveShadow = true;
-                        bridgeGroup.add(sleeper);
-                    }
-
-                    // Опоры моста
-                    const pillar = new THREE.Mesh(
-                        new THREE.CylinderGeometry(1.5, 2, 25),
-                        new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6 })
-                    );
-                    pillar.position.set(i * 12 - 10, 17.5, i * 15);
-                    pillar.castShadow = true;
-                    pillar.receiveShadow = true;
-                    bridgeGroup.add(pillar);
-
-                    const pillar2 = new THREE.Mesh(
-                        new THREE.CylinderGeometry(1.5, 2, 25),
-                        new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6 })
-                    );
-                    pillar2.position.set(i * 12 + 10, 17.5, i * 15);
-                    pillar2.castShadow = true;
-                    pillar2.receiveShadow = true;
-                    bridgeGroup.add(pillar2);
-                }
-
-                this.scene.add(bridgeGroup);
-            }
-
-            createRockCliff() {
-                const rockGroup = new THREE.Group();
-                
-                // Основная скала
-                const rockGeo = new THREE.DodecahedronGeometry(20);
-                const rockMat = new THREE.MeshStandardMaterial({ color: 0x5a5a5a, roughness: 0.8 });
-                const rock = new THREE.Mesh(rockGeo, rockMat);
-                rock.position.set(-80, 10, 80);
-                rock.scale.set(3, 2, 2);
-                rock.castShadow = true;
-                rock.receiveShadow = true;
-                rockGroup.add(rock);
-
-                // Мелкие камни
-                for (let i = 0; i < 15; i++) {
-                    const smallRock = new THREE.Mesh(
-                        new THREE.DodecahedronGeometry(Math.random() * 3 + 1),
-                        new THREE.MeshStandardMaterial({ color: 0x666666 })
-                    );
-                    smallRock.position.set(
-                        -80 + Math.random() * 30 - 15,
-                        5 + Math.random() * 15,
-                        80 + Math.random() * 30 - 15
-                    );
-                    smallRock.castShadow = true;
-                    smallRock.receiveShadow = true;
-                    rockGroup.add(smallRock);
-                }
-
-                // Укрытия
-                for (let i = 0; i < 8; i++) {
-                    const cover = new THREE.Mesh(
-                        new THREE.BoxGeometry(4, 2, 4),
-                        new THREE.MeshStandardMaterial({ color: 0x6a6a6a })
-                    );
-                    cover.position.set(
-                        -80 + Math.random() * 40 - 20,
-                        2,
-                        80 + Math.random() * 40 - 20
-                    );
-                    cover.castShadow = true;
-                    cover.receiveShadow = true;
-                    rockGroup.add(cover);
-                }
-
-                this.scene.add(rockGroup);
-                this.paydaySpawn = new THREE.Vector3(-80, 15, 80);
-            }
-
-            createTrain() {
-                const trainGroup = new THREE.Group();
-                
-                // Локомотив
-                const locoMat = new THREE.MeshStandardMaterial({ color: 0x3366cc });
-                const locoBody = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 10), locoMat);
-                locoBody.position.set(0, 7.5, -80);
-                locoBody.castShadow = true;
-                locoBody.receiveShadow = true;
-                trainGroup.add(locoBody);
-
-                // Колёса
-                const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-                for (let i = -1; i <= 1; i+=2) {
-                    for (let j = -1; j <= 1; j+=2) {
-                        const wheel = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.5, 16), wheelMat);
-                        wheel.rotation.z = Math.PI/2;
-                        wheel.position.set(i * 1.8, 3.5, -80 + j * 3);
-                        wheel.castShadow = true;
-                        trainGroup.add(wheel);
-                    }
-                }
-
-                // Вагоны
-                for (let i = 1; i <= 4; i++) {
-                    const wagon = new THREE.Mesh(
-                        new THREE.BoxGeometry(4, 4, 14),
-                        new THREE.MeshStandardMaterial({ color: 0x44aa44 })
-                    );
-                    wagon.position.set(0, 6, -80 - i * 15);
-                    wagon.castShadow = true;
-                    wagon.receiveShadow = true;
-                    trainGroup.add(wagon);
-                    
-                    // Колёса вагонов
-                    for (let j = -1; j <= 1; j+=2) {
-                        for (let k = -1; k <= 1; k+=2) {
-                            const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.4, 16), wheelMat);
-                            wheel.rotation.z = Math.PI/2;
-                            wheel.position.set(j * 1.8, 3, -80 - i * 15 + k * 4);
-                            wheel.castShadow = true;
-                            trainGroup.add(wheel);
-                        }
-                    }
-                }
-
-                this.scene.add(trainGroup);
-                this.train = trainGroup;
-            }
-
-            createHelicopters() {
-                const heliGroup = new THREE.Group();
-                
-                // Создаём два вертолёта
-                const heli1 = this.createHelicopterModel();
-                heli1.position.set(50, 40, -30);
-                heli1.rotation.y = Math.PI;
-                heliGroup.add(heli1);
-
-                const heli2 = this.createHelicopterModel();
-                heli2.position.set(70, 40, 0);
-                heli2.rotation.y = Math.PI;
-                heliGroup.add(heli2);
-
-                this.scene.add(heliGroup);
-                this.helicopters = heliGroup;
-
-                // Тросы
-                const ropeMat = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
-                for (let i = 0; i < 2; i++) {
-                    const points = [
-                        new THREE.Vector3(50 + i*20, 35, -30 + i*30),
-                        new THREE.Vector3(50 + i*20, 10, -30 + i*30)
-                    ];
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    const line = new THREE.Line(geometry, ropeMat);
-                    this.scene.add(line);
-                }
-            }
-
-            createHelicopterModel() {
-                const group = new THREE.Group();
-                
-                // Корпус
-                const body = new THREE.Mesh(
-                    new THREE.CylinderGeometry(2, 2, 8, 8),
-                    new THREE.MeshStandardMaterial({ color: 0x2a3a4a })
-                );
-                body.rotation.x = Math.PI/2;
-                body.castShadow = true;
-                group.add(body);
-
-                // Хвост
-                const tail = new THREE.Mesh(
-                    new THREE.BoxGeometry(1, 1, 4),
-                    new THREE.MeshStandardMaterial({ color: 0x2a3a4a })
-                );
-                tail.position.set(0, 0, -4);
-                tail.castShadow = true;
-                group.add(tail);
-
-                // Основной винт
-                const rotor = new THREE.Mesh(
-                    new THREE.BoxGeometry(8, 0.2, 1),
-                    new THREE.MeshStandardMaterial({ color: 0x888888 })
-                );
-                rotor.position.set(0, 2.5, 0);
-                rotor.castShadow = true;
-                group.add(rotor);
-
-                // Хвостовой винт
-                const tailRotor = new THREE.Mesh(
-                    new THREE.BoxGeometry(1, 0.2, 2),
-                    new THREE.MeshStandardMaterial({ color: 0x888888 })
-                );
-                tailRotor.position.set(0, 1, -5.5);
-                tailRotor.rotation.x = Math.PI/2;
-                tailRotor.castShadow = true;
-                group.add(tailRotor);
-
-                // Окна
-                const windowMat = new THREE.MeshStandardMaterial({ color: 0x88aaff });
-                for (let i = -1; i <= 1; i+=2) {
-                    const window = new THREE.Mesh(
-                        new THREE.BoxGeometry(1, 1, 0.5),
-                        windowMat
-                    );
-                    window.position.set(i, 0.5, 2);
-                    window.castShadow = true;
-                    group.add(window);
-                }
-
-                return group;
-            }
-
-            createCover() {
-                const coverMat = new THREE.MeshStandardMaterial({ color: 0x7a7a7a });
-                
-                // Укрытия на мосту
-                for (let i = -4; i <= 4; i+=2) {
-                    for (let j = -2; j <= 2; j+=2) {
-                        const cover = new THREE.Mesh(
-                            new THREE.BoxGeometry(3, 2, 3),
-                            coverMat
-                        );
-                        cover.position.set(i * 12, 6, j * 20);
-                        cover.castShadow = true;
-                        cover.receiveShadow = true;
-                        this.scene.add(cover);
-                    }
-                }
-            }
-
-            createSWATPlayer(x, y, z, isHeavy = false) {
-                const group = new THREE.Group();
-                
-                // Основное тело (форма)
-                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1a3a6a }); // Тёмно-синяя форма
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), bodyMat);
-                body.position.y = 1;
-                body.castShadow = true;
-                body.receiveShadow = true;
-                group.add(body);
-
-                // Зелёные наплечники (как просили)
-                const shoulderMat = new THREE.MeshStandardMaterial({ color: 0x2a9a2a }); // Ярко-зелёные
-                
-                const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.35), shoulderMat);
-                leftShoulder.position.set(-0.6, 1.8, 0);
-                leftShoulder.castShadow = true;
-                group.add(leftShoulder);
-                
-                const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.35), shoulderMat);
-                rightShoulder.position.set(0.6, 1.8, 0);
-                rightShoulder.castShadow = true;
-                group.add(rightShoulder);
-
-                // Бронежилет с надписью SWAT
-                const vestMat = new THREE.MeshStandardMaterial({ color: 0x2a4a7a });
-                const vest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1.2, 0.4), vestMat);
-                vest.position.set(0, 1.2, 0.2);
-                vest.castShadow = true;
-                group.add(vest);
-
-                // Баллистический шлем
-                const helmetMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-                const helmet = new THREE.Mesh(new THREE.SphereGeometry(0.4), helmetMat);
-                helmet.position.set(0, 2.3, 0);
-                helmet.scale.set(1, 0.8, 0.9);
-                helmet.castShadow = true;
-                group.add(helmet);
-
-                // Забрало
-                const visorMat = new THREE.MeshStandardMaterial({ color: 0x88aaff, transparent: true, opacity: 0.5 });
-                const visor = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), visorMat);
-                visor.position.set(0, 2.2, 0.3);
-                visor.castShadow = true;
-                group.add(visor);
-
-                // Тактические перчатки
-                const gloveMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-                const leftGlove = new THREE.Mesh(new THREE.SphereGeometry(0.2), gloveMat);
-                leftGlove.position.set(-0.5, 0.3, 0.3);
-                leftGlove.castShadow = true;
-                group.add(leftGlove);
-                
-                const rightGlove = new THREE.Mesh(new THREE.SphereGeometry(0.2), gloveMat);
-                rightGlove.position.set(0.5, 0.3, 0.3);
-                rightGlove.castShadow = true;
-                group.add(rightGlove);
-
-                // Наколенники
-                const kneeMat = new THREE.MeshStandardMaterial({ color: 0x444444 });
-                const leftKnee = new THREE.Mesh(new THREE.SphereGeometry(0.2), kneeMat);
-                leftKnee.position.set(-0.3, 0.2, 0.2);
-                leftKnee.castShadow = true;
-                group.add(leftKnee);
-                
-                const rightKnee = new THREE.Mesh(new THREE.SphereGeometry(0.2), kneeMat);
-                rightKnee.position.set(0.3, 0.2, 0.2);
-                rightKnee.castShadow = true;
-                group.add(rightKnee);
-
-                // Пояс с подсумками
-                const beltMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-                const belt = new THREE.Mesh(new THREE.TorusGeometry(0.5, 0.1, 8, 20), beltMat);
-                belt.rotation.x = Math.PI/2;
-                belt.position.set(0, 0.8, 0);
-                belt.scale.set(1, 1, 0.5);
-                belt.castShadow = true;
-                group.add(belt);
-
-                // Оружие M4
-                const weaponGroup = new THREE.Group();
-                
-                const gunBody = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.3, 0.3, 1.5),
-                    new THREE.MeshStandardMaterial({ color: 0x222222 })
-                );
-                gunBody.position.set(0.5, 1.2, 0.8);
-                gunBody.castShadow = true;
-                weaponGroup.add(gunBody);
-                
-                const barrel = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.1, 0.1, 1),
-                    new THREE.MeshStandardMaterial({ color: 0x444444 })
-                );
-                barrel.rotation.x = Math.PI/2;
-                barrel.position.set(0.5, 1.2, 1.6);
-                barrel.castShadow = true;
-                weaponGroup.add(barrel);
-                
-                const magazine = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.2, 0.5, 0.3),
-                    new THREE.MeshStandardMaterial({ color: 0x666666 })
-                );
-                magazine.position.set(0.5, 0.9, 0.8);
-                magazine.castShadow = true;
-                weaponGroup.add(magazine);
-
-                group.add(weaponGroup);
-
-                // Для тяжёлого спецназовца
-                if (isHeavy) {
-                    // Дополнительная броня
-                    const heavyArmor = new THREE.Mesh(
-                        new THREE.BoxGeometry(1.1, 1.5, 0.6),
-                        new THREE.MeshStandardMaterial({ color: 0x111111 })
-                    );
-                    heavyArmor.position.set(0, 1.3, 0.1);
-                    heavyArmor.castShadow = true;
-                    group.add(heavyArmor);
-                    
-                    // Увеличиваем размер
-                    group.scale.set(1.2, 1.2, 1.2);
-                    
-                    // Меняем оружие на пулемёт
-                    weaponGroup.children.forEach(child => group.remove(child));
-                    
-                    const lmg = new THREE.Mesh(
-                        new THREE.BoxGeometry(0.5, 0.5, 2),
-                        new THREE.MeshStandardMaterial({ color: 0x333333 })
-                    );
-                    lmg.position.set(0.6, 1.3, 1);
-                    lmg.castShadow = true;
-                    group.add(lmg);
-                }
-
-                group.position.set(x, y, z);
-                return group;
-            }
-
-            createPAYDAYPlayer(x, y, z, isHeavy = false) {
-                const group = new THREE.Group();
-                
-                // Основное тело (чёрная одежда)
-                const bodyMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-                const body = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), bodyMat);
-                body.position.y = 1;
-                body.castShadow = true;
-                body.receiveShadow = true;
-                group.add(body);
-
-                // Маска (клоунская)
-                const maskMat = new THREE.MeshStandardMaterial({ color: 0xffaa00 });
-                const mask = new THREE.Mesh(new THREE.SphereGeometry(0.45), maskMat);
-                mask.position.set(0, 2.2, 0.1);
-                mask.scale.set(1, 0.9, 0.7);
-                mask.castShadow = true;
-                group.add(mask);
-
-                // Глаза маски
-                const eyeMat = new THREE.MeshStandardMaterial({ color: 0x000000 });
-                const leftEye = new THREE.Mesh(new THREE.SphereGeometry(0.1), eyeMat);
-                leftEye.position.set(-0.15, 2.25, 0.3);
-                leftEye.castShadow = true;
-                group.add(leftEye);
-                
-                const rightEye = new THREE.Mesh(new THREE.SphereGeometry(0.1), eyeMat);
-                rightEye.position.set(0.15, 2.25, 0.3);
-                rightEye.castShadow = true;
-                group.add(rightEye);
-
-                // Рот маски
-                const mouthMat = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-                const mouth = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.05, 8, 20), mouthMat);
-                mouth.rotation.x = Math.PI/2;
-                mouth.rotation.z = Math.PI;
-                mouth.position.set(0, 2.1, 0.3);
-                mouth.scale.set(1, 0.5, 1);
-                mouth.castShadow = true;
-                group.add(mouth);
-
-                // Разгрузка
-                const vestMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-                const vest = new THREE.Mesh(new THREE.BoxGeometry(0.9, 1, 0.3), vestMat);
-                vest.position.set(0, 1.2, 0.2);
-                vest.castShadow = true;
-                group.add(vest);
-
-                // Гранаты на поясе
-                const grenadeMat = new THREE.MeshStandardMaterial({ color: 0x44aa44 });
-                for (let i = -1; i <= 1; i+=2) {
-                    const grenade = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.4), grenadeMat);
-                    grenade.rotation.z = Math.PI/2;
-                    grenade.position.set(i * 0.3, 0.8, 0.3);
-                    grenade.castShadow = true;
-                    group.add(grenade);
-                }
-
-                // Оружие
-                const weaponGroup = new THREE.Group();
-                
-                const gunBody = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.3, 0.3, 1.3),
-                    new THREE.MeshStandardMaterial({ color: 0x333333 })
-                );
-                gunBody.position.set(0.5, 1.2, 0.7);
-                gunBody.castShadow = true;
-                weaponGroup.add(gunBody);
-
-                group.add(weaponGroup);
-
-                // Для тяжёлого бандита
-                if (isHeavy) {
-                    // Тяжёлый бронежилет
-                    const heavyVest = new THREE.Mesh(
-                        new THREE.BoxGeometry(1.1, 1.4, 0.5),
-                        new THREE.MeshStandardMaterial({ color: 0x444444 })
-                    );
-                    heavyVest.position.set(0, 1.3, 0.1);
-                    heavyVest.castShadow = true;
-                    group.add(heavyVest);
-                    
-                    group.scale.set(1.2, 1.2, 1.2);
-                }
-
-                group.position.set(x, y, z);
-                return group;
-            }
-
-            setupEventListeners() {
-                // Кнопки выбора команды
-                document.getElementById('swat-btn').addEventListener('click', () => {
-                    this.joinTeam('swat');
-                });
-                
-                document.getElementById('payday-btn').addEventListener('click', () => {
-                    this.joinTeam('payday');
-                });
-
-                // Клавиатура
-                document.addEventListener('keydown', (e) => {
-                    if (!this.team) return;
-                    
-                    switch(e.code) {
-                        case 'KeyW': this.moveState.forward = true; break;
-                        case 'KeyS': this.moveState.backward = true; break;
-                        case 'KeyA': this.moveState.left = true; break;
-                        case 'KeyD': this.moveState.right = true; break;
-                        case 'Space': this.jump(); break;
-                        case 'KeyR': this.reload(); break;
-                    }
-                });
-
-                document.addEventListener('keyup', (e) => {
-                    switch(e.code) {
-                        case 'KeyW': this.moveState.forward = false; break;
-                        case 'KeyS': this.moveState.backward = false; break;
-                        case 'KeyA': this.moveState.left = false; break;
-                        case 'KeyD': this.moveState.right = false; break;
-                    }
-                });
-
-                // Стрельба
-                document.addEventListener('click', (e) => {
-                    if (this.team && document.pointerLockElement) {
-                        this.shoot();
-                    }
-                });
-
-                // Блокировка указателя
-                document.addEventListener('click', () => {
-                    if (this.team) {
-                        document.body.requestPointerLock();
-                    }
-                });
-
-                // Мышь для поворота
-                document.addEventListener('mousemove', (e) => {
-                    if (this.team && document.pointerLockElement) {
-                        this.camera.rotation.y -= e.movementX * this.mouseSensitivity;
-                        this.camera.rotation.x -= e.movementY * this.mouseSensitivity;
-                        this.camera.rotation.x = Math.max(-Math.PI/3, Math.min(Math.PI/3, this.camera.rotation.x));
-                    }
-                });
-
-                // Изменение размера окна
-                window.addEventListener('resize', () => {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
-                    this.camera.updateProjectionMatrix();
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-            }
-
-            joinTeam(team) {
-                this.team = team;
-                document.getElementById('team-select').style.display = 'none';
-                document.getElementById('debug').innerHTML = `Статус: В игре за ${team === 'swat' ? 'SWAT' : 'PAYDAY'}`;
-                
-                // Устанавливаем камеру в зависимости от команды
-                if (team === 'swat') {
-                    this.camera.position.set(50, 12, -30);
-                } else {
-                    this.camera.position.set(-80, 17, 80);
-                }
-                
-                // Создаём локального игрока
-                this.createLocalPlayer();
-                
-                // Создаём ботов
-                this.createBots();
-                
-                // Обновляем задачи
-                this.updateObjectives();
-                
-                // Запускаем таймер
-                this.startGameTimer();
-            }
-
-            createLocalPlayer() {
-                this.localPlayer = {
-                    team: this.team,
-                    health: 100,
-                    ammo: 30
-                };
-                
-                // Создаём модель оружия
-                this.createWeaponModel();
-            }
-
-            createWeaponModel() {
-                const weaponGroup = new THREE.Group();
-                
-                // Основная часть
-                const body = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.4, 0.4, 1.8),
-                    new THREE.MeshStandardMaterial({ color: 0x222222 })
-                );
-                body.position.set(0.3, -0.2, -0.6);
-                weaponGroup.add(body);
-                
-                // Рукоятка
-                const grip = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.3, 0.5, 0.3),
-                    new THREE.MeshStandardMaterial({ color: 0x8B4513 })
-                );
-                grip.position.set(0.3, -0.4, -0.2);
-                weaponGroup.add(grip);
-                
-                // Ствол
-                const barrel = new THREE.Mesh(
-                    new THREE.CylinderGeometry(0.1, 0.1, 1.2),
-                    new THREE.MeshStandardMaterial({ color: 0x444444 })
-                );
-                barrel.rotation.x = Math.PI/2;
-                barrel.position.set(0.3, -0.2, -1.3);
-                weaponGroup.add(barrel);
-                
-                // Магазин
-                const mag = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.25, 0.5, 0.3),
-                    new THREE.MeshStandardMaterial({ color: 0x666666 })
-                );
-                mag.position.set(0.3, -0.5, -0.6);
-                weaponGroup.add(mag);
-                
-                // Прицел
-                const sight = new THREE.Mesh(
-                    new THREE.BoxGeometry(0.1, 0.1, 0.2),
-                    new THREE.MeshStandardMaterial({ color: 0xff0000 })
-                );
-                sight.position.set(0.3, 0, -0.8);
-                weaponGroup.add(sight);
-                
-                this.camera.add(weaponGroup);
-            }
-
-            createBots() {
-                // Создаём 4 бота для демонстрации
-                for (let i = 0; i < 4; i++) {
-                    const botTeam = i < 2 ? 'swat' : 'payday';
-                    const isHeavy = i === 1 || i === 3; // Каждый второй - тяжёлый
-                    
-                    let botMesh;
-                    let x, y = 5, z;
-                    
-                    if (botTeam === 'swat') {
-                        x = 40 + i * 8;
-                        z = -20 + i * 10;
-                        botMesh = this.createSWATPlayer(x, y, z, isHeavy);
+                if(obj.userData.team) {
+                    if(obj.userData.team === playerTeam) {
+                        msg("ОГОНЬ ПО СВОИМ!", "red");
                     } else {
-                        x = -70 + (i-2) * 8;
-                        z = 70 + (i-2) * 8;
-                        botMesh = this.createPAYDAYPlayer(x, y, z, isHeavy);
+                        scene.remove(obj);
+                        const idx = enemies.indexOf(obj);
+                        if(idx > -1) enemies.splice(idx, 1);
+                        msg("ВРАГ УБИТ!", "#00ff00");
                     }
-                    
-                    this.scene.add(botMesh);
-                    
-                    this.players.push({
-                        mesh: botMesh,
-                        team: botTeam,
-                        health: 100,
-                        isHeavy: isHeavy
-                    });
                 }
-            }
-
-            updateObjectives() {
-                const objList = document.getElementById('objective-list');
-                objList.innerHTML = '';
-                
-                if (this.team === 'swat') {
-                    objList.innerHTML += '<li>🚁 Высадиться с вертолёта Blackhawk</li>';
-                    objList.innerHTML += '<li>💣 Обезвредить взрывчатку (3 точки)</li>';
-                    objList.innerHTML += '<li>🎯 Ликвидировать террористов PAYDAY</li>';
-                    objList.innerHTML += '<li>🚂 Защитить поезд от подрыва</li>';
-                    document.getElementById('team-objective').innerHTML = '⚡ ЗАДАЧИ SWAT (КТ)';
-                } else {
-                    objList.innerHTML += '<li>💣 Заложить взрывчатку на опоры</li>';
-                    objList.innerHTML += '<li>🛡️ Защищать заряды до подрыва</li>';
-                    objList.innerHTML += '<li>💥 Уничтожить мост до прибытия поезда</li>';
-                    objList.innerHTML += '<li>🚁 Сбивать вертолёты SWAT из РПГ</li>';
-                    document.getElementById('team-objective').innerHTML = '⚡ ЗАДАЧИ PAYDAY';
-                }
-            }
-
-            startGameTimer() {
-                setInterval(() => {
-                    if (this.gameTime > 0 && this.team) {
-                        this.gameTime--;
-                        
-                        const mins = Math.floor(this.gameTime / 60);
-                        const secs = this.gameTime % 60;
-                        document.getElementById('timer').innerHTML = 
-                            `⏰ ${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-                        
-                        // Движение поезда
-                        if (this.train) {
-                            this.train.position.z += 0.03;
-                        }
-                        
-                        // Вращение винтов вертолётов
-                        if (this.helicopters) {
-                            this.helicopters.children.forEach(heli => {
-                                if (heli.children[2]) heli.children[2].rotation.y += 0.1;
-                                if (heli.children[4]) heli.children[4].rotation.y += 0.2;
-                            });
-                        }
-                    }
-                }, 1000);
-            }
-
-            jump() {
-                if (this.localPlayer) {
-                    this.camera.position.y += 2;
-                    setTimeout(() => {
-                        this.camera.position.y -= 2;
-                    }, 300);
-                }
-            }
-
-            reload() {
-                if (this.localPlayer) {
-                    this.ammo = 30;
-                    document.getElementById('ammo').innerHTML = `🔫 ${this.ammo}/${this.maxAmmo}`;
-                    this.addKillFeed('SYSTEM', 'Перезарядка', 'info');
-                }
-            }
-
-            shoot() {
-                if (this.localPlayer && this.ammo > 0) {
-                    this.ammo--;
-                    document.getElementById('ammo').innerHTML = `🔫 ${this.ammo}/${this.maxAmmo}`;
-                    
-                    // Эффект вспышки
-                    const flash = new THREE.PointLight(0xffaa00, 2, 10);
-                    flash.position.copy(this.camera.position);
-                    flash.position.add(new THREE.Vector3(0, 0, -2).applyQuaternion(this.camera.quaternion));
-                    this.scene.add(flash);
-                    
-                    setTimeout(() => {
-                        this.scene.remove(flash);
-                    }, 50);
-                    
-                    // Raycast для определения попадания
-                    const raycaster = new THREE.Raycaster();
-                    raycaster.set(this.camera.position, new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion));
-                    
-                    // Проверяем попадания во врагов
-                    this.players.forEach((player, index) => {
-                        if (player.team !== this.team) { // Проверка "свой-чужой"
-                            const intersects = raycaster.intersectObject(player.mesh, true);
-                            if (intersects.length > 0) {
-                                player.health -= 34;
-                                
-                                if (player.health <= 0) {
-                                    this.scene.remove(player.mesh);
-                                    this.players.splice(index, 1);
-                                    this.score++;
-                                    
-                                    // Сообщение об убийстве
-                                    const killedTeam = player.team === 'swat' ? 'SWAT' : 'PAYDAY';
-                                    const killerTeam = this.team === 'swat' ? 'SWAT' : 'PAYDAY';
-                                    this.addKillFeed(killerTeam, killedTeam, this.team);
-                                    
-                                    // Пасхалка GENSEC
-                                    if (this.score === 5) {
-                                        alert('🏆 GENSEC гордится тобой!');
-                                    }
-                                    
-                                    // Пасхалка Драго
-                                    if (Math.random() < 0.1) {
-                                        this.createEasterEgg();
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-
-            addKillFeed(killer, victim, team) {
-                const feed = document.getElementById('kill-feed');
-                const msg = document.createElement('div');
-                msg.className = 'kill-message ' + (team === 'swat' ? 'swat-kill' : 'payday-kill');
-                msg.innerHTML = `🔫 ${killer} → ${victim}`;
-                feed.appendChild(msg);
-                
-                setTimeout(() => {
-                    if (feed.contains(msg)) feed.removeChild(msg);
-                }, 5000);
-            }
-
-            createEasterEgg() {
-                // Драго
-                const drago = new THREE.Mesh(
-                    new THREE.SphereGeometry(0.5),
-                    new THREE.MeshStandardMaterial({ color: 0xffaa00 })
-                );
-                drago.position.copy(this.camera.position);
-                drago.position.y += 2;
-                this.scene.add(drago);
-                
-                const dragoText = document.createElement('div');
-                dragoText.style.position = 'absolute';
-                dragoText.style.top = '50%';
-                dragoText.style.left = '50%';
-                dragoText.style.transform = 'translate(-50%, -50%)';
-                dragoText.style.color = '#ffaa00';
-                dragoText.style.fontSize = '48px';
-                dragoText.style.fontWeight = 'bold';
-                dragoText.style.textShadow = '2px 2px 2px black';
-                dragoText.innerHTML = 'Я ДОЛЖЕН!';
-                document.body.appendChild(dragoText);
-                
-                setTimeout(() => {
-                    this.scene.remove(drago);
-                    document.body.removeChild(dragoText);
-                }, 2000);
-            }
-
-            update() {
-                if (this.localPlayer && this.team) {
-                    // Движение
-                    const speed = 0.2;
-                    const direction = new THREE.Vector3();
-                    
-                    if (this.moveState.forward) direction.z -= speed;
-                    if (this.moveState.backward) direction.z += speed;
-                    if (this.moveState.left) direction.x -= speed;
-                    if (this.moveState.right) direction.x += speed;
-                    
-                    direction.applyQuaternion(this.camera.quaternion);
-                    direction.y = 0;
-                    
-                    this.camera.position.add(direction);
-                    
-                    // Обновляем здоровье
-                    document.getElementById('health-fill').style.width = this.health + '%';
-                    
-                    // Движение ботов (простая анимация)
-                    this.players.forEach((player, index) => {
-                        if (player.team === 'swat') {
-                            player.mesh.position.x += Math.sin(Date.now() * 0.001 + index) * 0.01;
-                            player.mesh.position.z += Math.cos(Date.now() * 0.001 + index) * 0.01;
-                        } else {
-                            player.mesh.position.x -= Math.sin(Date.now() * 0.001 + index) * 0.01;
-                            player.mesh.position.z -= Math.cos(Date.now() * 0.001 + index) * 0.01;
-                        }
-                    });
-                }
-            }
-
-            animate() {
-                requestAnimationFrame(() => this.animate());
-                
-                this.update();
-                this.renderer.render(this.scene, this.camera);
             }
         }
 
-        // Запуск игры
-        window.onload = () => {
-            const game = new SanFierroBridge();
-            
-            // Обновляем счётчик игроков
-            setInterval(() => {
-                document.getElementById('player-count').innerHTML = Math.floor(Math.random() * 8) + 4;
-            }, 3000);
+        function msg(text, color) {
+            const m = document.getElementById('msg');
+            m.innerText = text;
+            m.style.color = color;
+        }
+
+        // --- ДВИЖЕНИЕ ---
+        const keys = {};
+        window.onkeydown = (e) => keys[e.code] = true;
+        window.onkeyup = (e) => keys[e.code] = false;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const speed = 0.15;
+            if(keys['KeyW']) camera.translateZ(-speed);
+            if(keys['KeyS']) camera.translateZ(speed);
+            if(keys['KeyA']) camera.translateX(-speed);
+            if(keys['KeyD']) camera.translateX(speed);
+            camera.position.y = 2.2;
+
+            renderer.render(scene, camera);
+        }
+
+        window.onmousemove = (e) => {
+            if(document.pointerLockElement) {
+                camera.rotation.y -= e.movementX * 0.002;
+                camera.rotation.x -= e.movementY * 0.002;
+                camera.rotation.order = 'YXZ';
+            }
         };
     </script>
 </body>
-</html>
+    </html>
