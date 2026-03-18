@@ -2,196 +2,544 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GENSEC: Охрана банка</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GENSEC: ОХРАНА БАНКА (рейкастинг)</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Courier New', monospace;
-            background: #111;
-            color: #fff;
-            overflow: hidden;
+        * {
+            box-sizing: border-box;
             user-select: none;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
-        #game {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            max-width: 1920px;
-            max-height: 1080px;
-            margin: 0 auto;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #0a0c0b;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', Courier, monospace;
         }
-        #interface {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px;
-            background: rgba(0,0,0,0.7);
+        #game-container {
+            background: #1e2a2e;
+            padding: 12px;
+            border-radius: 20px;
+            box-shadow: 0 0 0 4px #3a4a4f, inset 0 0 0 2px #5e7a82;
+            max-width: 1000px;
+            width: fit-content;
+            margin: 16px;
         }
-        #status {
-            display: flex;
-            gap: 20px;
+        .screen-panel {
+            background: #111c20;
+            border: 4px solid #3e5a62;
+            border-radius: 16px;
+            padding: 12px;
+            box-shadow: inset 0 0 20px #00000099;
         }
-        .status-item {
-            font-size: 14px;
-        }
-        #controls {
-            display: flex;
-            gap: 10px;
-        }
-        button {
-            padding: 8px 12px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-            cursor: pointer;
-        }
-        #playground {
-            flex: 1;
-            position: relative;
-            background: #222;
-        }
-        .object {
-            position: absolute;
-            cursor: pointer;
-        }
-        #desk {
-            width: 400px;
-            height: 200px;
-            background: #533;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        #newspaper, #phone, #monitor, #button-police, #ammo-box {
-            position: absolute;
-        }
-        #newspaper { bottom: 150px; left: 300px; width: 80px; height: 60px; background: #eee; color: #000; }
-        #phone { bottom: 160px; left: 400px; width: 60px; height: 40px; background: #ccc; }
-        #monitor { bottom: 170px; left: 500px; width: 100px; height: 80px; background: #000; border: 2px solid #33f; }
-        #button-police { bottom: 180px; left: 620px; width: 50px; height: 30px; background: #f33; }
-        #ammo-box { bottom: 150px; left: 100px; width: 70px; height: 50px; background: #666; }
-        #door-panel {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            background: #444;
-            padding: 10px;
-        }
-        .door-btn {
-            width: 60px;
-            height: 40px;
-            background: #555;
-            margin: 5px 0;
-            text-align: center;
-            line-height: 40px;
-            cursor: pointer;
-        }
-        .door-open { background: #4a4; }
-        .door-closed { background: #a44; }
-        .character {
-            position: absolute;
-            width: 40px;
-            height: 60px;
-        }
-        .banker { background: #ddd; border: 1px solid #aaa; }
-        .civilian { background: #888; border: 1px solid #666; }
-        .bandit { background: #222; border: 1px solid #000; color: red; }
-        .police { background: #aaf; border: 1px solid #88f; }
-        #time-display {
-            position: absolute;
-            top: 10px;
-            left: 50%;
-            transform: translateX(-50%);
-            font-size: 24px;
-            font-weight: bold;
-        }
-        #ending {
-            position: absolute;
-            top: 0;
-            left: 0;
+        #display-canvas {
+            display: block;
             width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
+            max-width: 960px;
+            aspect-ratio: 4 / 3;
+            background: #1f3138;
+            border-radius: 10px;
+            border: 3px solid #6f8f9c;
+            box-shadow: 0 0 0 2px #263b42;
+            image-rendering: crisp-edges;
+        }
+        .status-bar {
+            background: #1d2b30;
+            padding: 8px 16px;
+            margin: 10px 0 6px 0;
+            border-radius: 40px;
             display: flex;
-            flex-direction: column;
+            flex-wrap: wrap;
+            gap: 15px 25px;
+            justify-content: center;
+            color: #b3f0ff;
+            text-shadow: 2px 2px 0 #0e1a1f;
+            font-weight: bold;
+            font-size: 1.2rem;
+            border: 2px solid #4d6f7c;
+            box-shadow: inset 0 -2px 0 #2a4048;
+        }
+        .status-bar span {
+            background: #10262e;
+            padding: 6px 20px;
+            border-radius: 30px;
+            border: 1px solid #317087;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .control-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        .btn {
+            background: #263b44;
+            border: none;
+            border-bottom: 4px solid #0d1f26;
+            color: #deeeff;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 10px 18px;
+            border-radius: 30px;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 0 #0f1f27;
+            box-shadow: 0 3px 0 #1a2d35, inset 0 0 0 1px #508394;
+            cursor: pointer;
+            transition: 0.06s linear;
+            min-width: 90px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            z-index: 10;
-            display: none;
+            gap: 6px;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            border-bottom-width: 2px;
+            background: #1f353f;
+        }
+        .btn.red {
+            background: #632e3a;
+            border-bottom-color: #35161d;
+            box-shadow: inset 0 0 0 1px #c0677a;
+        }
+        .phase-tag {
+            background: #00000060;
+            color: #ffd966;
+            font-size: 0.9rem;
+            padding: 4px 15px;
+            border-radius: 40px;
+            border: 1px solid #f0b44b;
+        }
+        .mobile-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        @media (max-width: 600px) {
+            .btn { padding: 12px 14px; font-size: 1rem; }
+            .status-bar { font-size: 1rem; }
+        }
+        .hint {
+            color: #6faec9;
+            font-size: 0.9rem;
+            text-align: center;
+            margin-top: 8px;
         }
     </style>
 </head>
 <body>
-    <div id="game">
-        <div id="interface">
-            <div id="status">
-                <div class="status-item">Время: <span id="time">22:00</span></div>
-                <div class="status-item">Патроны: <span id="ammo">30</span></div>
-                <div class="status-item">Здоровье: <span id="health">100</span></div>
-            </div>
-            <div id="controls">
-                <button id="read-news">Читать газету</button>
-                <button id="call-boss">Позвонить начальнику</button>
-                <button id="study-map">Изучить планировку</button>
-                <button id="watch-cameras">Смотреть камеры</button>
-            </div>
-        </div>
-        <div id="playground">
-            <div id="time-display">22:00</div>
-            <div id="desk">
-                <div id="newspaper" class="object" title="Газета с новостями про PAYDAY"></div>
-                <div id="phone" class="object" title="Телефон для звонков"></div>
-<div id="monitor" class="object" title="Монитор с камерами"></div>
-                <div id="button-police" class="object" title="Кнопка вызова полиции"></div>
-                <div id="ammo-box" class="object" title="Ящик с патронами"></div>
-            </div>
-            <div id="door-panel">
-                <div class="door-btn door-open" id="door1">Дверь 1</div>
-                <div class="door-btn door-open" id="door2">Дверь 2</div>
-                <div class="door-btn door-open" id="door3">Дверь 3</div>
-            </div>
-            <div id="ending">
-                <h1 id="ending-title"></h1>
-                <p id="ending-text"></p>
-                <button id="restart">Новая смена</button>
-            </div>
-        </div>
+<div id="game-container" class="screen-panel">
+    <canvas id="display-canvas" width="960" height="720"></canvas>
+
+    <div class="status-bar">
+        <span>🔫 ПАТРОНЫ: <span id="ammoDisplay">30</span></span>
+        <span>📹 РЕЖИМ: <span id="modeDisplay">КАМЕРЫ</span></span>
+        <span>⏰ <span id="phaseDisplay">ПОДГОТОВКА 22:45</span></span>
     </div>
 
-    <script>
-        // Инициализация игры
-        const game = {
-            time: 22,
-            minutes: 0,
-            ammo: 30,
-            health: 100,
-            bandits: [],
-            doors: [true, true, true], // true = открыта
-            policeCalled: false,
-            policeArrived: false,
-            allBanditsKilled: false,
-            gameOver: false
-        };
+    <div class="control-panel">
+        <button class="btn" id="cam1Btn">📹 КАМЕРА 1</button>
+        <button class="btn" id="cam2Btn">📹 КАМЕРА 2</button>
+        <button class="btn" id="cam3Btn">📹 КАМЕРА 3</button>
+        <button class="btn" id="cam4Btn">📹 КАМЕРА 4</button>
+        <button class="btn" id="cam5Btn">📹 КАМЕРА 5</button>
+        <button class="btn" id="cam6Btn">📹 КАМЕРА 6</button>
+    </div>
+    <div class="control-panel" style="margin-top: 5px;">
+        <button class="btn" id="deskPhoneBtn">📞 ЗВОНОК НАЧ.</button>
+        <button class="btn" id="deskMapBtn">🗺️ ПЛАНИРОВКА</button>
+        <button class="btn" id="deskNewsBtn">📰 ГАЗЕТА</button>
+        <button class="btn" id="deskCoffeeBtn">☕ КОФЕ</button>
+        <button class="btn red" id="door1Btn">🚪 ДВЕРЬ 1</button>
+        <button class="btn red" id="door2Btn">🚪 ДВЕРЬ 2</button>
+        <button class="btn red" id="door3Btn">🚪 ДВЕРЬ 3</button>
+    </div>
+    <div class="mobile-row">
+        <button class="btn" id="shootBtn">🔫 СТРЕЛЯТЬ (БОЙ)</button>
+        <button class="btn" id="switchModeBtn">🔄 РЕЖИМ КАМЕРЫ/БОЙ</button>
+    </div>
+    <div class="hint">🐻 Медведь с чайником в углу. Драго кричит: "Я ДОЛЖЕН!" (изредка)</div>
+</div>
 
-        // DOM элементы
-        const timeEl = document.getElementById('time');
-        const ammoEl = document.getElementById('ammo');
-        const healthEl = document.getElementById('health');
-        const timeDisplay = document.getElementById('time-display');
-        const ending = document.getElementById('ending');
-        const endingTitle = document.getElementById('ending-title');
-        const endingText = document.getElementById('ending-text');
-        const playground = document.getElementById('playground');
+<script>
+(function() {
+    const canvas = document.getElementById('display-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;
 
-        // Обновление интерфейса
-        function updateUI() {
-            const minutesStr = game.minutes < 10 ? `0${game.minutes}` : game.minutes;
-            timeEl.textContent = `${game.time}:${minutesStr}`;
-            timeDisplay
-            script
-        body
-        html
+    // ---- Состояние игры ----
+    let phase = 'preparation'; // 'preparation', 'robbery', 'combat'
+    let mode = 'cameras';      // 'cameras', 'combat'
+    let ammo = 30;
+    let gameOver = false;
+    let endingType = null;     // 'hero', 'police', 'allseeing', 'surrendered'
+    let cameraIndex = 1;       // 1..6
+    let doors = [true, true, true]; // true = закрыто
+    let bandits = [];
+    let banditSpawnTimer = 0;
+    let policeCalled = false;
+    let coffeeActive = false;
+    let lastDragoTime = 0;
+
+    // предметы стола (для анимации)
+    let viewingItem = null;    // 'phone', 'map', 'news', null
+
+    // ---- Параметры камер (вид сверху - рисуем как 3D-план) ----
+    const camZones = [
+        { name: 'ХОЛЛ', x: 200, y: 150, w: 180, h: 120, bg: '#4f6750', details: 'стойка, ящики' },
+        { name: 'ОПЕР.ЗАЛ', x: 440, y: 140, w: 200, h: 130, bg: '#5f5a4b', details: 'кассы, очередь' },
+        { name: 'ХРАНИЛИЩЕ', x: 720, y: 200, w: 160, h: 140, bg: '#4f5f6b', details: 'СЕЙФ' },
+        { name: 'КОМН.ОХРАНЫ', x: 100, y: 400, w: 200, h: 150, bg: '#3f5055', details: 'стол, монитор' },
+        { name: 'КОРИДОР А', x: 380, y: 370, w: 260, h: 70, bg: '#4f5340', details: '' },
+        { name: 'КОРИДОР Б', x: 660, y: 400, w: 180, h: 90, bg: '#4f5340', details: '' }
+    ];
+
+    // ---- Бандиты ----
+    function spawnBandit() {
+        if (phase === 'robbery' && bandits.length < 4) {
+            bandits.push({
+                x: 100 + Math.random() * 700,
+                y: 80 + Math.random() * 400,
+                hp: 100,
+                active: true,
+                mask: true
+            });
+        }
+    }
+
+    // ---- обновление фазы ----
+    function updatePhase() {
+        if (gameOver) return;
+        if (phase === 'preparation') {
+            // после 23:00 (по таймеру условно) переходим в ограбление
+            if (Date.now() % 30000 > 15000) { // для демки через 15 сек после старта
+                phase = 'robbery';
+                document.getElementById('phaseDisplay').innerText = 'ОГРАБЛЕНИЕ 23:05';
+            }
+        } else if (phase === 'robbery') {
+            // спавним бандитов
+            if (Math.random() < 0.02) spawnBandit();
+            // если бандиты близко к комнате охраны (условно y>500) -> combat
+            for (let b of bandits) {
+                if (b.y > 550 && b.active) {
+                    phase = 'combat';
+                    mode = 'combat';
+                    document.getElementById('modeDisplay').innerText = 'БОЙ';
+                    break;
+                }
+            }
+        } else if (phase === 'combat') {
+            // логика боя обрабатывается отдельно
+        }
+    }
+
+    // ---- выстрел (в боевом режиме) ----
+    function shootAtBandit(mx, my) {
+        if (mode !== 'combat' || ammo <= 0 || gameOver) return false;
+        // попадание если кликнули по бандиту (упрощённо зона)
+        for (let b of bandits) {
+            if (!b.active) continue;
+            // детект клика: в районе 50px (для демки)
+            let dx = mx - b.x;
+            let dy = my - b.y;
+            if (Math.abs(dx) < 40 && Math.abs(dy) < 40) {
+                b.hp -= 33; // три выстрела
+                ammo = Math.max(0, ammo-1);
+                if (b.hp <= 0) {
+                    b.active = false;
+                }
+                return true;
+            }
+        }
+        // промах
+        ammo = Math.max(0, ammo-1);
+        return false;
+    }
+
+    // ---- закрыть дверь (панель) ----
+    function closeDoor(idx) {
+        if (doors[idx]) return;
+        doors[idx] = true;
+        // эффект
+    }
+
+    // ---- рендер основного вида (рейкастинг-like) ----
+    function render() {
+        ctx.clearRect(0, 0, 960, 720);
+
+        // псевдо-3D фон (стены/пол/потолок)
+        ctx.fillStyle = '#271e1a';
+        ctx.fillRect(0, 0, 960, 360);
+        ctx.fillStyle = '#3d322c';
+        ctx.fillRect(0, 360, 960, 360);
+        // полоски текстур
+        for (let i=0; i<20; i++) {
+            ctx.fillStyle = '#5f4d40';
+            ctx.fillRect(i*48, 360, 24, 360);
+        }
+
+        if (mode === 'cameras') {
+            // вид камеры (план банка в 3D-стиле)
+            ctx.save();
+            ctx.shadowColor = '#00000080';
+            ctx.shadowBlur = 12;
+            ctx.fillStyle = '#1f3a44';
+            ctx.fillRect(60, 60, 840, 600);
+            ctx.restore();
+            // линии сетки (как DOOM map)
+            ctx.strokeStyle = '#1f9eb0';
+            ctx.lineWidth = 2;
+            for (let i=0; i<10; i++) {
+                ctx.beginPath();
+                ctx.moveTo(60 + i*84, 60);
+                ctx.lineTo(60 + i*84, 660);
+                ctx.strokeStyle = '#0f6f80';
+                ctx.stroke();
+            }
+            for (let i=0; i<8; i++) {
+                ctx.beginPath();
+                ctx.moveTo(60, 60 + i*75);
+                ctx.lineTo(900, 60 + i*75);
+                ctx.strokeStyle = '#0f6f80';
+                ctx.stroke();
+            }
+
+            // отрисовка зон камер (3D-объём)
+            let cam = camZones[cameraIndex-1];
+            ctx.fillStyle = '#2b5750';
+            ctx.fillRect(cam.x-20, cam.y-20, cam.w+40, cam.h+40);
+            ctx.fillStyle = '#3b8770';
+            ctx.fillRect(cam.x-10, cam.y-10, cam.w+20, cam.h+20);
+            ctx.fillStyle = cam.bg;
+            ctx.fillRect(cam.x, cam.y, cam.w, cam.h);
+            ctx.font = 'bold 26px "Courier New"';
+            ctx.fillStyle = '#c2f0ff';
+            ctx.fillText(cam.name, cam.x+20, cam.y+50);
+
+            // рисуем бандитов как красные пиксельные маски
+            for (let b of bandits) {
+                if (!b.active) continue;
+                ctx.fillStyle = '#e03030';
+                ctx.beginPath();
+                ctx.arc(b.x, b.y, 18, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 18px monospace';
+                ctx.fillText('PAYDAY', b.x-35, b.y-20);
+            }
+
+            // рисовать игрока (охранник) в виде синей фигурки в комнате охраны
+            ctx.fillStyle = '#2266cc';
+            ctx.beginPath();
+            ctx.arc(180, 470, 16, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '14px monospace';
+            ctx.fillText('GENSEC', 150, 500);
+
+            // пасхалка медведь
+            ctx.fillStyle = '#996633';
+            ctx.fillRect(800, 600, 50, 60);
+            ctx.fillStyle = '#442211';
+            ctx.fillRect(825, 580, 20, 20); // чайник
+            ctx.fillStyle = '#edc287';
+            ctx.font = '20px monospace';
+            ctx.fillText('🐻', 810, 640);
+
+        } else if (mode === 'combat') {
+            // Боевой режим от первого лица (псевдо-3D коридор)
+            ctx.fillStyle = '#482e22';
+            for (let i=0; i<5; i++) {
+                ctx.fillRect(200 + i*140, 200, 60, 400);
+            }
+            // бандиты слева и справа
+            let leftBandit = bandits.find(b => b.active && b.x < 400);
+            let rightBandit = bandits.find(b => b.active && b.x >= 400);
+            if (leftBandit) {
+                ctx.fillStyle = '#b33e3e';
+                ctx.fillRect(100, 280, 150, 300);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 28px monospace';
+                ctx.fillText('👹', 140, 380);
+            }
+            if (rightBandit) {
+                ctx.fillStyle = '#b33e3e';
+                ctx.fillRect(650, 280, 150, 300);
+                ctx.fillStyle = '#000000';
+                ctx.font = 'bold 28px monospace';
+                ctx.fillText('👹', 700, 380);
+            }
+            // руки с пистолетом
+            ctx.fillStyle = '#2f602f';
+            ctx.fillRect(400, 500, 70, 150);
+            ctx.fillRect(470, 520, 100, 40);
+            ctx.fillStyle = '#808080';
+            ctx.beginPath();
+            ctx.arc(520, 540, 18, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // просмотр предметов (поверх)
+        if (viewingItem === 'news') {
+            ctx.fillStyle = '#e0dbc8';
+            ctx.fillRect(300, 200, 400, 300);
+            ctx.fillStyle = '#1f1f1f';
+            ctx.font = '24px monospace';
+            ctx.fillText('ГАЗЕТА: PAYDAY', 350, 280);
+            ctx.fillText('готовят налёт!', 350, 340);
+        } else if (viewingItem === 'map') {
+            ctx.fillStyle = '#a0b0aa';
+            ctx.fillRect(300, 200, 400, 300);
+            ctx.fillStyle = '#101010';
+            ctx.font = 'bold 22px monospace';
+            ctx.fillText('ПЛАНИРОВКА', 400, 260);
+            ctx.fillText('ХРАН: подход слева', 330, 350);
+        } else if (viewingItem === 'phone') {
+            ctx.fillStyle = '#303030';
+            ctx.fillRect(350, 280, 260, 130);
+            ctx.fillStyle = '#b0ffb0';
+            ctx.font = '26px monospace';
+            ctx.fillText('НАЧ: если что', 370, 350);
+            ctx.fillText('звони 911', 400, 400);
+        }
+
+        // интерфейс, патроны
+        ctx.fillStyle = '#eedd99';
+        ctx.font = 'bold 30px "Courier New"';
+        ctx.fillText(`🔫 ${ammo}`, 780, 80);
+        if (coffeeActive) ctx.fillText('☕ ВНИМАНИЕ +', 60, 100);
+
+        // концовка если есть
+        if (endingType) {
+            ctx.fillStyle = '#000000dd';
+            ctx.fillRect(0, 0, 960, 720);
+            ctx.fillStyle = '#ffcc99';
+            ctx.font = '48px monospace';
+            if (endingType === 'hero') ctx.fillText('ГЕРОЙ (ПОГИБ)', 280, 360);
+            if (endingType === 'police') ctx.fillText('ПОЛИЦИЯ ПРИЕХАЛА', 200, 360);
+            if (endingType === 'allseeing') ctx.fillText('ВСЕВИДЯЩИЙ (АРЕСТ)', 200, 360);
+            if (endingType === 'surrendered') ctx.fillText('СДАЛСЯ, КАЗНА ПУСТА', 180, 360);
+        }
+    }
+
+    // ---- анимация и обновление ----
+    function gameLoop() {
+        if (!gameOver && !endingType) {
+            updatePhase();
+
+            // спавн драго
+            if (Date.now() - lastDragoTime > 20000) {
+                lastDragoTime = Date.now();
+                if (Math.random() < 0.5) alert('👺 ДРАГО: "Я ДОЛЖЕН!" (отдалённый крик)');
+            }
+
+            // если полиция вызвана до грабежа
+            if (policeCalled && phase==='preparation') {
+                endingType = 'allseeing';
+                gameOver = true;
+            }
+            // концовка герой
+            if (phase==='combat' && bandits.filter(b=>b.active).length===0 && ammo<30) {
+                endingType = 'hero';
+                gameOver = true;
+            }
+            // сдался (если двери открыты и бандиты в хранилище)
+            if (phase==='robbery' && bandits.some(b=>b.y>500 && b.y<600) && !policeCalled) {
+                endingType = 'surrendered';
+                gameOver = true;
+            }
+        }
+        render();
+        requestAnimationFrame(gameLoop);
+    }
+
+    // ---- события мыши/тач ----
+    canvas.addEventListener('click', (e) => {
+        if (gameOver) return;
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        const mouseX = (e.clientX - rect.left) * scaleX;
+        const mouseY = (e.clientY - rect.top) * scaleY;
+
+        if (mode === 'combat') {
+            shootAtBandit(mouseX, mouseY);
+        } else {
+            // в режиме камер можно кликать по объектам? пока пропуск
+        }
+    });
+
+    // кнопки
+    document.getElementById('cam1Btn').onclick = () => { cameraIndex = 1; };
+    document.getElementById('cam2Btn').onclick = () => { cameraIndex = 2; };
+    document.getElementById('cam3Btn').onclick = () => { cameraIndex = 3; };
+    document.getElementById('cam4Btn').onclick = () => { cameraIndex = 4; };
+    document.getElementById('cam5Btn').onclick = () => { cameraIndex = 5; };
+    document.getElementById('cam6Btn').onclick = () => { cameraIndex = 6; };
+
+    document.getElementById('deskPhoneBtn').onclick = () => {
+        viewingItem = 'phone';
+        if (!policeCalled && confirm('Вызвать полицию? (Всевидящий конец если ДО 23:00)')) {
+            policeCalled = true;
+        }
+        setTimeout(()=>{ viewingItem = null; }, 2500);
+    };
+    document.getElementById('deskMapBtn').onclick = () => {
+        viewingItem = 'map';
+        setTimeout(()=>{ viewingItem = null; }, 2500);
+    };
+    document.getElementById('deskNewsBtn').onclick = () => {
+        viewingItem = 'news';
+        setTimeout(()=>{ viewingItem = null; }, 2500);
+    };
+    document.getElementById('deskCoffeeBtn').onclick = () => {
+        coffeeActive = true;
+        setTimeout(()=>{ coffeeActive = false; }, 8000);
+    };
+    document.getElementById('door1Btn').onclick = () => { doors[0] = !doors[0]; };
+    document.getElementById('door2Btn').onclick = () => { doors[1] = !doors[1]; };
+    document.getElementById('door3Btn').onclick = () => { doors[2] = !doors[2]; };
+    document.getElementById('switchModeBtn').onclick = () => {
+        if (phase === 'combat') mode = 'combat';
+        else mode = mode === 'cameras' ? 'combat' : 'cameras';
+        document.getElementById('modeDisplay').innerText = mode==='cameras'?'КАМЕРЫ':'БОЙ';
+    };
+    document.getElementById('shootBtn').onclick = () => {
+        if (mode==='combat' && ammo>0 && !gameOver) {
+            // стрельба по первому активному
+            for (let b of bandits) {
+                if (b.active) {
+                    b.hp -= 33;
+                    ammo--;
+                    if (b.hp<=0) b.active=false;
+                    break;
+                }
+            }
+        }
+    };
+
+    // инициализация
+    document.getElementById('ammoDisplay').innerText = ammo;
+    setInterval(()=>{
+        document.getElementById('ammoDisplay').innerText = ammo;
+    }, 100);
+    // пасхалка медведь просто сидит
+    gameLoop();
+
+    // авто-переход по фазе для демки
+    setTimeout(()=> {
+        if (phase === 'preparation') phase = 'robbery';
+    }, 12000);
+})();
+</script>
+</body>
+    </html>
