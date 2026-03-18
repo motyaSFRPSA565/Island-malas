@@ -2,61 +2,40 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>GENSEC: FINAL RESPONSE</title>
+    <title>GENSEC: ACTIVE ASSAULT</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: 'Segoe UI', Tahoma, sans-serif; color: #0f0; }
+        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; color: #0f0; }
         canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        #hud { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.85); padding: 12px; border: 1px solid #333; pointer-events: none; border-left: 4px solid #f00; }
-        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 25px; }
-        .btn { pointer-events: auto; cursor: pointer; background: #111; border: 1px solid #0f0; color: #0f0; padding: 12px 24px; font-weight: bold; text-transform: uppercase; }
-        #start-screen, #end-screen { position: absolute; inset: 0; background: #000; z-index: 1000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
-        #hp-bar { width: 150px; height: 8px; background: #300; border: 1px solid #f00; margin: 5px 0; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; transition: 0.1s; }
-        #damage { position: absolute; inset: 0; background: rgba(255,0,0,0.4); opacity: 0; pointer-events: none; }
+        #hud { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #444; pointer-events: none; }
+        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px; }
+        .btn { pointer-events: auto; cursor: pointer; background: #111; border: 1px solid #0f0; color: #0f0; padding: 10px 20px; font-weight: bold; }
+        #hp-bar { width: 100px; height: 8px; background: #300; border: 1px solid #f00; display: inline-block; }
+        #hp-fill { width: 100%; height: 100%; background: #f00; }
+        #start-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
 
 <div id="start-screen">
-    <h1 style="color: #fff; margin-bottom: 0;">GENSEC SECURITY</h1>
-    <p id="rank-display" style="color: gold; margin-top: 5px;">Рядовой</p>
-    <p style="color: #666; max-width: 400px;">Патрулируйте банк, вызывайте подкрепление и защищайте заложников. Прогресс сохраняется автоматически.</p>
-    <button class="btn" onclick="startGame()">ПРИНЯТЬ СМЕНУ</button>
+    <h1>GENSEC: БАНК (ACTIVE AI)</h1>
+    <button class="btn" onclick="startGame()">НАЧАТЬ СМЕНУ</button>
 </div>
 
-<div id="end-screen" style="display: none;">
-    <h1 style="color: gold;">ОБЪЕКТ ЗАЧИЩЕН</h1>
-    <p>Ликвидировано: <span id="res-kills" style="color:#fff">0</span></p>
-    <p>Бонус: <span id="res-money" style="color:#fff">0</span>$</p>
-    <button class="btn" onclick="location.reload()">СЛЕДУЮЩИЙ ДЕНЬ</button>
-</div>
-
-<div id="damage"></div>
 <canvas id="game"></canvas>
 
 <div id="hud">
-    <b id="hud-rank">РЯДОВОЙ</b> | HP: <div id="hp-bar"><div id="hp-fill"></div></div>
-    БАЛАНС: <span id="money-display" style="color:#fff">0</span>$<br>
-    СТАТУС: <span id="status">ДЕЖУРСТВО</span> | <span id="timer">03:00</span>
+    <b>GENSEC UNIT</b> | HP: <div id="hp-bar"><div id="hp-fill"></div></div><br>
+    СТАТУС: <span id="status">ДЕЖУРСТВО</span> | БАНДИТЫ: <span id="targets">0</span>
 </div>
 
 <div id="ui">
-    <button class="btn" id="act-btn" onclick="toggleState()">ВСТАТЬ С МЕСТА</button>
-    <div style="font-size: 11px; margin-top: 10px; color: #888;">[F] Оружие | [G] Обычная охрана | [H] Тяжелый SWAT | [LMB] Огонь</div>
+    <button class="btn" id="act-btn" onclick="toggleSit()">ВСТАТЬ С МЕСТА</button>
 </div>
 
 <script>
-/** ДАННЫЕ И СОХРАНЕНИЯ **/
-let stats = JSON.parse(localStorage.getItem('gensec_v1')) || { money: 0, exp: 0, kills: 0 };
-const ranks = ["Рядовой", "Капрал", "Сержант", "Лейтенант", "Капитан", "Шеф Безопасности"];
-function getRank() { return ranks[Math.min(Math.floor(stats.exp / 150), ranks.length - 1)]; }
-document.getElementById('rank-display').innerText = "Ваш ранг: " + getRank();
-
-/** ДВИЖОК **/
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const W = 640, H = 360;
-canvas.width = W; canvas.height = H;
+const W = 640, H = 360; canvas.width = W; canvas.height = H;
 
 const M = 16;
 const world = [
@@ -65,158 +44,133 @@ const world = [
     1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,
     1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
     1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,5,0,0,5,0,0,5,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,1,2,2,1,0,0,0,1,
-    1,0,0,0,0,0,0,0,1,0,0,1,0,0,0,1,
-    1,0,0,0,0,0,5,0,1,1,1,1,0,5,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+    1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,
+    1,0,0,0,0,0,0,0,1,2,2,2,1,0,0,1,
     1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
 ];
 
-let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false, recoil: 0 };
-let sprites = [{x: 2.2, y: 2.1, type: 'desk'}];
-let keys = {}, timeLeft = 180, heist = false, zBuf = new Array(W), killsInRound = 0;
-let audioCtx;
-
-function playSound(f, d, vol=0.1) {
-    if(!audioCtx) return;
-    let o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.frequency.value = f; g.gain.value = vol;
-    o.connect(g); g.connect(audioCtx.destination);
-    o.start(); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-    o.stop(audioCtx.currentTime + d);
-}
-
-function speak(text) {
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.pitch = 0.6; msg.rate = 1; msg.lang = 'ru-RU';
-    window.speechSynthesis.speak(msg);
-}
+let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false };
+let sprites = [{x: 2.1, y: 2.1, type: 'desk'}];
+let keys = {}, heist = false, timer = 100; // Ускорил таймер для теста
 
 function startGame() {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     document.getElementById('start-screen').style.display = 'none';
-    document.getElementById('hud-rank').innerText = getRank().toUpperCase();
-    document.getElementById('money-display').innerText = stats.money;
-    for(let i=0; i<10; i++) sprites.push({x: 6+Math.random()*7, y: 2+Math.random()*8, type: 'civ', state: 'free'});
-    requestAnimationFrame(loop);
+    for(let i=0; i<5; i++) sprites.push({x: 6+i, y: 3, type: 'civ'});
+    loop();
 }
 
-function combatAI() {
-    let banditCount = 0;
-    sprites.forEach(s => {
-        if(s.type === 'bandit') {
-            banditCount++;
-            if(Math.random() < 0.03) {
-                let target = sprites.find(t => t.type==='guard' || t.type==='heavy' || t===player);
-                if(target && Math.hypot(s.x-target.x, s.y-target.y) < 8) {
-                    s.shooting = 5; playSound(400, 0.1);
-                    if(target === player) {
-                        player.hp -= 4;
+/** ЛОГИКА ДВИЖЕНИЯ И БОЯ **/
+function updateAI() {
+    sprites.forEach((s, idx) => {
+        if (s.type === 'bandit' || s.type === 'guard') {
+            // 1. Поиск цели
+            let target = (s.type === 'bandit') ? player : sprites.find(t => t.type === 'bandit');
+            
+            if (target) {
+                let dx = target.x - s.x;
+                let dy = target.y - s.y;
+                let dist = Math.sqrt(dx*dx + dy*dy);
+
+                // 2. Движение к цели
+                if (dist > 2) {
+                    let vx = (dx / dist) * 0.03;
+                    let vy = (dy / dist) * 0.03;
+                    if (world[Math.floor(s.y + vy) * M + Math.floor(s.x + vx)] === 0) {
+                        s.x += vx; s.y += vy;
+                    }
+                }
+
+                // 3. Атака
+                if (dist < 6 && Math.random() < 0.05) {
+                    s.shooting = 5;
+                    if (target === player) {
+                        player.hp -= 2;
                         document.getElementById('hp-fill').style.width = player.hp + "%";
-                        document.getElementById('damage').style.opacity = 1; setTimeout(()=>document.getElementById('damage').style.opacity=0, 50);
-                        if(player.hp <= 0) location.reload();
-                    } else if(Math.random() < 0.1) { sprites = sprites.filter(x => x !== target); }
+                        if (player.hp <= 0) location.reload();
+                    } else if (target.type === 'bandit' && Math.random() < 0.1) {
+                        sprites.splice(sprites.indexOf(target), 1);
+                    }
                 }
             }
         }
-        if((s.type==='guard' || s.type==='heavy') && Math.random() < 0.04) {
-            let enemy = sprites.find(t => t.type === 'bandit');
-            if(enemy && Math.hypot(s.x-enemy.x, s.y-enemy.y) < 9) {
-                s.shooting = 5; playSound(s.type==='heavy'?150:600, 0.1);
-                if(Math.random() < (s.type==='heavy'?0.3:0.1)) { sprites = sprites.filter(x => x !== enemy); killsInRound++; }
-            }
-        }
     });
-    if(heist && banditCount === 0) endMission();
-}
-
-function endMission() {
-    heist = false;
-    let reward = killsInRound * 40 + 150;
-    stats.money += reward; stats.exp += (killsInRound * 15 + 80);
-    localStorage.setItem('gensec_v1', JSON.stringify(stats));
-    document.getElementById('end-screen').style.display = 'flex';
-    document.getElementById('res-kills').innerText = killsInRound;
-    document.getElementById('res-money').innerText = reward;
-    speak("Сектор зачищен. Отличная работа.");
 }
 
 function render() {
-    ctx.fillStyle = "#0a0a0a"; ctx.fillRect(0,0,W,H/2);
-    ctx.fillStyle = "#151515"; ctx.fillRect(0,H/2,W,H/2);
+    ctx.fillStyle = "#111"; ctx.fillRect(0,0,W,H/2);
+    ctx.fillStyle = "#222"; ctx.fillRect(0,H/2,W,H/2);
+
     const fov = Math.PI/3;
     for(let i=0; i<W; i++) {
         let a = (player.dir - fov/2) + (i/W) * fov;
-        let d=0, hit=0, dx=Math.cos(a), dy=Math.sin(a);
-        while(d < 16) { d += 0.05; let cx=Math.floor(player.x+dx*d), cy=Math.floor(player.y+dy*d); if(world[cy*M+cx]>0){ hit=world[cy*M+cx]; break; } }
-        zBuf[i] = d; let h = H / (d * Math.cos(a - player.dir));
-        let c = Math.max(10, 90-d*6); ctx.fillStyle = hit===5?`rgb(0,0,${c+30})`:hit===2?`rgb(${c+20},${c+20},0)`:`rgb(${c},${c},${c})`;
+        let d=0, dx=Math.cos(a), dy=Math.sin(a);
+        while(d < 16) {
+            d += 0.1;
+            let cx = Math.floor(player.x + dx*d), cy = Math.floor(player.y + dy*d);
+            if(world[cy*M + cx] > 0) break;
+        }
+        let h = H / (d * Math.cos(a - player.dir));
+        ctx.fillStyle = `rgb(${100-d*5},${100-d*5},${100-d*5})`;
         ctx.fillRect(i, H/2-h/2, 1, h);
     }
+
     sprites.sort((a,b) => Math.hypot(b.x-player.x, b.y-player.y) - Math.hypot(a.x-player.x, a.y-player.y));
     sprites.forEach(s => {
-        let dx = s.x - player.x, dy = s.y - player.y, dist = Math.hypot(dx, dy);
+        let dx = s.x - player.x, dy = s.y - player.y;
+        let dist = Math.sqrt(dx*dx+dy*dy);
         let a = Math.atan2(dy, dx) - player.dir;
         while(a < -Math.PI) a += 2*Math.PI; while(a > Math.PI) a -= 2*Math.PI;
-        if(Math.abs(a) < fov/2 + 0.1 && dist < zBuf[Math.floor((a/fov+0.5)*W)]) {
+        if(Math.abs(a) < fov/2) {
             let sx = (a/fov+0.5)*W, h = H/dist;
-            if(s.type==='desk'){ ctx.fillStyle="#211"; ctx.fillRect(sx-h/2,H/2+h/10,h,h/3); }
-            else {
-                ctx.fillStyle = s.type==='bandit'?"#222":s.type==='heavy'?"#000":s.type==='guard'?"#fff":"#445";
-                ctx.fillRect(sx-h/6, H/2, h/3, h/2);
-                ctx.fillStyle = "#d2b48c"; ctx.fillRect(sx-h/10, H/2-h/5, h/5, h/5);
-                if(s.shooting > 0) { ctx.fillStyle="#ff0"; ctx.beginPath(); ctx.arc(sx+h/5,H/2+h/10,h/10,0,7); ctx.fill(); s.shooting--; }
-            }
+            ctx.fillStyle = s.type==='bandit'?"#f00":s.type==='guard'?"#fff":s.type==='desk'?"#630":"#55a";
+            ctx.fillRect(sx-h/6, H/2-h/4, h/3, h/2);
+            if(s.shooting > 0) { ctx.fillStyle="#ff0"; ctx.fillRect(sx, H/2, 10, 10); s.shooting--; }
         }
     });
+
     if(!player.isSitting) {
-        ctx.save(); ctx.translate(0, player.recoil); ctx.fillStyle="#111";
-        if(player.hasGun){ ctx.fillRect(W/2+45,H-140,30,140); ctx.fillRect(W/2+45,H-150,90,40); }
-        else { ctx.fillRect(W/2+60,H-130,40,90); ctx.fillStyle="#000"; ctx.fillRect(W/2+78,H-175,6,45); }
-        ctx.restore(); if(player.recoil > 0) player.recoil -= 3;
+        ctx.fillStyle = "#444"; ctx.fillRect(W/2+20, H-100, 40, 100); // Оружие
     }
 }
 
-function toggleState() {
-    let d = Math.hypot(player.x-2.2, player.y-2.1);
-    if(player.isSitting) { player.isSitting = false; speak("Начинаю патрулирование."); }
-    else if(d < 1.4) { player.isSitting = true; player.x=2.5; player.y=2.2; player.dir=0; speak("На посту."); }
+function toggleSit() {
+    player.isSitting = !player.isSitting;
+    if(!player.isSitting) player.hasGun = true;
+    document.getElementById('act-btn').innerText = player.isSitting ? "ВСТАТЬ" : "СЕСТЬ";
 }
 
 window.onclick = () => {
-    if(!player.hasGun || player.isSitting) return;
-    player.recoil = 20; playSound(800, 0.1);
-    sprites.forEach((s,i) => { if(s.type==='bandit'){ let a=Math.atan2(s.y-player.y, s.x-player.x)-player.dir; while(a<-Math.PI) a+=2*Math.PI; if(Math.abs(a)<0.12){ sprites.splice(i,1); killsInRound++; } } });
+    if(player.isSitting) return;
+    sprites.forEach((s,i) => {
+        if(s.type === 'bandit') {
+            let a = Math.atan2(s.y-player.y, s.x-player.x) - player.dir;
+            while(a < -Math.PI) a += 2*Math.PI;
+            if(Math.abs(a) < 0.2) sprites.splice(i, 1);
+        }
+    });
 };
 
 window.onkeydown = e => {
     keys[e.code] = true;
-    if(e.code==='KeyF'&&!player.isSitting) player.hasGun = !player.hasGun;
-    if(e.code==='KeyG'&&!player.isSitting) { speak("Нужна поддержка!"); for(let i=0; i<2; i++) sprites.push({x: 4, y: 3.5, type: 'guard'}); }
-    if(e.code==='KeyH'&&!player.isSitting) { speak("Тяжелый отряд, на выход!"); for(let i=0; i<2; i++) sprites.push({x: 4.5, y: 4, type: 'heavy'}); }
+    if(e.code === 'KeyG') for(let i=0; i<2; i++) sprites.push({x: player.x, y: player.y, type: 'guard'});
 };
 window.onkeyup = e => keys[e.code] = false;
 
 function loop() {
     if(!player.isSitting) {
-        let nx=player.x, ny=player.y;
-        if(keys['KeyW']){ nx+=Math.cos(player.dir)*0.07; ny+=Math.sin(player.dir)*0.07; }
-        if(keys['KeyS']){ nx-=Math.cos(player.dir)*0.07; ny-=Math.sin(player.dir)*0.07; }
-        if(keys['KeyA']) player.dir-=0.05; if(keys['KeyD']) player.dir+=0.05;
-        if(world[Math.floor(ny)*M+Math.floor(nx)]===0) { player.x=nx; player.y=ny; }
-        document.getElementById('act-btn').innerText = Math.hypot(player.x-2.2, player.y-2.1) < 1.4 ? "СЕСТЬ ЗА СТОЛ" : "ПАТРУЛЬ";
+        if(keys['KeyW']) { player.x += Math.cos(player.dir)*0.05; player.y += Math.sin(player.dir)*0.05; }
+        if(keys['KeyS']) { player.x -= Math.cos(player.dir)*0.05; player.y -= Math.sin(player.dir)*0.05; }
+        if(keys['KeyA']) player.dir -= 0.04; if(keys['KeyD']) player.dir += 0.04;
     }
-    if(timeLeft > 0) {
-        timeLeft -= 0.016; document.getElementById('timer').innerText = Math.floor(timeLeft/60) + ":" + (Math.floor(timeLeft%60)).toString().padStart(2,'0');
-        if(timeLeft <= 0 && !heist) { heist=true; document.getElementById('status').innerText="ВТОРЖЕНИЕ!"; speak("Объект под атакой! Охрана, к бою!"); for(let i=0; i<7; i++) sprites.push({x: 14, y: 2+i, type: 'bandit'}); }
+    if(timer > 0) {
+        timer--;
+        if(timer === 0 && !heist) {
+            heist = true;
+            for(let i=0; i<5; i++) sprites.push({x: 14, y: 2+i, type: 'bandit'});
+        }
     }
-    combatAI(); render(); requestAnimationFrame(loop);
+    document.getElementById('targets').innerText = sprites.filter(x=>x.type==='bandit').length;
+    updateAI(); render(); requestAnimationFrame(loop);
 }
 </script>
 </body>
