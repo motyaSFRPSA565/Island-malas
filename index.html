@@ -1,105 +1,85 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>SAN FIERRO: 1.6 FIXED</title>
+    <title>SAN FIERRO: TOTAL WARFARE (RETRO)</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #333; font-family: monospace; }
-        #ui { position: absolute; bottom: 20px; left: 20px; color: #0f0; font-size: 20px; text-shadow: 2px 2px #000; pointer-events: none; }
-        #cross { position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; border: 2px solid #0f0; transform: translate(-50%, -50%); }
-        #btn { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); padding: 20px; background: #008000; color: white; cursor: pointer; border: 3px solid white; font-weight: bold; }
+        body { margin: 0; background: #222; overflow: hidden; font-family: monospace; }
+        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
+        #ui { position: absolute; bottom: 20px; left: 20px; color: #0f0; font-size: 24px; text-shadow: 2px 2px #000; }
+        #cross { position: absolute; top: 50%; left: 50%; color: #0f0; transform: translate(-50%, -50%); font-size: 30px; }
+        #msg { position: absolute; top: 10px; width: 100%; text-align: center; color: yellow; font-size: 20px; }
     </style>
 </head>
 <body>
-
-<div id="ui">HP: 100 | AMMO: 30/90 | $: 800</div>
-<div id="cross"></div>
-<button id="btn" onclick="start()">ВСТУПИТЬ В БОЙ (START)</button>
-
-<script src="https://cdnjs.cloudflare.com"></script>
+    <div id="msg">WASD - Движение | MOUSE - Поворот | CLICK - Огонь</div>
+    <div id="ui">HP: 100 | AMMO: 30 | $: 800</div>
+    <div id="cross">+</div>
+    <canvas id="game"></canvas>
 
 <script>
-let scene, camera, renderer, player;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+// Карта моста (1 - стена/ящик, 2 - опора, 0 - пусто)
+const map = [
+    [1,1,1,1,1,1,1,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,1,0,0,2,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,0,2,0,1,0,1],
+    [1,0,0,0,0,0,0,1],
+    [1,0,1,0,0,2,0,1],
+    [1,1,1,1,1,1,1,1]
+];
+
+let player = { x: 2, y: 2, dir: 0, rot: 0 };
 let keys = {};
 
-function start() {
-    document.getElementById('btn').style.display = 'none';
-    document.body.requestPointerLock();
-    
-    // 1. Сцена
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x5588aa); // Голубое небо
+// Управление
+window.onkeydown = e => keys[e.code] = true;
+window.onkeyup = e => keys[e.code] = false;
+canvas.onclick = () => canvas.requestPointerLock();
+document.onmousemove = e => { if(document.pointerLockElement) player.rot -= e.movementX * 0.005; };
 
-    // 2. Камера
-    camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-    camera.position.set(0, 5, 50); // Ставим камеру чуть выше моста
-
-    // 3. Свет (Добавляем много, чтобы не было черным)
-    const sun = new THREE.DirectionalLight(0xffffff, 1);
-    sun.position.set(10, 20, 10);
-    scene.add(sun);
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-
-    // 4. Рендерер
-    renderer = new THREE.WebGLRenderer();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
-
-    // 5. МОСТ
-    // Полотно
-    const bridgeGeo = new THREE.BoxGeometry(20, 2, 500);
-    const bridgeMat = new THREE.MeshLambertMaterial({ color: 0x444444 });
-    const bridge = new THREE.Mesh(bridgeGeo, bridgeMat);
-    scene.add(bridge);
-
-    // Опоры (Точки для бомб)
-    const pillarGeo = new THREE.BoxGeometry(10, 40, 10);
-    const pillarMat = new THREE.MeshLambertMaterial({ color: 0x222222 });
-    for(let z = -200; z <= 200; z += 200) {
-        let p = new THREE.Mesh(pillarGeo, pillarMat);
-        p.position.set(0, -20, z);
-        scene.add(p);
-    }
-
-    // Вода (снизу)
-    const water = new THREE.Mesh(new THREE.PlaneGeometry(1000, 1000), new THREE.MeshBasicMaterial({color: 0x004466}));
-    water.rotation.x = -Math.PI/2;
-    water.position.y = -30;
-    scene.add(water);
-
-    // 6. БОТЫ (Красные кубы)
-    for(let i = 0; i < 5; i++) {
-        let bot = new THREE.Mesh(new THREE.BoxGeometry(2, 4, 2), new THREE.MeshLambertMaterial({color: 0xff0000}));
-        bot.position.set(Math.random()*10-5, 3, -50 - (i * 20));
-        scene.add(bot);
-    }
-
-    animate();
-}
-
-window.onkeydown = (e) => keys[e.code] = true;
-window.onkeyup = (e) => keys[e.code] = false;
-
-document.addEventListener('mousemove', (e) => {
-    if (document.pointerLockElement) {
-        camera.rotation.y -= e.movementX * 0.003;
-    }
-});
-
-function animate() {
-    requestAnimationFrame(animate);
+function draw() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
     
     // Движение
-    const speed = 0.4;
-    if(keys['KeyW']) camera.translateZ(-speed);
-    if(keys['KeyS']) camera.translateZ(speed);
-    if(keys['KeyA']) camera.translateX(-speed);
-    if(keys['KeyD']) camera.translateX(speed);
-    
-    camera.position.y = 5; // Не даем падать
+    if(keys['KeyW']) { player.x += Math.cos(player.rot) * 0.05; player.y += Math.sin(player.rot) * 0.05; }
+    if(keys['KeyS']) { player.x -= Math.cos(player.rot) * 0.05; player.y -= Math.sin(player.rot) * 0.05; }
 
-    renderer.render(scene, camera);
+    // Отрисовка неба и пола
+    ctx.fillStyle = "#5588aa"; ctx.fillRect(0, 0, canvas.width, canvas.height/2);
+    ctx.fillStyle = "#333"; ctx.fillRect(0, canvas.height/2, canvas.width, canvas.height/2);
+
+    // Рейкастинг (отрисовка стен)
+    const res = 300;
+    for(let i = 0; i < res; i++) {
+        let angle = player.rot - 0.5 + (i / res);
+        let tx = player.x, ty = player.y;
+        let dist = 0;
+        let hit = 0;
+
+        while(dist < 15) {
+            dist += 0.05;
+            tx = player.x + Math.cos(angle) * dist;
+            ty = player.y + Math.sin(angle) * dist;
+            if(map[Math.floor(ty)] && map[Math.floor(tx)] > 0) {
+                hit = map[Math.floor(ty)][Math.floor(tx)];
+                break;
+            }
+        }
+
+        let h = canvas.height / (dist * Math.cos(angle - player.rot));
+        ctx.fillStyle = hit === 2 ? "#d00" : "#666"; // Опоры красные, стены серые
+        ctx.fillRect(i * (canvas.width/res), (canvas.height - h)/2, canvas.width/res + 1, h);
+    }
+    
+    requestAnimationFrame(draw);
 }
 
+draw();
 console.log("ДРАГО: Я ДОЛЖЕН!");
 </script>
 </body>
