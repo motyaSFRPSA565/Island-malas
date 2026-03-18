@@ -2,176 +2,1106 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>GENSEC: ACTIVE ASSAULT</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SAN FIERRO: МОСТ - SWAT vs PAYDAY</title>
     <style>
-        body { margin: 0; background: #000; overflow: hidden; font-family: sans-serif; color: #0f0; }
-        canvas { display: block; width: 100vw; height: 100vh; image-rendering: pixelated; }
-        #hud { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); padding: 10px; border: 1px solid #444; pointer-events: none; }
-        #ui { position: absolute; inset: 0; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; padding-bottom: 20px; }
-        .btn { pointer-events: auto; cursor: pointer; background: #111; border: 1px solid #0f0; color: #0f0; padding: 10px 20px; font-weight: bold; }
-        #hp-bar { width: 100px; height: 8px; background: #300; border: 1px solid #f00; display: inline-block; }
-        #hp-fill { width: 100%; height: 100%; background: #f00; }
-        #start-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+        }
+        #info {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 100;
+            pointer-events: none;
+            text-shadow: 1px 1px 2px black;
+        }
+        #timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 100;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px black;
+        }
+        #objectives {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            color: white;
+            background: rgba(0,0,0,0.7);
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 100;
+            max-width: 300px;
+        }
+        #objectives h3 {
+            margin: 0 0 10px 0;
+            color: #ffaa00;
+        }
+        #objectives ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        #team-select {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            z-index: 1000;
+            text-align: center;
+            border: 2px solid #444;
+        }
+        #team-select h2 {
+            margin-top: 0;
+            color: #ffaa00;
+        }
+        .team-btn {
+            padding: 15px 30px;
+            margin: 10px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .team-btn:hover {
+            transform: scale(1.05);
+        }
+        #swat-btn {
+            background: #0066cc;
+            color: white;
+        }
+        #payday-btn {
+            background: #cc6600;
+            color: white;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            color: white;
+            background: rgba(0,0,0,0.5);
+            padding: 10px;
+            border-radius: 5px;
+            z-index: 100;
+            font-size: 12px;
+        }
+        #mobile-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: none;
+            justify-content: space-between;
+            padding: 20px;
+            z-index: 200;
+            pointer-events: none;
+        }
+        #mobile-left {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        #mobile-right {
+            display: flex;
+            gap: 10px;
+            pointer-events: auto;
+        }
+        .mobile-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 2px solid white;
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        #health-bar {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 300px;
+            height: 30px;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid white;
+            border-radius: 15px;
+            overflow: hidden;
+            z-index: 100;
+        }
+        #health-fill {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #ff0000, #ff6600);
+            transition: width 0.3s;
+        }
+        #ammo {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-shadow: 2px 2px 2px black;
+            z-index: 100;
+        }
+        @media (max-width: 768px) {
+            #mobile-controls {
+                display: flex;
+            }
+            #controls {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="team-select">
+        <h2>ВЫБЕРИТЕ СТОРОНУ</h2>
+        <p>SWAT vs PAYDAY - Битва за мост</p>
+        <button class="team-btn" id="swat-btn">SWAT (спецназ)</button>
+        <button class="team-btn" id="payday-btn">PAYDAY (террористы)</button>
+        <div style="margin-top: 20px; font-size: 14px; color: #888;">
+            <p>Игроков в сети: <span id="player-count">0</span>/16</p>
+        </div>
+    </div>
 
-<div id="start-screen">
-    <h1>GENSEC: БАНК (ACTIVE AI)</h1>
-    <button class="btn" onclick="startGame()">НАЧАТЬ СМЕНУ</button>
-</div>
+    <div id="info">SAN FIERRO: МОСТ | SWAT vs PAYDAY</div>
+    <div id="timer">05:00</div>
+    <div id="health-bar"><div id="health-fill"></div></div>
+    <div id="ammo">30/90</div>
+    
+    <div id="objectives">
+        <h3 id="team-objective">ЗАДАЧИ</h3>
+        <ul id="objective-list">
+            <li>Высадиться с вертолёта</li>
+            <li>Найти и обезвредить взрывчатку</li>
+            <li>Устранить террористов</li>
+        </ul>
+    </div>
 
-<canvas id="game"></canvas>
+    <div id="controls">
+        <b>Управление:</b><br>
+        WASD - движение<br>
+        Мышь - поворот<br>
+        ЛКМ - стрельба<br>
+        R - перезарядка<br>
+        Пробел - прыжок
+    </div>
 
-<div id="hud">
-    <b>GENSEC UNIT</b> | HP: <div id="hp-bar"><div id="hp-fill"></div></div><br>
-    СТАТУС: <span id="status">ДЕЖУРСТВО</span> | БАНДИТЫ: <span id="targets">0</span>
-</div>
+    <div id="mobile-controls">
+        <div id="mobile-left">
+            <div class="mobile-btn" id="mobile-up">↑</div>
+            <div class="mobile-btn" id="mobile-down">↓</div>
+            <div class="mobile-btn" id="mobile-left">←</div>
+            <div class="mobile-btn" id="mobile-right">→</div>
+        </div>
+        <div id="mobile-right">
+            <div class="mobile-btn" id="mobile-shoot">🔫</div>
+            <div class="mobile-btn" id="mobile-jump">🏃</div>
+            <div class="mobile-btn" id="mobile-reload">↻</div>
+        </div>
+    </div>
 
-<div id="ui">
-    <button class="btn" id="act-btn" onclick="toggleSit()">ВСТАТЬ С МЕСТА</button>
-</div>
+    <!-- Подключаем Three.js и дополнительные библиотеки -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/PointerLockControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/stats.min.js"></script>
+    
+    <script>
+        // Главный класс игры
+        class SanFierroBridge {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                document.body.appendChild(this.renderer.domElement);
 
-<script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const W = 640, H = 360; canvas.width = W; canvas.height = H;
+                // Освещение
+                this.setupLights();
 
-const M = 16;
-const world = [
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
-    1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-    1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,
-    1,0,0,0,0,0,0,0,1,1,1,1,1,0,0,1,
-    1,0,0,0,0,0,0,0,1,2,2,2,1,0,0,1,
-    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
-];
+                // Создание мира
+                this.createWorld();
 
-let player = { x: 2.5, y: 2.2, dir: 0, hp: 100, isSitting: true, hasGun: false };
-let sprites = [{x: 2.1, y: 2.1, type: 'desk'}];
-let keys = {}, heist = false, timer = 100; // Ускорил таймер для теста
+                // Игровые переменные
+                this.players = new Map();
+                this.localPlayer = null;
+                this.team = null;
+                this.health = 100;
+                this.ammo = 30;
+                this.maxAmmo = 90;
+                this.score = 0;
+                this.gameTime = 300; // 5 минут в секундах
+                this.bombSites = [];
+                this.bombsPlanted = 0;
+                this.raining = false;
 
-function startGame() {
-    document.getElementById('start-screen').style.display = 'none';
-    for(let i=0; i<5; i++) sprites.push({x: 6+i, y: 3, type: 'civ'});
-    loop();
-}
+                // Запуск игрового цикла
+                this.animate();
 
-/** ЛОГИКА ДВИЖЕНИЯ И БОЯ **/
-function updateAI() {
-    sprites.forEach((s, idx) => {
-        if (s.type === 'bandit' || s.type === 'guard') {
-            // 1. Поиск цели
-            let target = (s.type === 'bandit') ? player : sprites.find(t => t.type === 'bandit');
-            
-            if (target) {
-                let dx = target.x - s.x;
-                let dy = target.y - s.y;
-                let dist = Math.sqrt(dx*dx + dy*dy);
+                // Обработчики событий
+                this.setupEventListeners();
 
-                // 2. Движение к цели
-                if (dist > 2) {
-                    let vx = (dx / dist) * 0.03;
-                    let vy = (dy / dist) * 0.03;
-                    if (world[Math.floor(s.y + vy) * M + Math.floor(s.x + vx)] === 0) {
-                        s.x += vx; s.y += vy;
+                // Запуск таймера
+                this.startGameTimer();
+
+                // Создание дождя (пасмурная погода как в PAYDAY)
+                this.createRain();
+            }
+
+            setupLights() {
+                // Основной свет (закат)
+                const ambientLight = new THREE.AmbientLight(0x404060);
+                this.scene.add(ambientLight);
+
+                const sunLight = new THREE.DirectionalLight(0xffaa88, 1);
+                sunLight.position.set(50, 100, 50);
+                sunLight.castShadow = true;
+                sunLight.shadow.mapSize.width = 2048;
+                sunLight.shadow.mapSize.height = 2048;
+                sunLight.shadow.camera.near = 0.5;
+                sunLight.shadow.camera.far = 500;
+                sunLight.shadow.camera.left = -100;
+                sunLight.shadow.camera.right = 100;
+                sunLight.shadow.camera.top = 100;
+                sunLight.shadow.camera.bottom = -100;
+                this.scene.add(sunLight);
+
+                // Дополнительный свет для моста
+                const pointLight = new THREE.PointLight(0x4466ff, 0.5, 200);
+                pointLight.position.set(0, 20, 0);
+                this.scene.add(pointLight);
+            }
+
+            createWorld() {
+                // Небо
+                const skyGeometry = new THREE.SphereGeometry(500, 60, 40);
+                const skyMaterial = new THREE.MeshBasicMaterial({
+                    color: 0x224466,
+                    side: THREE.BackSide
+                });
+                const sky = new THREE.Mesh(skyGeometry, skyMaterial);
+                this.scene.add(sky);
+
+                // Вода
+                const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+                const waterMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x225588,
+                    emissive: 0x113366,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                const water = new THREE.Mesh(waterGeometry, waterMaterial);
+                water.rotation.x = -Math.PI / 2;
+                water.position.y = -5;
+                water.receiveShadow = true;
+                this.scene.add(water);
+
+                // Скала для спавна PAYDAY
+                this.createRockCliff();
+
+                // Мост
+                this.createBridge();
+
+                // Поезд (готовый к отправлению)
+                this.createTrain();
+
+                // Вертолёты Blackhawk
+                this.createHelicopters();
+
+                // Добавляем скалы и укрытия
+                this.createCover();
+
+                // Туман для атмосферы
+                this.scene.fog = new THREE.FogExp2(0x224466, 0.002);
+            }
+
+            createBridge() {
+                const bridgeGroup = new THREE.Group();
+
+                // Основное полотно моста
+                const roadMaterial = new THREE.MeshStandardMaterial({ color: 0x888888 });
+                const metalMaterial = new THREE.MeshStandardMaterial({ color: 0xcccccc, emissive: 0x111111 });
+                
+                // Дорожное полотно
+                for (let i = -5; i <= 5; i++) {
+                    const segment = new THREE.Mesh(
+                        new THREE.BoxGeometry(10, 0.5, 30),
+                        roadMaterial
+                    );
+                    segment.position.set(i * 10, 5, i * 15);
+                    segment.castShadow = true;
+                    segment.receiveShadow = true;
+                    bridgeGroup.add(segment);
+
+                    // Рельсы
+                    const railLeft = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.3, 0.5, 30),
+                        metalMaterial
+                    );
+                    railLeft.position.set(i * 10 - 3, 5.5, i * 15);
+                    railLeft.castShadow = true;
+                    bridgeGroup.add(railLeft);
+
+                    const railRight = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.3, 0.5, 30),
+                        metalMaterial
+                    );
+                    railRight.position.set(i * 10 + 3, 5.5, i * 15);
+                    railRight.castShadow = true;
+                    bridgeGroup.add(railRight);
+
+                    // Шпалы
+                    for (let j = -5; j <= 5; j++) {
+                        const sleeper = new THREE.Mesh(
+                            new THREE.BoxGeometry(6, 0.2, 0.5),
+                            new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                        );
+                        sleeper.position.set(i * 10, 5.3, i * 15 + j * 3);
+                        sleeper.castShadow = true;
+                        sleeper.receiveShadow = true;
+                        bridgeGroup.add(sleeper);
                     }
+
+                    // Фермы моста
+                    const pillar = new THREE.Mesh(
+                        new THREE.CylinderGeometry(1, 1.5, 20),
+                        new THREE.MeshStandardMaterial({ color: 0xaaaaaa })
+                    );
+                    pillar.position.set(i * 10 - 8, 15, i * 15);
+                    pillar.castShadow = true;
+                    pillar.receiveShadow = true;
+                    bridgeGroup.add(pillar);
+
+                    const pillar2 = new THREE.Mesh(
+                        new THREE.CylinderGeometry(1, 1.5, 20),
+                        new THREE.MeshStandardMaterial({ color: 0xaaaaaa })
+                    );
+                    pillar2.position.set(i * 10 + 8, 15, i * 15);
+                    pillar2.castShadow = true;
+                    pillar2.receiveShadow = true;
+                    bridgeGroup.add(pillar2);
                 }
 
-                // 3. Атака
-                if (dist < 6 && Math.random() < 0.05) {
-                    s.shooting = 5;
-                    if (target === player) {
-                        player.hp -= 2;
-                        document.getElementById('hp-fill').style.width = player.hp + "%";
-                        if (player.hp <= 0) location.reload();
-                    } else if (target.type === 'bandit' && Math.random() < 0.1) {
-                        sprites.splice(sprites.indexOf(target), 1);
+                // Точки закладки взрывчатки
+                const bombPositions = [
+                    new THREE.Vector3(-30, 5, -45),
+                    new THREE.Vector3(0, 5, 0),
+                    new THREE.Vector3(30, 5, 45)
+                ];
+
+                bombPositions.forEach((pos, index) => {
+                    const bombSite = new THREE.Mesh(
+                        new THREE.CylinderGeometry(2, 2, 0.5, 16),
+                        new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0x330000 })
+                    );
+                    bombSite.position.copy(pos);
+                    bombSite.position.y += 0.5;
+                    bombSite.castShadow = true;
+                    bombSite.receiveShadow = true;
+                    bridgeGroup.add(bombSite);
+                    
+                    // Сохраняем информацию о точке
+                    this.bombSites.push({
+                        mesh: bombSite,
+                        position: pos,
+                        hasBomb: false,
+                        defusing: false,
+                        index: index
+                    });
+                });
+
+                this.scene.add(bridgeGroup);
+            }
+
+            createRockCliff() {
+                // Скала для спавна PAYDAY
+                const rockGroup = new THREE.Group();
+                
+                // Основная скала
+                const rockGeo = new THREE.DodecahedronGeometry(20);
+                const rockMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
+                const rock = new THREE.Mesh(rockGeo, rockMat);
+                rock.position.set(-80, 10, 80);
+                rock.scale.set(3, 2, 2);
+                rock.castShadow = true;
+                rock.receiveShadow = true;
+                rockGroup.add(rock);
+
+                // Добавляем мелкие камни
+                for (let i = 0; i < 10; i++) {
+                    const smallRock = new THREE.Mesh(
+                        new THREE.DodecahedronGeometry(Math.random() * 3 + 1),
+                        new THREE.MeshStandardMaterial({ color: 0x777777 })
+                    );
+                    smallRock.position.set(
+                        -80 + Math.random() * 20 - 10,
+                        5 + Math.random() * 10,
+                        80 + Math.random() * 20 - 10
+                    );
+                    smallRock.castShadow = true;
+                    smallRock.receiveShadow = true;
+                    rockGroup.add(smallRock);
+                }
+
+                // Укрытия для PAYDAY
+                for (let i = 0; i < 5; i++) {
+                    const cover = new THREE.Mesh(
+                        new THREE.BoxGeometry(4, 2, 4),
+                        new THREE.MeshStandardMaterial({ color: 0x555555 })
+                    );
+                    cover.position.set(
+                        -80 + Math.random() * 30 - 15,
+                        2,
+                        80 + Math.random() * 30 - 15
+                    );
+                    cover.castShadow = true;
+                    cover.receiveShadow = true;
+                    rockGroup.add(cover);
+                }
+
+                this.scene.add(rockGroup);
+
+                // Добавляем спавнпоинты для PAYDAY
+                this.paydaySpawn = new THREE.Vector3(-80, 15, 80);
+            }
+
+            createTrain() {
+                const trainGroup = new THREE.Group();
+                
+                // Локомотив
+                const locoMat = new THREE.MeshStandardMaterial({ color: 0x3366cc });
+                const locoBody = new THREE.Mesh(new THREE.BoxGeometry(4, 5, 10), locoMat);
+                locoBody.position.set(0, 7.5, -60);
+                locoBody.castShadow = true;
+                locoBody.receiveShadow = true;
+                trainGroup.add(locoBody);
+
+                // Колеса
+                const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
+                for (let i = -1; i <= 1; i+=2) {
+                    const wheel = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 0.5, 16), wheelMat);
+                    wheel.rotation.z = Math.PI/2;
+                    wheel.position.set(i * 1.5, 3.5, -60);
+                    wheel.castShadow = true;
+                    trainGroup.add(wheel);
+                }
+
+                // Вагоны
+                for (let i = 1; i <= 3; i++) {
+                    const wagon = new THREE.Mesh(
+                        new THREE.BoxGeometry(4, 4, 12),
+                        new THREE.MeshStandardMaterial({ color: 0x44aa44 })
+                    );
+                    wagon.position.set(0, 6, -60 - i * 12);
+                    wagon.castShadow = true;
+                    wagon.receiveShadow = true;
+                    trainGroup.add(wagon);
+                }
+
+                this.scene.add(trainGroup);
+                this.train = trainGroup;
+            }
+
+            createHelicopters() {
+                // Вертолёты Blackhawk (упрощённые модели)
+                const heliGroup = new THREE.Group();
+                
+                // Первый вертолёт
+                const heli1 = this.createHelicopterModel();
+                heli1.position.set(50, 40, -30);
+                heli1.rotation.y = Math.PI;
+                heliGroup.add(heli1);
+
+                // Второй вертолёт
+                const heli2 = this.createHelicopterModel();
+                heli2.position.set(70, 40, 0);
+                heli2.rotation.y = Math.PI;
+                heliGroup.add(heli2);
+
+                this.scene.add(heliGroup);
+                this.helicopters = heliGroup;
+
+                // Тросы для высадки
+                const ropeMat = new THREE.LineBasicMaterial({ color: 0xaaaaaa });
+                for (let i = 0; i < 2; i++) {
+                    const points = [];
+                    points.push(new THREE.Vector3(50 + i*20, 35, -30 + i*30));
+                    points.push(new THREE.Vector3(50 + i*20, 10, -30 + i*30));
+                    
+                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+                    const line = new THREE.Line(geometry, ropeMat);
+                    this.scene.add(line);
+                }
+            }
+
+            createHelicopterModel() {
+                const group = new THREE.Group();
+                
+                // Корпус
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(2, 2, 8, 8),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
+                );
+                body.rotation.x = Math.PI/2;
+                body.castShadow = true;
+                group.add(body);
+
+                // Хвост
+                const tail = new THREE.Mesh(
+                    new THREE.BoxGeometry(1, 1, 4),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
+                );
+                tail.position.set(0, 0, -4);
+                tail.castShadow = true;
+                group.add(tail);
+
+                // Винт
+                const rotor = new THREE.Mesh(
+                    new THREE.BoxGeometry(8, 0.2, 1),
+                    new THREE.MeshStandardMaterial({ color: 0x666666 })
+                );
+                rotor.position.set(0, 2, 0);
+                rotor.castShadow = true;
+                group.add(rotor);
+
+                // Окна
+                const windowMat = new THREE.MeshStandardMaterial({ color: 0x88aaff });
+                for (let i = -2; i <= 2; i+=2) {
+                    const window = new THREE.Mesh(
+                        new THREE.BoxGeometry(1, 1, 1),
+                        windowMat
+                    );
+                    window.position.set(i, 0, 2);
+                    window.castShadow = true;
+                    group.add(window);
+                }
+
+                return group;
+            }
+
+            createCover() {
+                // Укрытия на мосту
+                const coverMat = new THREE.MeshStandardMaterial({ color: 0x888888 });
+                
+                for (let i = -4; i <= 4; i+=2) {
+                    for (let j = -2; j <= 2; j+=2) {
+                        const cover = new THREE.Mesh(
+                            new THREE.BoxGeometry(2, 2, 2),
+                            coverMat
+                        );
+                        cover.position.set(i * 10, 6, j * 20);
+                        cover.castShadow = true;
+                        cover.receiveShadow = true;
+                        this.scene.add(cover);
                     }
                 }
             }
+
+            createRain() {
+                // Создаём дождь (простой эффект)
+                const rainGeo = new THREE.BufferGeometry();
+                const rainCount = 1500;
+                const rainPositions = new Float32Array(rainCount * 3);
+                
+                for (let i = 0; i < rainCount; i++) {
+                    rainPositions[i*3] = Math.random() * 400 - 200;
+                    rainPositions[i*3+1] = Math.random() * 200;
+                    rainPositions[i*3+2] = Math.random() * 400 - 200;
+                }
+                
+                rainGeo.setAttribute('position', new THREE.BufferAttribute(rainPositions, 3));
+                
+                const rainMat = new THREE.PointsMaterial({
+                    color: 0xaaaaff,
+                    size: 0.1,
+                    transparent: true
+                });
+                
+                this.rain = new THREE.Points(rainGeo, rainMat);
+                this.scene.add(this.rain);
+            }
+
+            setupEventListeners() {
+                // Выбор команды
+                document.getElementById('swat-btn').addEventListener('click', () => {
+                    this.joinTeam('swat');
+                });
+                
+                document.getElementById('payday-btn').addEventListener('click', () => {
+                    this.joinTeam('payday');
+                });
+
+                // Мобильное управление
+                document.getElementById('mobile-up').addEventListener('touchstart', () => { this.moveForward = true; });
+                document.getElementById('mobile-up').addEventListener('touchend', () => { this.moveForward = false; });
+                document.getElementById('mobile-down').addEventListener('touchstart', () => { this.moveBackward = true; });
+                document.getElementById('mobile-down').addEventListener('touchend', () => { this.moveBackward = false; });
+                document.getElementById('mobile-left').addEventListener('touchstart', () => { this.moveLeft = true; });
+                document.getElementById('mobile-left').addEventListener('touchend', () => { this.moveLeft = false; });
+                document.getElementById('mobile-right').addEventListener('touchstart', () => { this.moveRight = true; });
+                document.getElementById('mobile-right').addEventListener('touchend', () => { this.moveRight = false; });
+                
+                document.getElementById('mobile-shoot').addEventListener('touchstart', () => { this.shoot(); });
+                document.getElementById('mobile-jump').addEventListener('touchstart', () => { this.jump(); });
+                document.getElementById('mobile-reload').addEventListener('touchstart', () => { this.reload(); });
+
+                // Клавиатурное управление
+                document.addEventListener('keydown', (e) => {
+                    switch(e.code) {
+                        case 'KeyW': this.moveForward = true; break;
+                        case 'KeyS': this.moveBackward = true; break;
+                        case 'KeyA': this.moveLeft = true; break;
+                        case 'KeyD': this.moveRight = true; break;
+                        case 'Space': this.jump(); break;
+                        case 'KeyR': this.reload(); break;
+                    }
+                });
+
+                document.addEventListener('keyup', (e) => {
+                    switch(e.code) {
+                        case 'KeyW': this.moveForward = false; break;
+                        case 'KeyS': this.moveBackward = false; break;
+                        case 'KeyA': this.moveLeft = false; break;
+                        case 'KeyD': this.moveRight = false; break;
+                    }
+                });
+
+                // Стрельба по клику мыши
+                document.addEventListener('click', () => {
+                    this.shoot();
+                });
+
+                // Изменение размера окна
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+
+                // Блокировка указателя для FPS управления
+                document.addEventListener('click', () => {
+                    if (this.localPlayer) {
+                        document.body.requestPointerLock();
+                    }
+                });
+
+                // Обработка движения мыши
+                document.addEventListener('mousemove', (e) => {
+                    if (this.localPlayer && document.pointerLockElement) {
+                        this.camera.rotation.y -= e.movementX * 0.002;
+                        this.camera.rotation.x -= e.movementY * 0.002;
+                        this.camera.rotation.x = Math.max(-Math.PI/2, Math.min(Math.PI/2, this.camera.rotation.x));
+                    }
+                });
+            }
+
+            joinTeam(team) {
+                this.team = team;
+                document.getElementById('team-select').style.display = 'none';
+                
+                // Создаём игрока
+                this.createLocalPlayer();
+                
+                // Обновляем задачи
+                this.updateObjectives();
+                
+                // Запускаем симуляцию других игроков (для демо)
+                this.createBotPlayers();
+            }
+
+            createLocalPlayer() {
+                // Устанавливаем камеру
+                if (this.team === 'swat') {
+                    this.camera.position.set(50, 12, -30); // Спавн у вертолётов
+                } else {
+                    this.camera.position.set(-80, 17, 80); // Спавн на скале
+                }
+                
+                this.localPlayer = {
+                    mesh: null, // Мы не создаём mesh для локального игрока
+                    team: this.team,
+                    health: 100,
+                    ammo: 30,
+                    position: this.camera.position.clone()
+                };
+                
+                // Добавляем модель оружия
+                this.createWeaponModel();
+            }
+
+            createWeaponModel() {
+                // Простая модель оружия в руках
+                const weaponGroup = new THREE.Group();
+                
+                // Основная часть
+                const gunBody = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.5, 0.5, 2),
+                    new THREE.MeshStandardMaterial({ color: 0x222222 })
+                );
+                gunBody.position.set(0.3, -0.2, -0.5);
+                weaponGroup.add(gunBody);
+                
+                // Приклад
+                const stock = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.3, 0.8),
+                    new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                );
+                stock.position.set(0.3, -0.2, 0.3);
+                weaponGroup.add(stock);
+                
+                // Ствол
+                const barrel = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.1, 0.1, 1.5),
+                    new THREE.MeshStandardMaterial({ color: 0x444444 })
+                );
+                barrel.rotation.x = Math.PI/2;
+                barrel.position.set(0.3, -0.2, -1.2);
+                weaponGroup.add(barrel);
+                
+                // Магазин
+                const mag = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.3, 0.6, 0.4),
+                    new THREE.MeshStandardMaterial({ color: 0x666666 })
+                );
+                mag.position.set(0.3, -0.5, -0.5);
+                weaponGroup.add(mag);
+                
+                this.camera.add(weaponGroup);
+            }
+
+            createBotPlayers() {
+                // Создаём несколько ботов для демонстрации мультиплеера
+                const botCount = 4;
+                
+                for (let i = 0; i < botCount; i++) {
+                    const botTeam = i < 2 ? 'swat' : 'payday';
+                    this.createBot(botTeam, i);
+                }
+            }
+
+            createBot(team, id) {
+                const botGroup = new THREE.Group();
+                
+                // Тело
+                let bodyColor = team === 'swat' ? 0x0066cc : 0x663300;
+                const body = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.5, 0.5, 2),
+                    new THREE.MeshStandardMaterial({ color: bodyColor })
+                );
+                body.position.y = 1;
+                body.castShadow = true;
+                body.receiveShadow = true;
+                botGroup.add(body);
+                
+                // Голова
+                const head = new THREE.Mesh(
+                    new THREE.SphereGeometry(0.3),
+                    new THREE.MeshStandardMaterial({ color: 0xffccaa })
+                );
+                head.position.y = 2.2;
+                head.castShadow = true;
+                botGroup.add(head);
+                
+                // Оружие
+                const weapon = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.2, 0.2, 1),
+                    new THREE.MeshStandardMaterial({ color: 0x333333 })
+                );
+                weapon.position.set(0.5, 1.2, 0.5);
+                weapon.castShadow = true;
+                botGroup.add(weapon);
+                
+                // Маска для PAYDAY
+                if (team === 'payday') {
+                    const mask = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.35),
+                        new THREE.MeshStandardMaterial({ color: 0xffaa00 })
+                    );
+                    mask.position.set(0, 2.2, 0.3);
+                    mask.scale.set(1, 0.8, 0.5);
+                    mask.castShadow = true;
+                    botGroup.add(mask);
+                }
+                
+                // Позиция
+                if (team === 'swat') {
+                    botGroup.position.set(45 + id * 5, 10, -25 + id * 10);
+                } else {
+                    botGroup.position.set(-75 + id * 5, 15, 75 + id * 5);
+                }
+                
+                this.scene.add(botGroup);
+                
+                // Сохраняем информацию о боте
+                const botId = `bot_${id}`;
+                this.players.set(botId, {
+                    mesh: botGroup,
+                    team: team,
+                    health: 100,
+                    position: botGroup.position.clone()
+                });
+            }
+
+            updateObjectives() {
+                const objList = document.getElementById('objective-list');
+                objList.innerHTML = '';
+                
+                if (this.team === 'swat') {
+                    objList.innerHTML += '<li>Высадиться с вертолёта Blackhawk</li>';
+                    objList.innerHTML += '<li>Обезвредить взрывчатку на опорах моста</li>';
+                    objList.innerHTML += '<li>Ликвидировать террористов PAYDAY</li>';
+                    objList.innerHTML += '<li>Защитить поезд от подрыва</li>';
+                    document.getElementById('team-objective').innerHTML = 'ЗАДАЧИ SWAT';
+                } else {
+                    objList.innerHTML += '<li>Заложить взрывчатку на опоры (3 точки)</li>';
+                    objList.innerHTML += '<li>Защищать заряды до подрыва</li>';
+                    objList.innerHTML += '<li>Уничтожить мост до прибытия поезда</li>';
+                    objList.innerHTML += '<li>Сбивать вертолёты SWAT из РПГ</li>';
+                    document.getElementById('team-objective').innerHTML = 'ЗАДАЧИ PAYDAY';
+                }
+            }
+
+            startGameTimer() {
+                setInterval(() => {
+                    if (this.gameTime > 0) {
+                        this.gameTime--;
+                        
+                        const mins = Math.floor(this.gameTime / 60);
+                        const secs = this.gameTime % 60;
+                        document.getElementById('timer').innerHTML = 
+                            `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                        
+                        // Движение поезда (приближение)
+                        if (this.train) {
+                            this.train.position.z += 0.05;
+                        }
+                        
+                        // Вращение винтов вертолётов
+                        if (this.helicopters) {
+                            this.helicopters.children.forEach(heli => {
+                                heli.children[2].rotation.y += 0.1; // Вращаем винт
+                            });
+                        }
+                        
+                        // Движение дождя
+                        if (this.rain) {
+                            const positions = this.rain.geometry.attributes.position.array;
+                            for (let i = 1; i < positions.length; i += 3) {
+                                positions[i] -= 0.2;
+                                if (positions[i] < -10) {
+                                    positions[i] = 100;
+                                }
+                            }
+                            this.rain.geometry.attributes.position.needsUpdate = true;
+                        }
+                        
+                        // Проверка окончания игры
+                        if (this.gameTime === 0) {
+                            alert('ПОЕЗД ПРОЕХАЛ! ПОБЕДА SWAT!');
+                            location.reload();
+                        }
+                    }
+                }, 1000);
+            }
+
+            jump() {
+                if (this.localPlayer) {
+                    // Простая анимация прыжка
+                    this.camera.position.y += 2;
+                    setTimeout(() => {
+                        this.camera.position.y -= 2;
+                    }, 300);
+                }
+            }
+
+            shoot() {
+                if (this.localPlayer && this.ammo > 0) {
+                    this.ammo--;
+                    document.getElementById('ammo').innerHTML = `${this.ammo}/${this.maxAmmo}`;
+                    
+                    // Эффект стрельбы (вспышка)
+                    const flash = new THREE.PointLight(0xffaa00, 2, 10);
+                    flash.position.copy(this.camera.position);
+                    flash.position.add(new THREE.Vector3(0, 0, -2).applyQuaternion(this.camera.quaternion));
+                    this.scene.add(flash);
+                    
+                    setTimeout(() => {
+                        this.scene.remove(flash);
+                    }, 50);
+                    
+                    // Звуковой эффект (визуальный)
+                    console.log('BANG!');
+                    
+                    // Raycast для определения попадания
+                    const raycaster = new THREE.Raycaster();
+                    raycaster.set(this.camera.position, new THREE.Vector3(0, 0, -1).applyQuaternion(this.camera.quaternion));
+                    
+                    // Проверяем попадания в ботов
+                    this.players.forEach((player, id) => {
+                        if (player.team !== this.team) {
+                            const intersects = raycaster.intersectObject(player.mesh);
+                            if (intersects.length > 0) {
+                                player.health -= 34;
+                                if (player.health <= 0) {
+                                    this.scene.remove(player.mesh);
+                                    this.players.delete(id);
+                                    this.score++;
+                                    
+                                    // Пасхалка GENSEC
+                                    if (this.score === 5) {
+                                        alert('GENSEC гордится тобой!');
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Проверка попадания в точки закладки
+                    this.bombSites.forEach(site => {
+                        const intersects = raycaster.intersectObject(site.mesh);
+                        if (intersects.length > 0 && this.team === 'swat' && site.hasBomb) {
+                            // Обезвреживание
+                            site.mesh.material.color.setHex(0x00ff00);
+                            site.hasBomb = false;
+                            this.bombsPlanted--;
+                            alert('Взрывчатка обезврежена!');
+                        }
+                    });
+                } else if (this.ammo === 0) {
+                    alert('Нет патронов! Нажми R для перезарядки');
+                }
+            }
+
+            reload() {
+                if (this.localPlayer) {
+                    this.ammo = 30;
+                    document.getElementById('ammo').innerHTML = `${this.ammo}/${this.maxAmmo}`;
+                }
+            }
+
+            update() {
+                if (this.localPlayer) {
+                    // Движение
+                    const speed = 0.2;
+                    const direction = new THREE.Vector3();
+                    
+                    if (this.moveForward) {
+                        direction.z -= speed;
+                    }
+                    if (this.moveBackward) {
+                        direction.z += speed;
+                    }
+                    if (this.moveLeft) {
+                        direction.x -= speed;
+                    }
+                    if (this.moveRight) {
+                        direction.x += speed;
+                    }
+                    
+                    direction.applyQuaternion(this.camera.quaternion);
+                    direction.y = 0;
+                    
+                    this.camera.position.add(direction);
+                    
+                    // Обновляем позицию игрока
+                    this.localPlayer.position.copy(this.camera.position);
+                    
+                    // Проверка на закладку бомбы (для PAYDAY)
+                    if (this.team === 'payday') {
+                        this.bombSites.forEach(site => {
+                            const distance = this.camera.position.distanceTo(site.position);
+                            if (distance < 5 && !site.hasBomb) {
+                                if (confirm('Заложить взрывчатку?')) {
+                                    site.mesh.material.color.setHex(0xff6600);
+                                    site.hasBomb = true;
+                                    this.bombsPlanted++;
+                                    
+                                    // Пасхалка Драго
+                                    if (Math.random() < 0.1) {
+                                        alert('Я ДОЛЖЕН!');
+                                        const drago = new THREE.Mesh(
+                                            new THREE.SphereGeometry(0.5),
+                                            new THREE.MeshStandardMaterial({ color: 0xffaa00 })
+                                        );
+                                        drago.position.copy(this.camera.position);
+                                        drago.position.y += 2;
+                                        this.scene.add(drago);
+                                        setTimeout(() => this.scene.remove(drago), 3000);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Обновляем полоску здоровья
+                    if (this.health < 0) this.health = 0;
+                    document.getElementById('health-fill').style.width = this.health + '%';
+                }
+            }
+
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                this.update();
+                
+                // Рендеринг с позиции камеры
+                this.renderer.render(this.scene, this.camera);
+            }
         }
-    });
-}
 
-function render() {
-    ctx.fillStyle = "#111"; ctx.fillRect(0,0,W,H/2);
-    ctx.fillStyle = "#222"; ctx.fillRect(0,H/2,W,H/2);
-
-    const fov = Math.PI/3;
-    for(let i=0; i<W; i++) {
-        let a = (player.dir - fov/2) + (i/W) * fov;
-        let d=0, dx=Math.cos(a), dy=Math.sin(a);
-        while(d < 16) {
-            d += 0.1;
-            let cx = Math.floor(player.x + dx*d), cy = Math.floor(player.y + dy*d);
-            if(world[cy*M + cx] > 0) break;
-        }
-        let h = H / (d * Math.cos(a - player.dir));
-        ctx.fillStyle = `rgb(${100-d*5},${100-d*5},${100-d*5})`;
-        ctx.fillRect(i, H/2-h/2, 1, h);
-    }
-
-    sprites.sort((a,b) => Math.hypot(b.x-player.x, b.y-player.y) - Math.hypot(a.x-player.x, a.y-player.y));
-    sprites.forEach(s => {
-        let dx = s.x - player.x, dy = s.y - player.y;
-        let dist = Math.sqrt(dx*dx+dy*dy);
-        let a = Math.atan2(dy, dx) - player.dir;
-        while(a < -Math.PI) a += 2*Math.PI; while(a > Math.PI) a -= 2*Math.PI;
-        if(Math.abs(a) < fov/2) {
-            let sx = (a/fov+0.5)*W, h = H/dist;
-            ctx.fillStyle = s.type==='bandit'?"#f00":s.type==='guard'?"#fff":s.type==='desk'?"#630":"#55a";
-            ctx.fillRect(sx-h/6, H/2-h/4, h/3, h/2);
-            if(s.shooting > 0) { ctx.fillStyle="#ff0"; ctx.fillRect(sx, H/2, 10, 10); s.shooting--; }
-        }
-    });
-
-    if(!player.isSitting) {
-        ctx.fillStyle = "#444"; ctx.fillRect(W/2+20, H-100, 40, 100); // Оружие
-    }
-}
-
-function toggleSit() {
-    player.isSitting = !player.isSitting;
-    if(!player.isSitting) player.hasGun = true;
-    document.getElementById('act-btn').innerText = player.isSitting ? "ВСТАТЬ" : "СЕСТЬ";
-}
-
-window.onclick = () => {
-    if(player.isSitting) return;
-    sprites.forEach((s,i) => {
-        if(s.type === 'bandit') {
-            let a = Math.atan2(s.y-player.y, s.x-player.x) - player.dir;
-            while(a < -Math.PI) a += 2*Math.PI;
-            if(Math.abs(a) < 0.2) sprites.splice(i, 1);
-        }
-    });
-};
-
-window.onkeydown = e => {
-    keys[e.code] = true;
-    if(e.code === 'KeyG') for(let i=0; i<2; i++) sprites.push({x: player.x, y: player.y, type: 'guard'});
-};
-window.onkeyup = e => keys[e.code] = false;
-
-function loop() {
-    if(!player.isSitting) {
-        if(keys['KeyW']) { player.x += Math.cos(player.dir)*0.05; player.y += Math.sin(player.dir)*0.05; }
-        if(keys['KeyS']) { player.x -= Math.cos(player.dir)*0.05; player.y -= Math.sin(player.dir)*0.05; }
-        if(keys['KeyA']) player.dir -= 0.04; if(keys['KeyD']) player.dir += 0.04;
-    }
-    if(timer > 0) {
-        timer--;
-        if(timer === 0 && !heist) {
-            heist = true;
-            for(let i=0; i<5; i++) sprites.push({x: 14, y: 2+i, type: 'bandit'});
-        }
-    }
-    document.getElementById('targets').innerText = sprites.filter(x=>x.type==='bandit').length;
-    updateAI(); render(); requestAnimationFrame(loop);
-}
-</script>
+        // Запуск игры после загрузки страницы
+        window.onload = () => {
+            const game = new SanFierroBridge();
+            
+            // Обновляем счётчик игроков
+            setInterval(() => {
+                document.getElementById('player-count').innerHTML = Math.floor(Math.random() * 8) + 4;
+            }, 3000);
+            
+            // Пасхалка - медведь с чайником
+            setTimeout(() => {
+                if (Math.random() < 0.3) {
+                    const bear = new THREE.Mesh(
+                        new THREE.BoxGeometry(1, 2, 1),
+                        new THREE.MeshStandardMaterial({ color: 0x8B4513 })
+                    );
+                    bear.position.set(50, 42, -30);
+                    game.scene.add(bear);
+                    
+                    const kettle = new THREE.Mesh(
+                        new THREE.SphereGeometry(0.5),
+                        new THREE.MeshStandardMaterial({ color: 0x888888 })
+                    );
+                    kettle.position.set(50.5, 43, -29.5);
+                    game.scene.add(kettle);
+                }
+            }, 5000);
+        };
+    </script>
 </body>
 </html>
