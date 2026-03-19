@@ -30,11 +30,11 @@
         canvas {
             display: block;
             margin: 0 auto;
-            width: 800px;
+            width: 900px;
             height: 500px;
             border-radius: 12px;
             box-shadow: inset 0 0 0 2px #7f8c9a, 0 0 0 3px #2c3e50;
-            background: #6b7f8f;
+            background: #3a4e62;  /* цвет фона для неба/стены */
             image-rendering: pixelated;
         }
         .control-panel {
@@ -103,7 +103,7 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 700px;
+            width: 750px;
             background: #0e1c28;
             border: 4px solid #b1c9e8;
             border-radius: 24px;
@@ -119,10 +119,14 @@
             color: #ffd966;
             font-size: 18px;
             margin-bottom: 5px;
+            border-bottom: 2px solid #4a6990;
+            display: inline-block;
+            padding-right: 20px;
         }
         .dialog-text {
-            min-height: 60px;
-            margin: 10px 0;
+            min-height: 70px;
+            margin: 15px 0;
+            line-height: 1.4;
         }
         .dialog-options {
             display: flex;
@@ -149,7 +153,7 @@
 </head>
 <body>
 <div class="game-wrapper">
-    <canvas id="gameCanvas" width="800" height="500"></canvas>
+    <canvas id="gameCanvas" width="900" height="500"></canvas>
 
     <!-- Диалоговое окно -->
     <div id="dialogOverlay" class="dialog-box">
@@ -166,7 +170,7 @@
             <button id="btnLeft">←</button>
             <button id="btnRight">→</button>
         </div>
-        <div class="status" id="statusText">3 этаж</div>
+        <div class="status" id="statusText">3 этаж • коридор</div>
         <button class="action-btn" id="actionBtn">💬 говорить</button>
     </div>
 </div>
@@ -174,7 +178,7 @@
 <script>
 (function() {
     // -------------------------------------------------
-    // ТВОИ ТЕКСТУРЫ - СЮДА ВСТАВЛЯЙ СВОИ КАРТИНКИ
+    // ТВОИ ТЕКСТУРЫ
     // -------------------------------------------------
     const TEXTURES = {
         hero: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAP0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwPj4+fO7cOQMdA7VdwEDtF8DwgQbVq1evRkZGBl9fXwb6Gc5AawAAy38dDy8zrI8AAAAASUVORK5CYII=',
@@ -191,15 +195,15 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    let motyaX = 8;  // позиция слева-направо
-    const WORLD_WIDTH = 20;
+    let motyaX = 8;
+    const WORLD_WIDTH = 22;  // больше клеток для широкого экрана
     const CELL_SIZE = 40;
 
     let dialogActive = false;
     let currentNPC = null;
     let nearbyNPC = null;
 
-    // ---------- ПЕРСОНАЖИ (меняй как хочешь) ----------
+    // ---------- ПЕРСОНАЖИ ----------
     const npcs = [
         { 
             id: 'teacher1', 
@@ -227,7 +231,7 @@
             id: 'friend1', 
             name: 'друг Юки', 
             type: 'friend', 
-            x: 13,
+            x: 14,
             dialog: {
                 text: 'Мотя! В новую игру рубились?',
                 options: ['Ага', 'Не, не было времени'],
@@ -238,7 +242,7 @@
             id: 'teacher2', 
             name: 'завуч', 
             type: 'teacher', 
-            x: 17,
+            x: 18,
             dialog: {
                 text: 'Опять по коридору бегаешь?',
                 options: ['Я не бегал', 'Извините'],
@@ -247,16 +251,16 @@
         }
     ];
 
-    // ---------- ОБЪЕКТЫ (двери, окна, лестницы) ----------
+    // ---------- ОБЪЕКТЫ ----------
     const objects = [
         { type: 'door', x: 2, name: 'кабинет 210' },
         { type: 'door', x: 6, name: 'кабинет 211' },
         { type: 'stairs', x: 11, name: 'лестница' },
-        { type: 'window', x: 15, name: 'окно' },
-        { type: 'door', x: 19, name: 'кабинет 212' }
+        { type: 'window', x: 16, name: 'окно' },
+        { type: 'door', x: 20, name: 'кабинет 212' }
     ];
 
-    // ---------- ОТРИСОВКА ----------
+    // ---------- ОТРИСОВКА (НАСТОЯЩИЙ ВИД СБОКУ) ----------
     function drawSprite(type, dx, dy) {
         let img = new Image();
         img.src = TEXTURES[type] || TEXTURES.wall;
@@ -264,81 +268,117 @@
     }
 
     function renderGame() {
-        ctx.clearRect(0, 0, 800, 500);
+        ctx.clearRect(0, 0, 900, 500);
 
-        // Пол и стены
-        for (let col = 0; col < WORLD_WIDTH; col++) {
-            // Пол
-            ctx.fillStyle = '#5f7d9c';
-            ctx.fillRect(col * CELL_SIZE, 320, CELL_SIZE, 100);
-            // Cтена
-            ctx.fillStyle = '#3f5568';
-            ctx.fillRect(col * CELL_SIZE, 200, CELL_SIZE, 120);
-            // Полоска на стене
-            ctx.fillStyle = '#2c4055';
-            ctx.fillRect(col * CELL_SIZE, 280, CELL_SIZE, 4);
+        // --- ФОН (ДАЛЬНЯЯ СТЕНА) ---
+        ctx.fillStyle = '#4f6f8f';  // цвет дальней стены
+        ctx.fillRect(0, 0, 900, 220);
+
+        // --- ЛИНИЯ ГОРИЗОНТА (стык стены и пола) ---
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(0, 210, 900, 10);
+
+        // --- ПОЛ (СВЕТЛЫЙ ДЕРЕВЯННЫЙ) ---
+        ctx.fillStyle = '#b8a27b';  // светлый деревянный пол
+        ctx.fillRect(0, 220, 900, 280);
+        
+        // Текстура пола (доски)
+        ctx.strokeStyle = '#9b8460';
+        ctx.lineWidth = 2;
+        for (let i = 0; i < 15; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, 240 + i * 18);
+            ctx.lineTo(900, 240 + i * 18);
+            ctx.strokeStyle = '#9b8460';
+            ctx.stroke();
         }
 
-        // Рисуем объекты
+        // --- ПЛИНТУС (где пол встречается со стеной) ---
+        ctx.fillStyle = '#6b4f3a';
+        ctx.fillRect(0, 210, 900, 10);
+
+        // --- ПРЕДМЕТЫ (стоят на полу, прислонены к стене) ---
         objects.forEach(obj => {
             let x = obj.x * CELL_SIZE;
+            
             if (obj.type === 'door') {
-                drawSprite('door', x, 200);
+                // Дверь (на стене)
                 ctx.fillStyle = '#8b6e4c';
-                ctx.fillRect(x+12, 220, 15, 35);
-            } else if (obj.type === 'stairs') {
-                drawSprite('stairs', x, 300);
-                ctx.fillStyle = '#7b6a4a';
-                ctx.fillRect(x+5, 330, 30, 10);
-            } else if (obj.type === 'window') {
-                drawSprite('window', x, 200);
+                ctx.fillRect(x, 140, 35, 80);  // дверь
+                ctx.fillStyle = '#c9b27c';
+                ctx.fillRect(x + 10, 170, 15, 30);  // окошко в двери
+                ctx.fillStyle = '#f0d090';
+                ctx.fillRect(x + 25, 175, 5, 5);  // ручка
+            } 
+            else if (obj.type === 'stairs') {
+                // Лестница (на полу)
+                ctx.fillStyle = '#8b7a5a';
+                ctx.fillRect(x, 150, 40, 60);
+                for (let i = 0; i < 4; i++) {
+                    ctx.fillStyle = '#6b5a3a';
+                    ctx.fillRect(x + 5 + i*8, 160 + i*12, 5, 30);
+                }
+            } 
+            else if (obj.type === 'window') {
+                // Окно
                 ctx.fillStyle = '#a5d0ff';
-                ctx.fillRect(x+8, 220, 24, 30);
+                ctx.fillRect(x + 5, 140, 30, 50);
+                ctx.fillStyle = '#2c3e50';
+                ctx.fillRect(x + 18, 140, 4, 50);  // перекладина
+                ctx.fillRect(x + 5, 165, 30, 4);    // перекладина
             }
         });
 
-        // Рисуем NPC
+        // --- NPC (СТОЯТ НА ПОЛУ, ВИД СБОКУ) ---
         npcs.forEach(npc => {
             let npcX = npc.x * CELL_SIZE;
-            let type = npc.type;
             
-            if (type === 'teacher') drawSprite('teacher', npcX, 270);
-            else if (type === 'classmate') drawSprite('classmate', npcX, 270);
-            else if (type === 'friend') drawSprite('friend', npcX, 270);
+            // Тело (вид сбоку)
+            ctx.fillStyle = npc.type === 'teacher' ? '#3a6790' : (npc.type === 'friend' ? '#7fb07f' : '#c96b8b');
+            ctx.fillRect(npcX + 5, 160, 30, 60);  // тело
+            ctx.fillStyle = '#f0d5b0';
+            ctx.fillRect(npcX + 12, 150, 16, 16);  // голова
             
-            // Имя
+            // Имя над головой
             ctx.font = 'bold 14px "Courier New"';
             ctx.fillStyle = 'white';
             ctx.strokeStyle = 'black';
             ctx.lineWidth = 3;
-            ctx.strokeText(npc.name, npcX, 260);
-            ctx.fillText(npc.name, npcX, 260);
+            ctx.strokeText(npc.name, npcX, 140);
+            ctx.fillText(npc.name, npcX, 140);
         });
 
-        // Мотя
+        // --- МОТЯ (ВИД СБОКУ) ---
         let heroX = motyaX * CELL_SIZE;
-        drawSprite('hero', heroX, 280);
+        
+        // Тело Моти
+        ctx.fillStyle = '#d97706';  // оранжевый
+        ctx.fillRect(heroX + 5, 160, 30, 60);
+        ctx.fillStyle = '#f0d5b0';
+        ctx.fillRect(heroX + 12, 150, 16, 16);  // голова
+        
+        // Имя
         ctx.font = 'bold 16px "Courier New"';
         ctx.fillStyle = '#ffd966';
         ctx.strokeStyle = 'black';
-        ctx.strokeText('Мотя', heroX, 260);
-        ctx.fillText('Мотя', heroX, 260);
+        ctx.strokeText('Мотя', heroX, 130);
+        ctx.fillText('Мотя', heroX, 130);
 
-        // Подсветка если рядом NPC
+        // --- ПОДСВЕТКА ЕСЛИ РЯДОМ NPC ---
         if (nearbyNPC && !dialogActive) {
             ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 5, 260, CELL_SIZE + 10, 70);
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 8]);
+            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 5, 140, 50, 90);
             ctx.setLineDash([]);
         }
 
         // Статус
         let place = objects.find(o => o.x === motyaX);
-        document.getElementById('statusText').innerText = place ? place.name : 'коридор';
+        document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
     }
 
-    // ---------- ДИАЛОГИ (БЕЗ БАГОВ) ----------
+    // ---------- ДИАЛОГИ ----------
     function talkTo(npc) {
         if (!npc) return;
         
@@ -360,7 +400,6 @@
         renderGame();
     }
 
-    // Выбор ответа (персонаж отвечает на наш выбор)
     document.getElementById('choice1').addEventListener('click', () => {
         if (currentNPC) {
             document.getElementById('speakerName').innerText = currentNPC.name;
