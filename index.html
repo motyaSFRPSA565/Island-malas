@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школа Моти • 90-е аниме RPG</title>
+    <title>Школа Моти • Пиксель-арт RPG</title>
     <style>
         * {
             box-sizing: border-box;
@@ -14,119 +14,130 @@
         body {
             margin: 0;
             min-height: 100vh;
-            background: #1a2b3c;
+            background: #0f1a24;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', monospace;
+            background-image: radial-gradient(circle at 20% 30%, #1e3a4a 0%, #0a141f 100%);
         }
-        .game-wrapper {
-            background: #0a1a2a;
+        .game-container {
+            position: relative;
             padding: 20px;
-            border-radius: 16px;
-            box-shadow: 0 10px 0 #04121e, 0 20px 30px rgba(0,0,0,0.6);
-            border: 2px solid #7f8c9a;
+            background: linear-gradient(145deg, #122b38 0%, #07121c 100%);
+            border-radius: 32px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(100,180,255,0.2);
+            border: 2px solid #4f7b9e;
         }
         canvas {
             display: block;
-            margin: 0 auto;
-            width: 900px;
+            width: 1000px;
             height: 600px;
-            border-radius: 12px;
-            box-shadow: inset 0 0 0 2px #7f8c9a, 0 0 0 3px #2c3e50;
-            background: #2a3f54;
+            border-radius: 20px;
+            box-shadow: inset 0 0 0 3px #6d8fb0, 0 0 0 4px #2a4055, 0 20px 30px black;
+            background: #1a3243;
             image-rendering: pixelated;
         }
         .control-panel {
-            margin-top: 16px;
+            margin-top: 20px;
             display: flex;
             gap: 20px;
             align-items: center;
             justify-content: space-between;
-            background: #2e4155;
-            padding: 12px 20px;
-            border-radius: 60px;
-            border: 2px solid #0f1c2a;
-            box-shadow: inset 0 -2px 0 #0f1c2a;
+            background: linear-gradient(145deg, #1e384b 0%, #10212f 100%);
+            padding: 15px 25px;
+            border-radius: 80px;
+            border: 2px solid #4a789c;
+            box-shadow: inset 0 -3px 0 #0b1a26, 0 10px 20px rgba(0,0,0,0.5);
         }
         .dpad {
             display: flex;
-            gap: 6px;
+            gap: 8px;
         }
         .dpad button {
-            background: #4a617c;
+            background: linear-gradient(145deg, #3d5e7e 0%, #1f3950 100%);
             border: none;
-            color: white;
-            font-size: 28px;
+            color: #ddf0ff;
+            font-size: 32px;
             font-weight: bold;
-            width: 60px;
-            height: 60px;
-            border-radius: 20px;
-            box-shadow: 0 5px 0 #1e2f3f, 0 6px 10px black;
+            width: 70px;
+            height: 70px;
+            border-radius: 30px;
+            box-shadow: 0 6px 0 #0f202f, 0 8px 15px black;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            border: 2px solid #8098b0;
+            border: 2px solid #7fa6c9;
+            text-shadow: 2px 2px 0 #0a1925;
+            transition: 0.03s linear;
         }
         .dpad button:active {
-            transform: translateY(5px);
-            box-shadow: 0 1px 0 #1e2f3f;
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #0f202f;
         }
         .action-btn {
-            background: #f0c45a;
+            background: linear-gradient(145deg, #e8b55a 0%, #c58a2f 100%);
             border: none;
-            font-size: 24px;
-            padding: 12px 30px;
-            border-radius: 40px;
+            font-size: 28px;
+            padding: 15px 40px;
+            border-radius: 60px;
             font-weight: bold;
-            box-shadow: 0 5px 0 #b87e2a, 0 6px 10px black;
+            box-shadow: 0 6px 0 #8b5f23, 0 8px 15px black;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            border: 2px solid #ffe29c;
-            color: #252017;
+            border: 3px solid #ffe6a3;
+            color: #221d12;
+            text-shadow: 1px 1px 0 #ffdd99;
+            letter-spacing: 2px;
         }
         .action-btn:active {
-            transform: translateY(5px);
-            box-shadow: 0 1px 0 #b87e2a;
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #8b5f23;
         }
         .status {
-            background: #1f313f;
-            padding: 10px 24px;
-            border-radius: 40px;
-            color: #b3dbff;
-            font-size: 20px;
+            background: linear-gradient(145deg, #1d3343 0%, #0f202f 100%);
+            padding: 12px 30px;
+            border-radius: 50px;
+            color: #c1e2ff;
+            font-size: 22px;
             font-weight: bold;
-            border: 2px solid #4b6e88;
-            box-shadow: inset 0 -2px 0 #0f1f2c;
+            border: 2px solid #5588aa;
+            box-shadow: inset 0 -2px 0 #0a1925, inset 0 2px 5px #3c6688;
+            text-shadow: 2px 2px 0 #0a1a2a;
         }
         .dialog-box {
             position: absolute;
-            bottom: 30px;
+            bottom: 40px;
             left: 50%;
             transform: translateX(-50%);
-            width: 750px;
-            background: #0e1c28;
-            border: 4px solid #b1c9e8;
-            border-radius: 24px;
-            padding: 20px 30px;
-            box-shadow: 0 10px 0 #030b12, 0 15px 30px black;
-            color: #e9f2ff;
-            font-size: 22px;
+            width: 850px;
+            background: linear-gradient(165deg, #0f2335 0%, #1a3349 100%);
+            border: 4px solid #9bc2e8;
+            border-radius: 40px;
+            padding: 25px 35px;
+            box-shadow: 0 15px 0 #05121e, 0 25px 40px black, inset 0 0 30px #3d6a9f;
+            color: #edf6ff;
+            font-size: 24px;
             font-family: 'Courier New', monospace;
             display: none;
             z-index: 10;
+            backdrop-filter: blur(2px);
         }
         .speaker-name {
-            color: #ffd966;
-            font-size: 18px;
-            margin-bottom: 5px;
-            border-bottom: 2px solid #4a6990;
+            color: #ffdb8e;
+            font-size: 20px;
+            margin-bottom: 8px;
+            border-bottom: 3px solid #5d8fc0;
             display: inline-block;
-            padding-right: 20px;
+            padding-right: 30px;
+            text-shadow: 2px 2px 0 #2a4058;
+            letter-spacing: 1px;
         }
         .dialog-text {
-            min-height: 70px;
+            min-height: 80px;
             margin: 15px 0;
-            line-height: 1.4;
+            line-height: 1.5;
+            text-shadow: 3px 3px 0 #0e1f30;
+            color: #eef7ff;
         }
         .dialog-options {
             display: flex;
@@ -135,27 +146,38 @@
             margin-top: 20px;
         }
         .dialog-options button {
-            background: #3a506b;
-            border: 3px solid #7d9ec0;
+            background: linear-gradient(145deg, #2d4b6b 0%, #1b3147 100%);
+            border: 3px solid #89b6e3;
             color: white;
-            font-size: 22px;
-            padding: 8px 25px;
-            border-radius: 50px;
+            font-size: 26px;
+            padding: 12px 35px;
+            border-radius: 70px;
             font-family: 'Courier New', monospace;
-            box-shadow: 0 5px 0 #1f2f3f;
+            font-weight: bold;
+            box-shadow: 0 6px 0 #112433, 0 8px 15px black;
             cursor: pointer;
+            transition: 0.03s;
+            text-shadow: 2px 2px 0 #0f263a;
         }
         .dialog-options button:active {
-            transform: translateY(5px);
-            box-shadow: none;
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #112433;
+        }
+        .hint {
+            color: #9bc2e8;
+            font-size: 16px;
+            text-shadow: 1px 1px 0 #0b1c2b;
+        }
+        .github-corner {
+            opacity: 0.6;
         }
     </style>
 </head>
 <body>
-<div class="game-wrapper">
-    <canvas id="gameCanvas" width="900" height="600"></canvas>
+<div class="game-container">
+    <canvas id="gameCanvas" width="1000" height="600"></canvas>
 
-    <!-- Диалоговое окно -->
+    <!-- Диалоговое окно (стильное, пиксельное) -->
     <div id="dialogOverlay" class="dialog-box">
         <div id="speakerName" class="speaker-name">Персонаж</div>
         <div id="dialogText" class="dialog-text">Текст диалога</div>
@@ -173,32 +195,48 @@
         <div class="status" id="statusText">3 этаж • коридор</div>
         <button class="action-btn" id="actionBtn">💬 говорить</button>
     </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 12px; padding: 0 10px;">
+        <span class="hint">←→ ходить | 💬 говорить</span>
+        <span class="hint">✨ твои текстуры — в объекте TEXTURES</span>
+    </div>
 </div>
 
 <script>
 (function() {
-    // -------------------------------------------------
-    // ТВОИ ТЕКСТУРЫ - ВСТАВЛЯЙ СЮДА СВОИ КАРТИНКИ
-    // -------------------------------------------------
+    // ----------------------------------------------------------------
+    // ТВОИ ТЕКСТУРЫ — СЮДА ВСТАВЛЯЙ СВОИ РИСУНКИ (PNG, base64 или ссылки)
+    // ----------------------------------------------------------------
     const TEXTURES = {
-        // Моя (нужны 3 кадра: стоячий, шаг левой, шаг правой)
-        hero_idle: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAP0lEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
-        hero_walk1: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAP0lEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
-        hero_walk2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAAP0lEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
+        // ===== МОТЯ (анимация ходьбы) =====
+        // тебе нужно 3 спрайта: стоячий, шаг левой, шаг правой
+        motya_idle: '',      // вставь сюда свой PNG (base64 или URL)
+        motya_walk1: '',      // шаг левой
+        motya_walk2: '',      // шаг правой
         
-        // Учитель
-        teacher: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        // ===== ПЕРСОНАЖИ (каждый может иметь свои спрайты) =====
+        // пока пусто — ты сам добавишь
         
-        // Одноклассница
-        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
-        
-        // Друг
-        friend: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
-        
-        // Дверь, окно, лестница
-        door: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
-        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
-        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII='
+        // ===== ОКРУЖЕНИЕ (детализированное) =====
+        // можешь оставить как есть или заменить своими
+        wall_pattern: '',     // текстура стены
+        floor_pattern: '',    // текстура пола
+        door_texture: '',     // дверь
+        window_texture: '',   // окно
+        stairs_texture: ''    // лестница
+    };
+
+    // ----------------------------------------------------------------
+    // ДЕТАЛИЗИРОВАННЫЙ ПИКСЕЛЬНЫЙ ФОН (встроенный, но ты можешь заменить)
+    // ----------------------------------------------------------------
+    const PIXEL_STYLES = {
+        wallBase: '#2d4c6e',
+        wallPanel: '#1f3a54',
+        wallHighlight: '#3f6790',
+        floorBase: '#bd9f6e',
+        floorDark: '#9f8357',
+        floorLight: '#dbbc85',
+        shadow: 'rgba(0,0,0,0.3)',
+        glow: 'rgba(200,230,255,0.15)'
     };
 
     // ---------- НАСТРОЙКИ ----------
@@ -206,277 +244,353 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    let motyaX = 10;  // позиция в мире
+    let motyaX = 15;  // стартовая позиция
     let motyaFrame = 0;
-    let motyaDirection = 0;
+    let motyaDirection = 0;  // 0 - idle, 1 - left step, 2 - right step
     let walkTimer = 0;
     
-    const WORLD_WIDTH = 32;  // 32 клетки (больше для камеры)
-    const CELL_SIZE = 64;
+    const WORLD_WIDTH = 40;  // 40 клеток (длинный коридор)
+    const CELL_SIZE = 64;     // большой пиксель-арт
     
-    // Центр камеры - Мотя всегда в центре экрана
-    const CAMERA_OFFSET_X = 450;  // половина ширины экрана 900/2
-    const CAMERA_OFFSET_Y = 300;  // половина высоты 600/2
+    const CAMERA_OFFSET_X = 500;  // центр экрана 1000/2
+    const CAMERA_OFFSET_Y = 300;
 
     let dialogActive = false;
     let currentNPC = null;
     let nearbyNPC = null;
 
-    // ---------- ПЕРСОНАЖИ ----------
+    // ---------- ТВОИ ПЕРСОНАЖИ (ДОБАВЛЯЙ СЮДА) ----------
+    // ты сам наполнишь этот массив своими персонажами
     const npcs = [
-        { 
-            id: 'teacher1', 
-            name: 'учитель', 
-            type: 'teacher', 
-            x: 4,
-            depth: 'wall',
-            yOffset: 20,
-            dialog: {
-                text: 'Мотя, когда будешь уроки делать?',
-                options: ['Сегодня', 'Завтра'],
-                responses: ['Ну смотри, не затягивай.', 'Лентяй...']
-            }
-        },
-        { 
-            id: 'classmate1', 
-            name: 'одноклассница', 
-            type: 'classmate', 
-            x: 9,
-            depth: 'center',
-            yOffset: 40,
-            dialog: {
-                text: 'Привет! Как каникулы прошли?',
-                options: ['Отлично!', 'Так себе'],
-                responses: ['Круто, я тоже отдохнула!', 'Бывает... в школе увидимся']
-            }
-        },
-        { 
-            id: 'friend1', 
-            name: 'друг Юки', 
-            type: 'friend', 
-            x: 16,
-            depth: 'front',
-            yOffset: 60,
-            dialog: {
-                text: 'Мотя! В новую игру рубились?',
-                options: ['Ага', 'Не, не было времени'],
-                responses: ['Я тебе дам поиграть!', 'Жалко, крутая игра']
-            }
-        },
-        { 
-            id: 'teacher2', 
-            name: 'завуч', 
-            type: 'teacher', 
-            x: 22,
-            depth: 'wall',
-            yOffset: 20,
-            dialog: {
-                text: 'Опять по коридору бегаешь?',
-                options: ['Я не бегал', 'Извините'],
-                responses: ['Смотри мне...', 'Так-то лучше']
-            }
-        },
-        { 
-            id: 'classmate2', 
-            name: 'Сакура', 
-            type: 'classmate', 
-            x: 27,
-            depth: 'center',
-            yOffset: 40,
-            dialog: {
-                text: 'Мотя, ты в кружок записался?',
-                options: ['Да', 'Нет'],
-                responses: ['Круто, увидимся там!', 'Приходи, весело!']
-            }
-        }
+        // Формат:
+        // { 
+        //     id: 'teacher1',           // уникальный id
+        //     name: 'учитель',           // имя
+        //     texture: 'teacher',        // ключ из TEXTURES
+        //     x: 8,                      // позиция
+        //     depth: 'wall',              // wall, center, front
+        //     dialog: {                   // диалог
+        //         text: 'Привет!',
+        //         options: ['Да', 'Нет'],
+        //         responses: ['Ок', 'Понятно']
+        //     }
+        // }
     ];
 
-    // ---------- ОБЪЕКТЫ ----------
+    // ---------- ОБЪЕКТЫ НА СТЕНЕ ----------
     const objects = [
-        { type: 'door', x: 2, name: 'кабинет 210' },
-        { type: 'door', x: 7, name: 'кабинет 211' },
-        { type: 'stairs', x: 13, name: 'лестница' },
-        { type: 'window', x: 18, name: 'окно' },
-        { type: 'door', x: 24, name: 'кабинет 212' },
-        { type: 'window', x: 29, name: 'окно' }
+        { type: 'door', x: 3, name: 'кабинет 210' },
+        { type: 'door', x: 8, name: 'кабинет 211' },
+        { type: 'window', x: 13, name: 'окно' },
+        { type: 'stairs', x: 18, name: 'лестница' },
+        { type: 'door', x: 23, name: 'кабинет 212' },
+        { type: 'window', x: 28, name: 'окно' },
+        { type: 'door', x: 33, name: 'кабинет 213' },
+        { type: 'window', x: 37, name: 'окно' }
     ];
 
     // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЙ ----------
     const images = {};
     function loadImages() {
         for (let key in TEXTURES) {
-            let img = new Image();
-            img.src = TEXTURES[key];
-            images[key] = img;
+            if (TEXTURES[key]) {  // если текстура задана
+                let img = new Image();
+                img.src = TEXTURES[key];
+                images[key] = img;
+            }
         }
     }
     loadImages();
 
-    // ---------- ОТРИСОВКА С КАМЕРОЙ ----------
+    // ---------- ПИКСЕЛЬНАЯ ОТРИСОВКА (ДЕТАЛИЗИРОВАННАЯ) ----------
     function getScreenX(worldX) {
         return worldX * CELL_SIZE - (motyaX * CELL_SIZE - CAMERA_OFFSET_X);
     }
 
-    function drawSprite(type, worldX, worldY, width = CELL_SIZE, height = CELL_SIZE) {
-        let screenX = getScreenX(worldX);
-        if (images[type]) {
-            ctx.drawImage(images[type], screenX, worldY, width, height);
-        } else {
-            ctx.fillStyle = '#ff00ff';
-            ctx.fillRect(screenX, worldY, width, height);
+    // Рисование стены с текстурой и тенями
+    function drawWall() {
+        // Градиент стены (объём)
+        let gradient = ctx.createLinearGradient(0, 0, 0, 380);
+        gradient.addColorStop(0, PIXEL_STYLES.wallHighlight);
+        gradient.addColorStop(0.6, PIXEL_STYLES.wallBase);
+        gradient.addColorStop(1, PIXEL_STYLES.wallPanel);
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1000, 380);
+
+        // Детали стены (панели)
+        ctx.shadowColor = PIXEL_STYLES.shadow;
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 2;
+        
+        for (let i = 0; i < 6; i++) {
+            ctx.fillStyle = i % 2 === 0 ? PIXEL_STYLES.wallPanel : PIXEL_STYLES.wallBase;
+            ctx.fillRect(0, 60 + i * 50, 1000, 25);
         }
+        
+        // Блик сверху
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = PIXEL_STYLES.glow;
+        ctx.fillRect(0, 0, 1000, 40);
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Линия горизонта (плинтус)
+        ctx.fillStyle = '#4d3e2e';
+        ctx.fillRect(0, 360, 1000, 10);
+        ctx.fillStyle = '#6b523a';
+        ctx.fillRect(0, 362, 1000, 6);
     }
 
-    function renderGame() {
-        ctx.clearRect(0, 0, 900, 600);
+    // Рисование пола с текстурой и перспективой
+    function drawFloor() {
+        // Основной пол
+        let grad = ctx.createLinearGradient(0, 380, 0, 600);
+        grad.addColorStop(0, PIXEL_STYLES.floorLight);
+        grad.addColorStop(0.4, PIXEL_STYLES.floorBase);
+        grad.addColorStop(1, PIXEL_STYLES.floorDark);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 380, 1000, 220);
 
-        // --- СТЕНА (вся рисуется со смещением камеры) ---
-        let startCol = Math.max(0, Math.floor((motyaX * CELL_SIZE - CAMERA_OFFSET_X) / CELL_SIZE) - 1);
-        let endCol = Math.min(WORLD_WIDTH, Math.ceil((motyaX * CELL_SIZE + CAMERA_OFFSET_X) / CELL_SIZE) + 2);
+        // Тени от персонажей (атмосферные)
+        ctx.shadowColor = '#00000040';
+        ctx.shadowBlur = 20;
+        ctx.shadowOffsetY = -5;
         
-        // Фон стены (сплошной)
-        ctx.fillStyle = '#3a5f7a';
-        ctx.fillRect(0, 0, 900, 380);
-        
-        // Текстура стены (рисуем для каждой видимой клетки)
-        for (let col = startCol; col < endCol; col++) {
-            let screenX = getScreenX(col);
-            
-            // Панели на стене
-            ctx.strokeStyle = '#2c4055';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 8; i++) {
-                ctx.beginPath();
-                ctx.moveTo(screenX, 100 + i * 40);
-                ctx.lineTo(screenX + CELL_SIZE, 100 + i * 40);
-                ctx.strokeStyle = '#2c4055';
-                ctx.stroke();
-            }
-        }
-
-        // Линия горизонта
-        ctx.fillStyle = '#6b4f3a';
-        ctx.fillRect(0, 370, 900, 10);
-
-        // Пол
-        ctx.fillStyle = '#c9b27c';
-        ctx.fillRect(0, 380, 900, 220);
-        
-        // Текстура пола
-        ctx.strokeStyle = '#a58e62';
+        // Доски пола (детализация)
+        ctx.strokeStyle = PIXEL_STYLES.floorDark;
         ctx.lineWidth = 3;
-        for (let i = 0; i < 8; i++) {
+        ctx.shadowBlur = 5;
+        
+        for (let i = 0; i < 12; i++) {
+            let y = 400 + i * 18;
             ctx.beginPath();
-            ctx.moveTo(0, 400 + i * 27);
-            ctx.lineTo(900, 400 + i * 27);
-            ctx.strokeStyle = '#a58e62';
+            ctx.moveTo(0, y);
+            ctx.lineTo(1000, y);
+            ctx.strokeStyle = i % 3 === 0 ? '#826e4a' : '#9f8357';
             ctx.stroke();
         }
+        
+        // Светлые блики на полу
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#fff9e6';
+        ctx.strokeStyle = '#ebd4aa';
+        ctx.lineWidth = 2;
+        for (let i = 1; i < 12; i+=2) {
+            ctx.beginPath();
+            ctx.moveTo(0, 408 + i * 18);
+            ctx.lineTo(1000, 408 + i * 18);
+            ctx.stroke();
+        }
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+    }
 
-        // --- ПРЕДМЕТЫ НА СТЕНЕ ---
+    // Рисование объекта (дверь/окно) с деталями и тенями
+    function drawObject(obj, screenX) {
+        ctx.shadowColor = '#00000080';
+        ctx.shadowBlur = 15;
+        ctx.shadowOffsetY = 5;
+        
+        if (obj.type === 'door') {
+            // Дверь с текстурой дерева
+            ctx.fillStyle = '#7b5f41';
+            ctx.fillRect(screenX, 160, 60, 200);
+            
+            // Панели двери
+            ctx.fillStyle = '#5f482f';
+            ctx.fillRect(screenX + 10, 180, 40, 40);
+            ctx.fillRect(screenX + 10, 240, 40, 40);
+            ctx.fillRect(screenX + 10, 300, 40, 40);
+            
+            // Окошко в двери
+            ctx.fillStyle = '#c0d8f0';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#acd4ff';
+            ctx.fillRect(screenX + 15, 190, 30, 30);
+            
+            // Ручка
+            ctx.fillStyle = '#eec68f';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(screenX + 45, 270, 8, 8);
+        }
+        else if (obj.type === 'window') {
+            // Окно со стеклом
+            ctx.fillStyle = '#5f7f9f';
+            ctx.fillRect(screenX + 5, 170, 50, 140);
+            
+            // Переплёты
+            ctx.fillStyle = '#2f4055';
+            ctx.fillRect(screenX + 25, 170, 8, 140);
+            ctx.fillRect(screenX + 5, 220, 50, 8);
+            ctx.fillRect(screenX + 5, 270, 50, 8);
+            
+            // Блик на стекле
+            ctx.fillStyle = '#ffffff30';
+            ctx.fillRect(screenX + 10, 180, 15, 25);
+        }
+        else if (obj.type === 'stairs') {
+            // Лестница
+            ctx.fillStyle = '#7b6b4a';
+            ctx.fillRect(screenX, 220, 60, 140);
+            
+            for (let i = 0; i < 5; i++) {
+                ctx.fillStyle = '#9f8b62';
+                ctx.fillRect(screenX + 5 + i*10, 230 + i*25, 8, 50);
+            }
+        }
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+    }
+
+    // Рисование персонажа (по текстуре или заглушке)
+    function drawCharacter(type, worldX, baseY, depth = 0) {
+        let screenX = getScreenX(worldX);
+        let yOffset = baseY - 40 + depth;
+        
+        if (images[type]) {
+            // Если есть текстура — рисуем её
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00000070';
+            ctx.shadowOffsetY = 6;
+            ctx.drawImage(images[type], screenX, yOffset, 64, 96);
+        } else {
+            // Заглушка (пиксельная, но красивая)
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = '#00000060';
+            ctx.shadowOffsetY = 6;
+            
+            // Тень
+            ctx.fillStyle = '#00000040';
+            ctx.beginPath();
+            ctx.ellipse(screenX + 32, yOffset + 90, 25, 10, 0, 0, Math.PI*2);
+            ctx.fill();
+            
+            // Силуэт
+            ctx.fillStyle = '#5f6f8f';
+            ctx.fillRect(screenX + 12, yOffset + 10, 40, 70);
+            ctx.fillStyle = '#d4b28c';
+            ctx.fillRect(screenX + 22, yOffset, 20, 20);
+            
+            // Пиксельные глаза
+            ctx.fillStyle = '#0a0a0a';
+            ctx.fillRect(screenX + 28, yOffset + 6, 4, 4);
+            ctx.fillRect(screenX + 40, yOffset + 6, 4, 4);
+        }
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+    }
+
+    // Основная отрисовка
+    function renderGame() {
+        ctx.clearRect(0, 0, 1000, 600);
+
+        // 1. Стена с деталями
+        drawWall();
+        
+        // 2. Объекты на стене (двери, окна)
         objects.forEach(obj => {
             let screenX = getScreenX(obj.x);
-            
-            if (obj.type === 'door') {
-                ctx.fillStyle = '#8b6e4c';
-                ctx.fillRect(screenX, 190, 55, 180);
-                ctx.fillStyle = '#c9b27c';
-                ctx.fillRect(screenX + 15, 250, 25, 50);
-                ctx.fillStyle = '#f0d090';
-                ctx.fillRect(screenX + 40, 280, 8, 8);
-            } 
-            else if (obj.type === 'stairs') {
-                ctx.fillStyle = '#8b7a5a';
-                ctx.fillRect(screenX, 230, 55, 140);
-                for (let i = 0; i < 5; i++) {
-                    ctx.fillStyle = '#6b5a3a';
-                    ctx.fillRect(screenX + 8 + i*8, 240 + i*25, 6, 50);
-                }
-            } 
-            else if (obj.type === 'window') {
-                ctx.fillStyle = '#a5d0ff';
-                ctx.fillRect(screenX + 5, 200, 50, 120);
-                ctx.fillStyle = '#2c3e50';
-                ctx.fillRect(screenX + 25, 200, 6, 120);
-                ctx.fillRect(screenX + 5, 260, 50, 6);
+            if (screenX > -100 && screenX < 1100) {  // оптимизация
+                drawObject(obj, screenX);
             }
         });
 
-        // --- NPC ---
+        // 3. Пол
+        drawFloor();
+
+        // 4. Персонажи NPC (твои)
         npcs.forEach(npc => {
             let screenX = getScreenX(npc.x);
-            let npcY = 280;
-            
-            let depthOffset = 0;
-            if (npc.depth === 'wall') depthOffset = -20;
-            else if (npc.depth === 'center') depthOffset = 20;
-            else if (npc.depth === 'front') depthOffset = 50;
-            
-            if (npc.type === 'teacher') {
-                drawSprite('teacher', npc.x, npcY - 40 + depthOffset, 64, 96);
-            } else if (npc.type === 'classmate') {
-                drawSprite('classmate', npc.x, npcY - 40 + depthOffset, 64, 96);
-            } else if (npc.type === 'friend') {
-                drawSprite('friend', npc.x, npcY - 40 + depthOffset, 64, 96);
+            if (screenX > -100 && screenX < 1100) {
+                let depthOffset = 0;
+                if (npc.depth === 'wall') depthOffset = -15;
+                else if (npc.depth === 'center') depthOffset = 20;
+                else if (npc.depth === 'front') depthOffset = 45;
+                
+                drawCharacter(npc.texture, npc.x, 300, depthOffset);
+                
+                // Имя
+                ctx.font = 'bold 16px "Courier New"';
+                ctx.fillStyle = '#fff5e0';
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = '#000000';
+                ctx.shadowOffsetY = 3;
+                ctx.fillText(npc.name, screenX, 280 + depthOffset);
             }
-            
-            ctx.font = 'bold 16px "Courier New"';
-            ctx.fillStyle = 'white';
-            ctx.strokeStyle = 'black';
-            ctx.lineWidth = 4;
-            ctx.strokeText(npc.name, screenX, npcY - 50 + depthOffset);
-            ctx.fillText(npc.name, screenX, npcY - 50 + depthOffset);
         });
 
-        // --- МОТЯ (всегда в центре экрана) ---
-        let heroScreenX = CAMERA_OFFSET_X - 32;  // центрируем спрайт
-        let heroY = 330;
+        // 5. Мотя (с анимацией)
+        let heroScreenX = CAMERA_OFFSET_X - 32;
         
-        let heroSprite = 'hero_idle';
-        if (motyaDirection === 1) {
-            heroSprite = 'hero_walk1';
-        } else if (motyaDirection === 2) {
-            heroSprite = 'hero_walk2';
-        }
+        // Определяем текстуру для анимации
+        let motyaTexture = 'motya_idle';
+        if (motyaDirection === 1) motyaTexture = 'motya_walk1';
+        else if (motyaDirection === 2) motyaTexture = 'motya_walk2';
         
-        if (images[heroSprite]) {
-            ctx.drawImage(images[heroSprite], heroScreenX, heroY - 40, 64, 96);
+        // Рисуем Мотю
+        if (images[motyaTexture]) {
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00000090';
+            ctx.shadowOffsetY = 8;
+            ctx.drawImage(images[motyaTexture], heroScreenX, 260, 64, 96);
         } else {
-            ctx.fillStyle = '#ff00ff';
-            ctx.fillRect(heroScreenX, heroY - 40, 64, 96);
+            // Заглушка, если текстуры нет
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#00000080';
+            ctx.shadowOffsetY = 8;
+            
+            ctx.fillStyle = '#f0b27a';
+            ctx.fillRect(heroScreenX + 12, 270, 40, 70);
+            ctx.fillStyle = '#f5d0a9';
+            ctx.fillRect(heroScreenX + 22, 260, 20, 20);
+            
+            ctx.fillStyle = '#202020';
+            ctx.fillRect(heroScreenX + 28, 266, 4, 4);
+            ctx.fillRect(heroScreenX + 40, 266, 4, 4);
         }
         
-        ctx.font = 'bold 18px "Courier New"';
-        ctx.fillStyle = '#ffd966';
-        ctx.strokeStyle = 'black';
-        ctx.strokeText('Мотя', heroScreenX, heroY - 50);
-        ctx.fillText('Мотя', heroScreenX, heroY - 50);
-
-        // --- ПОДСВЕТКА NPC РЯДОМ (с учетом камеры) ---
+        // Имя Моти
+        ctx.font = 'bold 20px "Courier New"';
+        ctx.fillStyle = '#ffe694';
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = '#b87c2a';
+        ctx.shadowOffsetY = 4;
+        ctx.fillText('Мотя', heroScreenX, 250);
+        
+        // Подсветка NPC рядом
         if (nearbyNPC && !dialogActive) {
-            ctx.strokeStyle = '#ffd966';
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = '#ffffa0';
+            ctx.strokeStyle = '#ffecaa';
             ctx.lineWidth = 5;
-            ctx.setLineDash([10, 10]);
+            ctx.setLineDash([12, 12]);
             
             let npc = nearbyNPC;
             let screenX = getScreenX(npc.x);
-            let depthOffset = npc.depth === 'wall' ? -20 : (npc.depth === 'center' ? 20 : 50);
+            let depthOffset = npc.depth === 'wall' ? -15 : (npc.depth === 'center' ? 20 : 45);
             
-            ctx.strokeRect(screenX - 5, 230 + depthOffset, 74, 110);
+            ctx.strokeRect(screenX - 6, 230 + depthOffset, 76, 116);
             ctx.setLineDash([]);
         }
+        
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
 
         // Статус
         let place = objects.find(o => o.x === motyaX);
         document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
     }
 
-    // ---------- АНИМАЦИЯ ----------
+    // ---------- АНИМАЦИЯ ХОДЬБЫ ----------
     function updateWalkAnimation(direction) {
         if (direction !== 0) {
             motyaDirection = direction;
             walkTimer++;
-            if (walkTimer > 5) {
+            if (walkTimer > 6) {
                 motyaFrame = (motyaFrame + 1) % 2;
                 walkTimer = 0;
             }
@@ -492,11 +606,8 @@
         let newX = motyaX + dx;
         if (newX >= 0 && newX < WORLD_WIDTH) {
             motyaX = newX;
-            if (dx > 0) {
-                updateWalkAnimation(2);
-            } else {
-                updateWalkAnimation(1);
-            }
+            if (dx > 0) updateWalkAnimation(2);
+            else updateWalkAnimation(1);
         }
         updateNearbyNPC();
     }
@@ -600,7 +711,7 @@
     function gameLoop() {
         if (!dialogActive && motyaDirection !== 0) {
             walkTimer++;
-            if (walkTimer > 5) {
+            if (walkTimer > 6) {
                 motyaFrame = (motyaFrame + 1) % 2;
                 walkTimer = 0;
             }
