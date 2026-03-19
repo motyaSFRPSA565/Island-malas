@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школа Моти • Пиксель-арт RPG</title>
+    <title>Школа Моти • 90-е аниме RPG</title>
     <style>
         * {
             box-sizing: border-box;
@@ -168,16 +168,13 @@
             font-size: 16px;
             text-shadow: 1px 1px 0 #0b1c2b;
         }
-        .github-corner {
-            opacity: 0.6;
-        }
     </style>
 </head>
 <body>
 <div class="game-container">
     <canvas id="gameCanvas" width="1000" height="600"></canvas>
 
-    <!-- Диалоговое окно (стильное, пиксельное) -->
+    <!-- Диалоговое окно -->
     <div id="dialogOverlay" class="dialog-box">
         <div id="speakerName" class="speaker-name">Персонаж</div>
         <div id="dialogText" class="dialog-text">Текст диалога</div>
@@ -197,103 +194,122 @@
     </div>
     <div style="display: flex; justify-content: space-between; margin-top: 12px; padding: 0 10px;">
         <span class="hint">←→ ходить | 💬 говорить</span>
-        <span class="hint">✨ твои текстуры — в объекте TEXTURES</span>
+        <span class="hint">✨ персонажи поворачиваются</span>
     </div>
 </div>
 
 <script>
 (function() {
     // ----------------------------------------------------------------
-    // ТВОИ ТЕКСТУРЫ — СЮДА ВСТАВЛЯЙ СВОИ РИСУНКИ (PNG, base64 или ссылки)
+    // ТВОИ ТЕКСТУРЫ — СЮДА ВСТАВЛЯЙ СВОИ РИСУНКИ
     // ----------------------------------------------------------------
     const TEXTURES = {
-        // ===== МОТЯ (анимация ходьбы) =====
-        // тебе нужно 3 спрайта: стоячий, шаг левой, шаг правой
-        motya_idle: '',      // вставь сюда свой PNG (base64 или URL)
-        motya_walk1: '',      // шаг левой
-        motya_walk2: '',      // шаг правой
+        // Мотя (с поворотом)
+        motya_idle_right: '',    // стоит лицом вправо
+        motya_idle_left: '',     // стоит лицом влево
+        motya_walk_right1: '',   // шаг правой (вправо)
+        motya_walk_right2: '',   // шаг левой (вправо)
+        motya_walk_left1: '',    // шаг левой (влево)
+        motya_walk_left2: '',    // шаг правой (влево)
         
-        // ===== ПЕРСОНАЖИ (каждый может иметь свои спрайты) =====
-        // пока пусто — ты сам добавишь
+        // Персонажи (примеры, заменишь на свои)
+        teacher: '',
+        classmate: '',
+        friend: '',
         
-        // ===== ОКРУЖЕНИЕ (детализированное) =====
-        // можешь оставить как есть или заменить своими
-        wall_pattern: '',     // текстура стены
-        floor_pattern: '',    // текстура пола
-        door_texture: '',     // дверь
-        window_texture: '',   // окно
-        stairs_texture: ''    // лестница
+        // Окружение (можно заменить)
+        door: '',
+        window: '',
+        stairs: ''
     };
 
-    // ----------------------------------------------------------------
-    // ДЕТАЛИЗИРОВАННЫЙ ПИКСЕЛЬНЫЙ ФОН (встроенный, но ты можешь заменить)
-    // ----------------------------------------------------------------
-    const PIXEL_STYLES = {
-        wallBase: '#2d4c6e',
-        wallPanel: '#1f3a54',
-        wallHighlight: '#3f6790',
-        floorBase: '#bd9f6e',
-        floorDark: '#9f8357',
-        floorLight: '#dbbc85',
-        shadow: 'rgba(0,0,0,0.3)',
-        glow: 'rgba(200,230,255,0.15)'
-    };
+    // ---------- ТЕСТОВЫЕ ПЕРСОНАЖИ (чтобы не пропадали) ----------
+    // ТЫ ПОТОМ ЗАМЕНИШЬ НА СВОИХ
+    const npcs = [
+        { 
+            id: 'teacher1', 
+            name: 'учитель', 
+            texture: 'teacher', 
+            x: 8,
+            depth: 'wall',  // у стены
+            dialog: {
+                text: 'Мотя, когда будешь уроки делать?',
+                options: ['Сегодня', 'Завтра'],
+                responses: ['Ну смотри, не затягивай.', 'Лентяй...']
+            }
+        },
+        { 
+            id: 'classmate1', 
+            name: 'одноклассница', 
+            texture: 'classmate', 
+            x: 15,
+            depth: 'center',  // посередине
+            dialog: {
+                text: 'Привет! Как каникулы прошли?',
+                options: ['Отлично!', 'Так себе'],
+                responses: ['Круто, я тоже отдохнула!', 'Бывает... в школе увидимся']
+            }
+        },
+        { 
+            id: 'friend1', 
+            name: 'друг Юки', 
+            texture: 'friend', 
+            x: 22,
+            depth: 'front',  // ближе к игроку
+            dialog: {
+                text: 'Мотя! В новую игру рубились?',
+                options: ['Ага', 'Не, не было времени'],
+                responses: ['Я тебе дам поиграть!', 'Жалко, крутая игра']
+            }
+        },
+        { 
+            id: 'teacher2', 
+            name: 'завуч', 
+            texture: 'teacher', 
+            x: 30,
+            depth: 'wall',
+            dialog: {
+                text: 'Опять по коридору бегаешь?',
+                options: ['Я не бегал', 'Извините'],
+                responses: ['Смотри мне...', 'Так-то лучше']
+            }
+        }
+    ];
+
+    // ---------- ОБЪЕКТЫ ----------
+    const objects = [
+        { type: 'door', x: 4, name: 'кабинет 210' },
+        { type: 'door', x: 11, name: 'кабинет 211' },
+        { type: 'window', x: 18, name: 'окно' },
+        { type: 'stairs', x: 25, name: 'лестница' },
+        { type: 'door', x: 32, name: 'кабинет 212' }
+    ];
 
     // ---------- НАСТРОЙКИ ----------
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    let motyaX = 15;  // стартовая позиция
-    let motyaFrame = 0;
-    let motyaDirection = 0;  // 0 - idle, 1 - left step, 2 - right step
+    let motyaX = 15;
+    let motyaDirection = 'right';  // 'right' или 'left'
+    let motyaWalkState = 0;  // 0 - idle, 1 - шаг1, 2 - шаг2
     let walkTimer = 0;
+    let isMoving = false;
     
-    const WORLD_WIDTH = 40;  // 40 клеток (длинный коридор)
-    const CELL_SIZE = 64;     // большой пиксель-арт
+    const WORLD_WIDTH = 40;
+    const CELL_SIZE = 64;  // ширина клетки
     
-    const CAMERA_OFFSET_X = 500;  // центр экрана 1000/2
-    const CAMERA_OFFSET_Y = 300;
+    const CAMERA_OFFSET_X = 500;
 
     let dialogActive = false;
     let currentNPC = null;
     let nearbyNPC = null;
 
-    // ---------- ТВОИ ПЕРСОНАЖИ (ДОБАВЛЯЙ СЮДА) ----------
-    // ты сам наполнишь этот массив своими персонажами
-    const npcs = [
-        // Формат:
-        // { 
-        //     id: 'teacher1',           // уникальный id
-        //     name: 'учитель',           // имя
-        //     texture: 'teacher',        // ключ из TEXTURES
-        //     x: 8,                      // позиция
-        //     depth: 'wall',              // wall, center, front
-        //     dialog: {                   // диалог
-        //         text: 'Привет!',
-        //         options: ['Да', 'Нет'],
-        //         responses: ['Ок', 'Понятно']
-        //     }
-        // }
-    ];
-
-    // ---------- ОБЪЕКТЫ НА СТЕНЕ ----------
-    const objects = [
-        { type: 'door', x: 3, name: 'кабинет 210' },
-        { type: 'door', x: 8, name: 'кабинет 211' },
-        { type: 'window', x: 13, name: 'окно' },
-        { type: 'stairs', x: 18, name: 'лестница' },
-        { type: 'door', x: 23, name: 'кабинет 212' },
-        { type: 'window', x: 28, name: 'окно' },
-        { type: 'door', x: 33, name: 'кабинет 213' },
-        { type: 'window', x: 37, name: 'окно' }
-    ];
-
     // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЙ ----------
     const images = {};
     function loadImages() {
         for (let key in TEXTURES) {
-            if (TEXTURES[key]) {  // если текстура задана
+            if (TEXTURES[key]) {
                 let img = new Image();
                 img.src = TEXTURES[key];
                 images[key] = img;
@@ -302,283 +318,193 @@
     }
     loadImages();
 
-    // ---------- ПИКСЕЛЬНАЯ ОТРИСОВКА (ДЕТАЛИЗИРОВАННАЯ) ----------
+    // ---------- КАМЕРА ----------
     function getScreenX(worldX) {
         return worldX * CELL_SIZE - (motyaX * CELL_SIZE - CAMERA_OFFSET_X);
     }
 
-    // Рисование стены с текстурой и тенями
-    function drawWall() {
-        // Градиент стены (объём)
-        let gradient = ctx.createLinearGradient(0, 0, 0, 380);
-        gradient.addColorStop(0, PIXEL_STYLES.wallHighlight);
-        gradient.addColorStop(0.6, PIXEL_STYLES.wallBase);
-        gradient.addColorStop(1, PIXEL_STYLES.wallPanel);
-        ctx.fillStyle = gradient;
-        ctx.fillRect(0, 0, 1000, 380);
-
-        // Детали стены (панели)
-        ctx.shadowColor = PIXEL_STYLES.shadow;
-        ctx.shadowBlur = 8;
-        ctx.shadowOffsetY = 2;
-        
-        for (let i = 0; i < 6; i++) {
-            ctx.fillStyle = i % 2 === 0 ? PIXEL_STYLES.wallPanel : PIXEL_STYLES.wallBase;
-            ctx.fillRect(0, 60 + i * 50, 1000, 25);
-        }
-        
-        // Блик сверху
-        ctx.shadowBlur = 15;
-        ctx.fillStyle = PIXEL_STYLES.glow;
-        ctx.fillRect(0, 0, 1000, 40);
-        
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-
-        // Линия горизонта (плинтус)
-        ctx.fillStyle = '#4d3e2e';
-        ctx.fillRect(0, 360, 1000, 10);
-        ctx.fillStyle = '#6b523a';
-        ctx.fillRect(0, 362, 1000, 6);
-    }
-
-    // Рисование пола с текстурой и перспективой
-    function drawFloor() {
-        // Основной пол
-        let grad = ctx.createLinearGradient(0, 380, 0, 600);
-        grad.addColorStop(0, PIXEL_STYLES.floorLight);
-        grad.addColorStop(0.4, PIXEL_STYLES.floorBase);
-        grad.addColorStop(1, PIXEL_STYLES.floorDark);
-        ctx.fillStyle = grad;
-        ctx.fillRect(0, 380, 1000, 220);
-
-        // Тени от персонажей (атмосферные)
-        ctx.shadowColor = '#00000040';
-        ctx.shadowBlur = 20;
-        ctx.shadowOffsetY = -5;
-        
-        // Доски пола (детализация)
-        ctx.strokeStyle = PIXEL_STYLES.floorDark;
-        ctx.lineWidth = 3;
-        ctx.shadowBlur = 5;
-        
-        for (let i = 0; i < 12; i++) {
-            let y = 400 + i * 18;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(1000, y);
-            ctx.strokeStyle = i % 3 === 0 ? '#826e4a' : '#9f8357';
-            ctx.stroke();
-        }
-        
-        // Светлые блики на полу
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#fff9e6';
-        ctx.strokeStyle = '#ebd4aa';
-        ctx.lineWidth = 2;
-        for (let i = 1; i < 12; i+=2) {
-            ctx.beginPath();
-            ctx.moveTo(0, 408 + i * 18);
-            ctx.lineTo(1000, 408 + i * 18);
-            ctx.stroke();
-        }
-        
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = 'transparent';
-    }
-
-    // Рисование объекта (дверь/окно) с деталями и тенями
-    function drawObject(obj, screenX) {
-        ctx.shadowColor = '#00000080';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetY = 5;
-        
-        if (obj.type === 'door') {
-            // Дверь с текстурой дерева
-            ctx.fillStyle = '#7b5f41';
-            ctx.fillRect(screenX, 160, 60, 200);
-            
-            // Панели двери
-            ctx.fillStyle = '#5f482f';
-            ctx.fillRect(screenX + 10, 180, 40, 40);
-            ctx.fillRect(screenX + 10, 240, 40, 40);
-            ctx.fillRect(screenX + 10, 300, 40, 40);
-            
-            // Окошко в двери
-            ctx.fillStyle = '#c0d8f0';
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#acd4ff';
-            ctx.fillRect(screenX + 15, 190, 30, 30);
-            
-            // Ручка
-            ctx.fillStyle = '#eec68f';
-            ctx.shadowBlur = 10;
-            ctx.fillRect(screenX + 45, 270, 8, 8);
-        }
-        else if (obj.type === 'window') {
-            // Окно со стеклом
-            ctx.fillStyle = '#5f7f9f';
-            ctx.fillRect(screenX + 5, 170, 50, 140);
-            
-            // Переплёты
-            ctx.fillStyle = '#2f4055';
-            ctx.fillRect(screenX + 25, 170, 8, 140);
-            ctx.fillRect(screenX + 5, 220, 50, 8);
-            ctx.fillRect(screenX + 5, 270, 50, 8);
-            
-            // Блик на стекле
-            ctx.fillStyle = '#ffffff30';
-            ctx.fillRect(screenX + 10, 180, 15, 25);
-        }
-        else if (obj.type === 'stairs') {
-            // Лестница
-            ctx.fillStyle = '#7b6b4a';
-            ctx.fillRect(screenX, 220, 60, 140);
-            
-            for (let i = 0; i < 5; i++) {
-                ctx.fillStyle = '#9f8b62';
-                ctx.fillRect(screenX + 5 + i*10, 230 + i*25, 8, 50);
-            }
-        }
-        
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-    }
-
-    // Рисование персонажа (по текстуре или заглушке)
-    function drawCharacter(type, worldX, baseY, depth = 0) {
-        let screenX = getScreenX(worldX);
-        let yOffset = baseY - 40 + depth;
-        
-        if (images[type]) {
-            // Если есть текстура — рисуем её
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00000070';
-            ctx.shadowOffsetY = 6;
-            ctx.drawImage(images[type], screenX, yOffset, 64, 96);
-        } else {
-            // Заглушка (пиксельная, но красивая)
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = '#00000060';
-            ctx.shadowOffsetY = 6;
-            
-            // Тень
-            ctx.fillStyle = '#00000040';
-            ctx.beginPath();
-            ctx.ellipse(screenX + 32, yOffset + 90, 25, 10, 0, 0, Math.PI*2);
-            ctx.fill();
-            
-            // Силуэт
-            ctx.fillStyle = '#5f6f8f';
-            ctx.fillRect(screenX + 12, yOffset + 10, 40, 70);
-            ctx.fillStyle = '#d4b28c';
-            ctx.fillRect(screenX + 22, yOffset, 20, 20);
-            
-            // Пиксельные глаза
-            ctx.fillStyle = '#0a0a0a';
-            ctx.fillRect(screenX + 28, yOffset + 6, 4, 4);
-            ctx.fillRect(screenX + 40, yOffset + 6, 4, 4);
-        }
-        
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
-    }
-
-    // Основная отрисовка
+    // ---------- ОТРИСОВКА ----------
     function renderGame() {
         ctx.clearRect(0, 0, 1000, 600);
 
-        // 1. Стена с деталями
-        drawWall();
+        // --- СТЕНА ---
+        // Основной цвет стены
+        ctx.fillStyle = '#3a5f7a';
+        ctx.fillRect(0, 0, 1000, 350);
         
-        // 2. Объекты на стене (двери, окна)
+        // Панели на стене
+        ctx.fillStyle = '#2d4c6e';
+        for (let i = 0; i < 5; i++) {
+            ctx.fillRect(0, 70 + i * 60, 1000, 20);
+        }
+        
+        // Верхний свет
+        ctx.fillStyle = '#4f7b9e';
+        ctx.fillRect(0, 0, 1000, 30);
+        
+        // Линия плинтуса
+        ctx.fillStyle = '#5d4a35';
+        ctx.fillRect(0, 340, 1000, 10);
+        ctx.fillStyle = '#7b6242';
+        ctx.fillRect(0, 345, 1000, 5);
+
+        // --- ПОЛ ---
+        ctx.fillStyle = '#bd9f6e';
+        ctx.fillRect(0, 350, 1000, 250);
+        
+        // Доски пола
+        ctx.strokeStyle = '#9f8357';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 10; i++) {
+            let y = 380 + i * 25;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(1000, y);
+            ctx.stroke();
+        }
+        
+        // Тени на полу
+        ctx.fillStyle = '#00000020';
+        ctx.fillRect(0, 350, 1000, 10);
+
+        // --- ОБЪЕКТЫ (ДВЕРИ, ОКНА) ---
         objects.forEach(obj => {
             let screenX = getScreenX(obj.x);
-            if (screenX > -100 && screenX < 1100) {  // оптимизация
-                drawObject(obj, screenX);
+            if (screenX > -100 && screenX < 1100) {
+                
+                if (obj.type === 'door') {
+                    // Дверь (нормальной ширины)
+                    ctx.fillStyle = '#8b6e4c';
+                    ctx.fillRect(screenX, 190, 64, 160);  // ширина 64 как клетка
+                    
+                    // Ручка
+                    ctx.fillStyle = '#f0d090';
+                    ctx.fillRect(screenX + 50, 270, 8, 8);
+                    
+                    // Окошко в двери
+                    ctx.fillStyle = '#c0d8f0';
+                    ctx.fillRect(screenX + 15, 230, 30, 30);
+                }
+                else if (obj.type === 'window') {
+                    // Окно
+                    ctx.fillStyle = '#a5d0ff';
+                    ctx.fillRect(screenX + 5, 200, 54, 120);
+                    
+                    // Перекладины
+                    ctx.fillStyle = '#2c3e50';
+                    ctx.fillRect(screenX + 28, 200, 8, 120);
+                    ctx.fillRect(screenX + 5, 260, 54, 8);
+                }
+                else if (obj.type === 'stairs') {
+                    // Лестница
+                    ctx.fillStyle = '#8b7a5a';
+                    ctx.fillRect(screenX, 240, 64, 120);
+                    
+                    for (let i = 0; i < 4; i++) {
+                        ctx.fillStyle = '#6b5a3a';
+                        ctx.fillRect(screenX + 8 + i*12, 250 + i*25, 8, 40);
+                    }
+                }
             }
         });
 
-        // 3. Пол
-        drawFloor();
-
-        // 4. Персонажи NPC (твои)
+        // --- NPC (ТЕПЕРЬ ОНИ ЕСТЬ) ---
         npcs.forEach(npc => {
             let screenX = getScreenX(npc.x);
             if (screenX > -100 && screenX < 1100) {
-                let depthOffset = 0;
-                if (npc.depth === 'wall') depthOffset = -15;
-                else if (npc.depth === 'center') depthOffset = 20;
-                else if (npc.depth === 'front') depthOffset = 45;
                 
-                drawCharacter(npc.texture, npc.x, 300, depthOffset);
+                // Смещение по глубине
+                let depthOffset = 0;
+                if (npc.depth === 'wall') depthOffset = -10;
+                else if (npc.depth === 'center') depthOffset = 15;
+                else if (npc.depth === 'front') depthOffset = 35;
+                
+                let npcY = 280 + depthOffset;  // Стоят на полу
+                
+                // Если есть текстура - рисуем, если нет - заглушку
+                if (images[npc.texture]) {
+                    ctx.drawImage(images[npc.texture], screenX, npcY - 40, 64, 96);
+                } else {
+                    // Заглушка чтобы было видно
+                    ctx.fillStyle = '#6b8cff';
+                    ctx.fillRect(screenX + 10, npcY - 30, 44, 70);
+                    ctx.fillStyle = '#f0d5b0';
+                    ctx.fillRect(screenX + 20, npcY - 40, 24, 24);
+                }
                 
                 // Имя
                 ctx.font = 'bold 16px "Courier New"';
-                ctx.fillStyle = '#fff5e0';
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = '#000000';
-                ctx.shadowOffsetY = 3;
-                ctx.fillText(npc.name, screenX, 280 + depthOffset);
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = 'black';
+                ctx.lineWidth = 3;
+                ctx.strokeText(npc.name, screenX, npcY - 50);
+                ctx.fillText(npc.name, screenX, npcY - 50);
             }
         });
 
-        // 5. Мотя (с анимацией)
-        let heroScreenX = CAMERA_OFFSET_X - 32;
+        // --- МОТЯ (БОЛЬШОЙ, С ПОВОРОТОМ) ---
+        let heroScreenX = CAMERA_OFFSET_X - 32;  // центрируем
+        let heroY = 310;  // Стоит на полу
         
-        // Определяем текстуру для анимации
-        let motyaTexture = 'motya_idle';
-        if (motyaDirection === 1) motyaTexture = 'motya_walk1';
-        else if (motyaDirection === 2) motyaTexture = 'motya_walk2';
+        // Выбираем текстуру в зависимости от направления и анимации
+        let motyaTexture = '';
+        if (!isMoving) {
+            // Стоит
+            motyaTexture = motyaDirection === 'right' ? 'motya_idle_right' : 'motya_idle_left';
+        } else {
+            // Идёт
+            if (motyaDirection === 'right') {
+                motyaTexture = motyaWalkState === 1 ? 'motya_walk_right1' : 'motya_walk_right2';
+            } else {
+                motyaTexture = motyaWalkState === 1 ? 'motya_walk_left1' : 'motya_walk_left2';
+            }
+        }
         
         // Рисуем Мотю
         if (images[motyaTexture]) {
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#00000090';
-            ctx.shadowOffsetY = 8;
-            ctx.drawImage(images[motyaTexture], heroScreenX, 260, 64, 96);
+            ctx.drawImage(images[motyaTexture], heroScreenX, heroY - 40, 64, 96);
         } else {
-            // Заглушка, если текстуры нет
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#00000080';
-            ctx.shadowOffsetY = 8;
+            // Заглушка (чтобы было видно)
+            ctx.fillStyle = '#d97706';
+            ctx.fillRect(heroScreenX + 12, heroY - 30, 40, 70);
+            ctx.fillStyle = '#f0d5b0';
+            ctx.fillRect(heroScreenX + 22, heroY - 40, 20, 20);
             
-            ctx.fillStyle = '#f0b27a';
-            ctx.fillRect(heroScreenX + 12, 270, 40, 70);
-            ctx.fillStyle = '#f5d0a9';
-            ctx.fillRect(heroScreenX + 22, 260, 20, 20);
-            
-            ctx.fillStyle = '#202020';
-            ctx.fillRect(heroScreenX + 28, 266, 4, 4);
-            ctx.fillRect(heroScreenX + 40, 266, 4, 4);
+            // Глаза в зависимости от направления
+            ctx.fillStyle = 'black';
+            if (motyaDirection === 'right') {
+                ctx.fillRect(heroScreenX + 32, heroY - 34, 4, 4);
+                ctx.fillRect(heroScreenX + 44, heroY - 34, 4, 4);
+            } else {
+                ctx.fillRect(heroScreenX + 22, heroY - 34, 4, 4);
+                ctx.fillRect(heroScreenX + 34, heroY - 34, 4, 4);
+            }
         }
         
         // Имя Моти
         ctx.font = 'bold 20px "Courier New"';
-        ctx.fillStyle = '#ffe694';
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = '#b87c2a';
-        ctx.shadowOffsetY = 4;
-        ctx.fillText('Мотя', heroScreenX, 250);
-        
+        ctx.fillStyle = '#ffd966';
+        ctx.strokeStyle = 'black';
+        ctx.lineWidth = 4;
+        ctx.strokeText('Мотя', heroScreenX, heroY - 50);
+        ctx.fillText('Мотя', heroScreenX, heroY - 50);
+
         // Подсветка NPC рядом
         if (nearbyNPC && !dialogActive) {
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = '#ffffa0';
-            ctx.strokeStyle = '#ffecaa';
-            ctx.lineWidth = 5;
-            ctx.setLineDash([12, 12]);
+            ctx.strokeStyle = '#ffd966';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 8]);
             
             let npc = nearbyNPC;
             let screenX = getScreenX(npc.x);
-            let depthOffset = npc.depth === 'wall' ? -15 : (npc.depth === 'center' ? 20 : 45);
+            let depthOffset = 0;
+            if (npc.depth === 'wall') depthOffset = -10;
+            else if (npc.depth === 'center') depthOffset = 15;
+            else if (npc.depth === 'front') depthOffset = 35;
             
-            ctx.strokeRect(screenX - 6, 230 + depthOffset, 76, 116);
+            ctx.strokeRect(screenX - 5, 230 + depthOffset, 74, 110);
             ctx.setLineDash([]);
         }
-        
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetY = 0;
 
         // Статус
         let place = objects.find(o => o.x === motyaX);
@@ -587,17 +513,19 @@
 
     // ---------- АНИМАЦИЯ ХОДЬБЫ ----------
     function updateWalkAnimation(direction) {
-        if (direction !== 0) {
-            motyaDirection = direction;
-            walkTimer++;
-            if (walkTimer > 6) {
-                motyaFrame = (motyaFrame + 1) % 2;
-                walkTimer = 0;
-            }
-        } else {
-            motyaDirection = 0;
-            motyaFrame = 0;
+        isMoving = true;
+        motyaDirection = direction;
+        walkTimer++;
+        if (walkTimer > 6) {
+            motyaWalkState = motyaWalkState === 1 ? 2 : 1;
+            walkTimer = 0;
         }
+    }
+
+    function stopWalking() {
+        isMoving = false;
+        motyaWalkState = 0;
+        walkTimer = 0;
     }
 
     // ---------- ДВИЖЕНИЕ ----------
@@ -606,14 +534,13 @@
         let newX = motyaX + dx;
         if (newX >= 0 && newX < WORLD_WIDTH) {
             motyaX = newX;
-            if (dx > 0) updateWalkAnimation(2);
-            else updateWalkAnimation(1);
+            if (dx > 0) {
+                updateWalkAnimation('right');
+            } else {
+                updateWalkAnimation('left');
+            }
         }
         updateNearbyNPC();
-    }
-
-    function stopWalking() {
-        updateWalkAnimation(0);
     }
 
     // ---------- ДИАЛОГИ ----------
@@ -709,10 +636,10 @@
 
     // Анимационный цикл
     function gameLoop() {
-        if (!dialogActive && motyaDirection !== 0) {
+        if (!dialogActive && isMoving) {
             walkTimer++;
             if (walkTimer > 6) {
-                motyaFrame = (motyaFrame + 1) % 2;
+                motyaWalkState = motyaWalkState === 1 ? 2 : 1;
                 walkTimer = 0;
             }
         }
