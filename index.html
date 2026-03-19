@@ -2,946 +2,451 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>CS 1.6: Мост Сан-Фиерро - Финальная битва</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школа Моти • 90-е аниме квест</title>
     <style>
         * {
+            box-sizing: border-box;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
         }
-        body { margin: 0; overflow: hidden; font-family: 'Courier New', monospace; background: #0a3d0a; touch-action: none; }
-        #info {
-            position: absolute;
-            top: 5px;
-            left: 5px;
-            color: #ffcc00;
-            text-shadow: 2px 2px 0 #000;
-            z-index: 100;
-            font-size: 14px;
-            background: rgba(0,0,0,0.8);
-            padding: 5px 10px;
-            border-radius: 15px;
-            border: 2px solid #8b4513;
-            pointer-events: none;
-        }
-        #story-container {
-            position: absolute;
-            top: 50px;
-            left: 10px;
-            right: 10px;
-            max-width: 500px;
-            margin: 0 auto;
-            z-index: 90;
-            transition: transform 0.3s;
-        }
-        #story {
-            background: rgba(0,0,0,0.8);
-            color: #fff;
-            padding: 10px;
-            border: 2px solid #8b4513;
-            border-radius: 10px;
-            font-size: 14px;
-            backdrop-filter: blur(5px);
-            text-align: center;
-        }
-        #toggle-story {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: #8b4513;
-            color: white;
-            border: 2px solid #ffaa00;
-            border-radius: 20px;
-            width: 30px;
-            height: 30px;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: #1a2b3c;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-weight: bold;
-            cursor: pointer;
-            z-index: 91;
+            align-items: center;
+            font-family: 'Courier New', monospace;
         }
-        #objective {
-            position: absolute;
-            top: 180px;
-            left: 10px;
-            background: rgba(0,0,0,0.8);
-            color: #ffaa00;
-            padding: 8px;
-            border-left: 5px solid #ff0000;
-            z-index: 95;
-            font-size: 14px;
-            border-radius: 0 10px 10px 0;
+        .game-wrapper {
+            background: #0a1a2a;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 10px 0 #04121e, 0 20px 30px rgba(0,0,0,0.6);
+            border: 2px solid #7f8c9a;
         }
-        #timer {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(0,0,0,0.9);
-            color: #ff5555;
-            padding: 10px 20px;
-            border: 3px solid #ffff00;
-            border-radius: 40px;
+        canvas {
+            display: block;
+            margin: 0 auto;
+            width: 800px;
+            height: 500px;
+            border-radius: 12px;
+            box-shadow: inset 0 0 0 2px #7f8c9a, 0 0 0 3px #2c3e50;
+            background: #6b7f8f;
+            image-rendering: pixelated;
+        }
+        .control-panel {
+            margin-top: 16px;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            justify-content: space-between;
+            background: #2e4155;
+            padding: 12px 20px;
+            border-radius: 60px;
+            border: 2px solid #0f1c2a;
+            box-shadow: inset 0 -2px 0 #0f1c2a;
+        }
+        .dpad {
+            display: flex;
+            gap: 6px;
+        }
+        .dpad button {
+            background: #4a617c;
+            border: none;
+            color: white;
             font-size: 28px;
             font-weight: bold;
-            z-index: 200;
-            text-shadow: 2px 2px 0 #000;
-            box-shadow: 0 0 20px red;
-        }
-        #truck-status {
-            position: absolute;
-            top: 80px;
-            right: 10px;
-            background: rgba(0,0,0,0.7);
-            color: #fff;
-            padding: 8px;
-            border: 2px solid #00aaff;
-            border-radius: 10px;
-            font-size: 16px;
-            z-index: 190;
-        }
-        #controls-panel {
-            position: absolute;
-            bottom: 20px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 5px;
-            z-index: 200;
-            padding: 5px;
-            background: rgba(20, 20, 20, 0.8);
-            backdrop-filter: blur(5px);
-            border-top: 3px solid #8b4513;
-            flex-wrap: wrap;
-        }
-        .ctrl-btn {
-            background: #3a6b3a;
-            border: 2px solid #c0a86a;
-            color: white;
-            font-weight: bold;
-            padding: 10px 14px;
-            border-radius: 30px;
-            font-size: 16px;
-            box-shadow: 0 4px 0 #1e3a1e;
-            text-transform: uppercase;
-            pointer-events: auto;
-            touch-action: manipulation;
+            width: 60px;
+            height: 60px;
+            border-radius: 20px;
+            box-shadow: 0 5px 0 #1e2f3f, 0 6px 10px black;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            min-width: 45px;
-            text-align: center;
+            transition: 0.03s linear;
+            line-height: 1;
+            border: 2px solid #8098b0;
         }
-        .ctrl-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
+        .dpad button:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #1e2f3f;
         }
-        #weapon-panel {
-            position: absolute;
-            bottom: 100px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            z-index: 150;
-            pointer-events: none;
-            padding: 0 10px;
-        }
-        .weapon-slot {
-            background: rgba(30, 30, 30, 0.9);
-            border: 3px solid #b8860b;
-            border-radius: 15px;
-            padding: 6px 12px;
-            color: #fff;
+        .action-btn {
+            background: #f0c45a;
+            border: none;
+            font-size: 24px;
+            padding: 12px 30px;
+            border-radius: 40px;
             font-weight: bold;
-            font-size: 16px;
-            text-shadow: 2px 2px 0 #000;
-            backdrop-filter: blur(2px);
-            box-shadow: inset 0 -3px 0 #5a3e0b;
-            pointer-events: auto;
-            touch-action: manipulation;
+            box-shadow: 0 5px 0 #b87e2a, 0 6px 10px black;
             cursor: pointer;
+            font-family: 'Courier New', monospace;
+            border: 2px solid #ffe29c;
+            color: #252017;
+            letter-spacing: 1px;
         }
-        .weapon-slot.active {
-            background: #b8860b;
-            color: #000;
-            border-color: #ffd700;
-            box-shadow: 0 0 20px gold;
+        .action-btn:active {
+            transform: translateY(5px);
+            box-shadow: 0 1px 0 #b87e2a;
         }
-        #camera-feed {
+        .status {
+            background: #1f313f;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: #b3dbff;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid #4b6e88;
+            box-shadow: inset 0 -2px 0 #0f1f2c;
+            text-shadow: 2px 2px 0 #0f1a24;
+        }
+        .info-text {
+            color: #cdddee;
+            font-size: 16px;
+            padding: 0 10px;
+            background: #152b39;
+            border-radius: 30px;
+            line-height: 40px;
+            border: 1px solid #567;
+        }
+        a {
+            color: #aac7ff;
+        }
+        .dialog-box {
             position: absolute;
-            bottom: 200px;
-            right: 10px;
-            width: 150px;
-            background: rgba(0,30,0,0.9);
-            border: 3px solid #6b8e23;
-            border-radius: 8px;
-            z-index: 300;
-            padding: 4px;
-            color: #0f0;
-            font-size: 10px;
-        }
-        .cam-row {
-            background: rgba(0,0,0,0.5);
-            margin: 2px 0;
-            padding: 3px;
-            border: 1px solid #6b8e23;
-        }
-        #joystick-move, #joystick-look {
-            position: absolute;
-            bottom: 170px;
-            width: 90px;
-            height: 90px;
-            background: rgba(50,50,50,0.6);
-            border-radius: 45px;
-            border: 3px solid #8b4513;
-            z-index: 250;
-            backdrop-filter: blur(5px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 18px;
-            touch-action: none;
-        }
-        #joystick-move { left: 15px; }
-        #joystick-look { right: 15px; }
-        #chat {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            color: #fff;
-            background: rgba(0,0,0,0.8);
-            padding: 6px;
-            border: 2px solid #8b4513;
-            font-size: 12px;
-            z-index: 400;
-            max-width: 200px;
-            border-radius: 8px;
-            pointer-events: none;
-        }
-        #health {
-            position: absolute;
-            bottom: 160px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            color: #ff5555;
+            width: 700px;
+            background: #0e1c28;
+            border: 4px solid #b1c9e8;
+            border-radius: 24px;
+            padding: 20px 30px;
+            box-shadow: 0 10px 0 #030b12, 0 15px 30px black;
+            color: #e9f2ff;
             font-size: 22px;
+            font-family: 'Courier New', monospace;
             font-weight: bold;
-            text-shadow: 2px 2px 0 #000;
-            z-index: 100;
-        }
-        #crosshair {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 20px;
-            height: 20px;
-            border: 2px solid white;
-            border-radius: 50%;
-            z-index: 1000;
+            text-shadow: 3px 3px 0 #1f374b;
+            display: none;
             pointer-events: none;
-            box-shadow: 0 0 5px black;
+            z-index: 10;
+        }
+        .dialog-options {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-top: 20px;
+            pointer-events: auto;
+        }
+        .dialog-options button {
+            background: #3a506b;
+            border: 3px solid #7d9ec0;
+            color: white;
+            font-size: 24px;
+            padding: 10px 30px;
+            border-radius: 50px;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #1f2f3f;
+            cursor: pointer;
+            transition: 0.03s;
+            text-shadow: 2px 2px 0 #1a2835;
+        }
+        .dialog-options button:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        .hint {
+            font-size: 16px;
+            background: #0a1b28;
+            padding: 6px 18px;
+            border-radius: 30px;
+            border: 1px solid #5f8bb2;
         }
     </style>
 </head>
 <body>
-    <div id="crosshair"></div>
-    <div id="info">🌉 МОСТ САН-ФИЕРРО | ОПЕРАЦИЯ "ГРУЗ"</div>
-    <div id="story-container">
-        <div id="story">📖 СЮЖЕТ: Террористы заминировали мост, чтобы уничтожить грузовик с продовольствием. Грузовик приближается по мосту! У вас есть 2 минуты, пока он не доедет до конца. Если бомба взорвётся до того, как грузовик проедет - миссия провалена.</div>
-        <div id="toggle-story">✕</div>
-    </div>
-    <div id="objective">🎯 T: Удерживайте мост 2 мин | CT: Разминируйте до приезда грузовика</div>
-    <div id="timer">02:00</div>
-    <div id="truck-status">🚚 Грузовик: 100м до финиша</div>
-    <div id="camera-feed">
-        <div class="cam-row">📹 МОСТ ЦЕНТР: 3T / 2CT</div>
-        <div class="cam-row">📹 ПОДХОДЫ: Грузовик на мосту</div>
-        <div class="cam-row">📹 ЛЕС: Чисто</div>
-    </div>
-    <div id="chat">🎮 Нажмите 1 (CT) или 2 (T)</div>
-    <div id="health">❤️ 100</div>
-    
-    <div id="weapon-panel">
-        <div class="weapon-slot active" id="weap1">🔫 M4 (30/90)</div>
-        <div class="weapon-slot" id="weap2">💣 C4 (T)</div>
-        <div class="weapon-slot" id="weap3">📻 Рация</div>
+<div class="game-wrapper">
+    <canvas id="gameCanvas" width="800" height="500"></canvas>
+
+    <!-- Диалоговое окно (появляется при разговоре) -->
+    <div id="dialogOverlay" class="dialog-box">
+        <div id="dialogText">Привет, Мотя! Как дела?</div>
+        <div class="dialog-options">
+            <button id="choice1">▶ Нормально</button>
+            <button id="choice2">▶ Кто ты?</button>
+        </div>
     </div>
 
-    <div id="controls-panel">
-        <div class="ctrl-btn" id="btn-w">W</div>
-        <div class="ctrl-btn" id="btn-s">S</div>
-        <div class="ctrl-btn" id="btn-a">A</div>
-        <div class="ctrl-btn" id="btn-d">D</div>
-        <div class="ctrl-btn" id="btn-shoot">🔫</div>
-        <div class="ctrl-btn" id="btn-jump">🦘</div>
-        <div class="ctrl-btn" id="btn-cam">📷</div>
-        <div class="ctrl-btn" id="btn-reload">🔄</div>
+    <div class="control-panel">
+        <div class="dpad">
+            <button id="btnLeft">←</button>
+            <button id="btnRight">→</button>
+        </div>
+        <div class="status" id="statusText">3 этаж • коридор</div>
+        <button class="action-btn" id="actionBtn">💬 говорить</button>
     </div>
+    <div style="display: flex; justify-content: space-between; margin-top: 10px; color:#bcd5f0; padding:0 10px;">
+        <span class="hint">←→ ходить | 💬 рядом с персонажем</span>
+        <span class="hint">✨ картинки ставь в код 👇</span>
+    </div>
+    <div style="text-align: center; color: #6e8fb0; margin-top: 8px; font-size: 15px;">
+        ⚡ сами текстуры — в массиве TEXTURES (открой код)
+    </div>
+</div>
 
-    <div id="joystick-move">🕹️</div>
-    <div id="joystick-look">👁️</div>
+<script>
+(function() {
+    // ---------- НАСТРОЙКА ТЕКСТУР (ТЫ СМОЖЕШЬ ЛЕГКО ЗАМЕНИТЬ) ----------
+    // просто меняй строки data:image... на свои картинки в base64 или ссылки
+    const TEXTURES = {
+        // главный герой Мотя (идол-пиксель)
+        hero: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAP0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwPj4+fO7cOQMdA7VdwEDtF8DwgQbVq1evRkZGBl9fXwb6Gc5AawAAy38dDy8zrI8AAAAASUVORK5CYII=', // розовый пиксель-чел
+        // учитель (очки, пиджак)
+        teacher: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAQ0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwbty48eHh4YyMjAw4DaeGAdQFDQ0NUVFRUQwMDLdv34ZRBgYGdDdQUfUAANIoI70IGz9CAAAAAElFTkSuQmCC',
+        // одноклассник (кепка)
+        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwNDR0PD09fUZGBm6DqWl4Q0NDVFhY2IyGhgY8BjPQ3gVUNAMAoqWlBRgYGBiobgYA2pQfPx2KbsoAAAAASUVORK5CYII=',
+        // друг (светлые волосы)
+        friend: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAASklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQzAwsLC4O3tPaOhoQGn4dQwgLqA0d7e/mR1dTUDIwMDLsOp4YLqAgYGBgYqRgEAkkAfP2+Q+1QAAAAASUVORK5CYII=',
+        // стена/пол (тайл школы)
+        wall: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAQklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwbty48eHh4YyMjAw4DaeGAdQFjIyMMyoqKhgYGBhwGU4NF1AXMDAwMFAxCgDodB8/ggNwUwAAAABJRU5ErkJgggAA',
+        // дверь
+        door: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIbDnNnQ0BAVFRXFwMBAzSgAAKB5Hz8NxUMrAAAAAElFTkSuQmCC',
+        // лестница
+        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjLOqKioYGBgYKBiFADX+R8/ikBgdQAAAABJRU5ErkJgggAA',
+        // окно
+        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjKeDA0NZaC6GQBE5R8/7I9eXgAAAABJRU5ErkJgggAA'
+    };
 
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+    // ---------- ИГРОВОЙ МИР ----------
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.imageSmoothingEnabled = false;   // пиксельный стиль
+
+    // положение Моти (в клетках, 0 — левая стена)
+    let motyaX = 8;        // индекс по коридору
+    const WORLD_WIDTH = 20; // 20 "клеток" этажа
+    const CELL_SIZE = 40;   // 40x40 пикселей (пиксельно, красиво)
+
+    // Состояния
+    let currentFloor = 'floor3';
+    let dialogActive = false;
+    let currentNPC = null;   // кто говорит
+    let nearbyNPC = null;    // индекс npc рядом
+
+    // NPC на 3 этаже: { name, type, x, dialogTree }
+    const npcs = [
+        { id: 'teacher1', name: 'учитель', type: 'teacher', x: 4, messages: ['Мотя, уроки сделаны?', 'Сделал', 'Забыл...'], options: ['✅ Сделал', '❌ Не сделал'] },
+        { id: 'classmate1', name: 'Одноклассница', type: 'classmate', x: 9, messages: ['Привет! Как каникулы?', 'Круто', 'Скучно'], options: ['😎 Круто', '😴 Скучно'] },
+        { id: 'friend1', name: 'Юки (друг)', type: 'friend', x: 13, messages: ['Мотя! В RPG новую играл?', 'Да', 'Нет пока'], options: ['🎮 Да', '📖 Нет'] },
+        { id: 'teacher2', name: 'завуч', type: 'teacher', x: 17, messages: ['По коридору не бегай', 'Ладно', 'Я тихо'], options: ['👌 Ладно', '🤫 Я тихо'] },
+    ];
+
+    // Карта объектов (двери, лестницы, окна)
+    const objects = [
+        { type: 'door', x: 2, name: 'дверь 210' },
+        { type: 'door', x: 6, name: 'дверь 211' },
+        { type: 'stairs', x: 11, name: 'лестница' },
+        { type: 'window', x: 15, name: 'окно' },
+        { type: 'door', x: 19, name: 'дверь 212' },
+    ];
+
+    // вспомогательные функции отрисовки пиксель-арта
+    function drawSprite(type, dx, dy) {
+        let img = new Image();
+        img.src = TEXTURES[type] || TEXTURES.wall;
+        ctx.drawImage(img, dx, dy, CELL_SIZE, CELL_SIZE);
+    }
+
+    // Отрисовка всего этажа
+    function renderGame() {
+        ctx.clearRect(0, 0, 800, 500);
+
+        // пол и стены (задний фон)
+        for (let col = 0; col < WORLD_WIDTH; col++) {
+            // пол
+            ctx.fillStyle = '#4f6d8c';
+            ctx.fillRect(col * CELL_SIZE, 300, CELL_SIZE, 120);
+            // стена
+            ctx.fillStyle = '#3f5568';
+            ctx.fillRect(col * CELL_SIZE, 200, CELL_SIZE, 100);
+            // окна-полосы (пиксельные тени)
+            ctx.fillStyle = '#2c4055';
+            ctx.fillRect(col * CELL_SIZE, 260, CELL_SIZE, 4);
+        }
+
+        // Рисуем детали: окна, двери, лестницы (поверх фона)
+        objects.forEach(obj => {
+            let x = obj.x * CELL_SIZE;
+            if (obj.type === 'door') {
+                drawSprite('door', x, 200); // дверь на стене
+                ctx.fillStyle = '#ab8e5c';
+                ctx.fillRect(x+5, 200, 6, 40);
+            } else if (obj.type === 'stairs') {
+                drawSprite('stairs', x, 300);
+                ctx.fillStyle = '#7b6b4a';
+                ctx.fillRect(x, 300, CELL_SIZE, 15);
+            } else if (obj.type === 'window') {
+                drawSprite('window', x, 200);
+                ctx.fillStyle = '#c9e2ff';
+                ctx.fillRect(x+8, 210, 24, 30);
             }
-        }
-    </script>
-
-    <script type="module">
-        import * as THREE from 'three';
-
-        // --- Инициализация сцены ---
-        const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87CEEB);
-        scene.fog = new THREE.Fog(0x87CEEB, 80, 300);
-
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(0, 12, 25); // На уровне моста
-
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        renderer.shadowMap.enabled = true;
-        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        document.body.appendChild(renderer.domElement);
-
-        // Освещение
-        const ambientLight = new THREE.AmbientLight(0x404060);
-        scene.add(ambientLight);
-        const sunLight = new THREE.DirectionalLight(0xffeedd, 1.5);
-        sunLight.position.set(30, 50, 30);
-        sunLight.castShadow = true;
-        sunLight.receiveShadow = true;
-        sunLight.shadow.mapSize.width = 2048;
-        sunLight.shadow.mapSize.height = 2048;
-        sunLight.shadow.camera.near = 1;
-        sunLight.shadow.camera.far = 200;
-        sunLight.shadow.camera.left = -50;
-        sunLight.shadow.camera.right = 50;
-        sunLight.shadow.camera.top = 50;
-        sunLight.shadow.camera.bottom = -50;
-        scene.add(sunLight);
-
-        // --- Ландшафт под мостом ---
-        const groundGeo = new THREE.PlaneGeometry(800, 800);
-        const groundMat = new THREE.MeshStandardMaterial({ color: 0x2a5a2a });
-        const ground = new THREE.Mesh(groundGeo, groundMat);
-        ground.rotation.x = -Math.PI / 2;
-        ground.position.y = 0;
-        ground.receiveShadow = true;
-        scene.add(ground);
-
-        // Река под мостом
-        const riverGeo = new THREE.PlaneGeometry(40, 600);
-        const riverMat = new THREE.MeshStandardMaterial({ color: 0x1a4a7a });
-        const river = new THREE.Mesh(riverGeo, riverMat);
-        river.rotation.x = -Math.PI / 2;
-        river.position.set(0, 0.1, 0);
-        river.receiveShadow = true;
-        scene.add(river);
-
-        // Деревья
-        function addTree(x, z) {
-            const group = new THREE.Group();
-            const trunkMat = new THREE.MeshStandardMaterial({ color: 0x8B4513 });
-            const leafMat = new THREE.MeshStandardMaterial({ color: 0x2e8b57 });
-            const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.0, 5), trunkMat);
-            trunk.position.y = 2.5;
-            trunk.castShadow = true;
-            trunk.receiveShadow = true;
-            group.add(trunk);
-            
-            const leaf1 = new THREE.Mesh(new THREE.ConeGeometry(1.8, 2.5, 6), leafMat);
-            leaf1.position.y = 5;
-            leaf1.castShadow = true;
-            group.add(leaf1);
-            
-            group.position.set(x, 0, z);
-            scene.add(group);
-        }
-        for (let i = -150; i < 150; i+=20) {
-            for (let j = -150; j < 150; j+=20) {
-                if (Math.random() > 0.5 && Math.abs(j) > 40) {
-                    addTree(i + Math.random()*10, j + Math.random()*10);
-                }
-            }
-        }
-
-        // --- Мост на высокой насыпи ---
-        const bridgeGroup = new THREE.Group();
-        
-        // Насыпь под мостом
-        const embankmentMat = new THREE.MeshStandardMaterial({ color: 0x6b4c3b });
-        for (let k = -60; k <= 60; k+=20) {
-            const embankment = new THREE.Mesh(new THREE.BoxGeometry(20, 6, 18), embankmentMat);
-            embankment.position.set(0, 3, k);
-            embankment.castShadow = true;
-            embankment.receiveShadow = true;
-            bridgeGroup.add(embankment);
-        }
-        
-        // Дорожное полотно (на высоте 9)
-        const roadMat = new THREE.MeshStandardMaterial({ color: 0x666666 });
-        const road = new THREE.Mesh(new THREE.BoxGeometry(14, 1, 160), roadMat);
-        road.position.set(0, 9, 0);
-        road.castShadow = true;
-        road.receiveShadow = true;
-        bridgeGroup.add(road);
-        
-        // Разметка
-        const stripeMat = new THREE.MeshStandardMaterial({ color: 0xffcc00 });
-        const stripe = new THREE.Mesh(new THREE.BoxGeometry(1, 1.2, 160), stripeMat);
-        stripe.position.set(0, 9.5, 0);
-        bridgeGroup.add(stripe);
-        
-        // Перила
-        const railMat = new THREE.MeshStandardMaterial({ color: 0xaaaaaa });
-        for (let i = -1; i <= 1; i+=2) {
-            const rail = new THREE.Mesh(new THREE.BoxGeometry(0.6, 2, 160), railMat);
-            rail.position.set(i*7, 10, 0);
-            rail.castShadow = true;
-            bridgeGroup.add(rail);
-            
-            for (let j = -70; j <= 70; j+=15) {
-                const pillar = new THREE.Mesh(new THREE.BoxGeometry(0.8, 3, 0.8), railMat);
-                pillar.position.set(i*7, 10.5, j);
-                pillar.castShadow = true;
-                bridgeGroup.add(pillar);
-            }
-        }
-        
-        // Опоры
-        const pillarMat = new THREE.MeshStandardMaterial({ color: 0x8a6d4b });
-        for (let k = -60; k <= 60; k+=30) {
-            const pillar1 = new THREE.Mesh(new THREE.BoxGeometry(4, 18, 6), pillarMat);
-            pillar1.position.set(-5, 0, k);
-            pillar1.castShadow = true;
-            pillar1.receiveShadow = true;
-            bridgeGroup.add(pillar1);
-            
-            const pillar2 = new THREE.Mesh(new THREE.BoxGeometry(4, 18, 6), pillarMat);
-            pillar2.position.set(5, 0, k);
-            pillar2.castShadow = true;
-            pillar2.receiveShadow = true;
-            bridgeGroup.add(pillar2);
-        }
-        
-        scene.add(bridgeGroup);
-
-        // --- Грузовик (едет ПО МОСТУ) ---
-        const truckGroup = new THREE.Group();
-        const cabMat = new THREE.MeshStandardMaterial({ color: 0x3366cc });
-        const trailerMat = new THREE.MeshStandardMaterial({ color: 0xcc5533 });
-        
-        // Кабина
-        const cab = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2, 3.5), cabMat);
-        cab.position.set(0, 1, 2);
-        cab.castShadow = true;
-        truckGroup.add(cab);
-        
-        // Прицеп
-        const trailer = new THREE.Mesh(new THREE.BoxGeometry(2.5, 2.5, 7), trailerMat);
-        trailer.position.set(0, 1.5, -2.5);
-        trailer.castShadow = true;
-        truckGroup.add(trailer);
-        
-        // Колёса
-        const wheelMat = new THREE.MeshStandardMaterial({ color: 0x222222 });
-        for (let i = -1; i <= 1; i+=2) {
-            for (let j = 0; j < 2; j++) {
-                const wheel = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.5, 16), wheelMat);
-                wheel.rotation.z = Math.PI/2;
-                wheel.position.set(i*1.2, 0.6, 2.5 - j*4);
-                wheel.castShadow = true;
-                truckGroup.add(wheel);
-            }
-        }
-        
-        truckGroup.position.set(0, 9, -120); // На мосту, далеко сзади
-        truckGroup.rotation.y = 0;
-        scene.add(truckGroup);
-
-        // --- Улучшенные модели персонажей НА МОСТУ ---
-        const enemies = [];
-        const allies = [];
-
-        function createTerrorist(x, z) {
-            const group = new THREE.Group();
-            
-            const bodyGeo = new THREE.CylinderGeometry(0.5, 0.5, 1.8, 8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x3c7a3c });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 0.9;
-            body.castShadow = true;
-            group.add(body);
-            
-            const headGeo = new THREE.SphereGeometry(0.35, 8);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0xf0d0b0 });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.8;
-            head.castShadow = true;
-            group.add(head);
-            
-            const gunGeo = new THREE.BoxGeometry(0.2, 0.2, 1);
-            const gunMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
-            const gun = new THREE.Mesh(gunGeo, gunMat);
-            gun.position.set(0.4, 0.8, -0.4);
-            gun.rotation.x = 0.3;
-            gun.castShadow = true;
-            group.add(gun);
-            
-            group.position.set(x, 9, z); // На мосту
-            group.userData = { health: 100, type: 'enemy', lastShot: 0, patrolDir: Math.random() > 0.5 ? 1 : -1 };
-            return group;
-        }
-
-        function createSWAT(x, z) {
-            const group = new THREE.Group();
-            
-            const bodyGeo = new THREE.CylinderGeometry(0.6, 0.6, 1.8, 8);
-            const bodyMat = new THREE.MeshStandardMaterial({ color: 0x111122 });
-            const body = new THREE.Mesh(bodyGeo, bodyMat);
-            body.position.y = 0.9;
-            body.castShadow = true;
-            group.add(body);
-            
-            const vestGeo = new THREE.BoxGeometry(0.9, 1.0, 0.4);
-            const vestMat = new THREE.MeshStandardMaterial({ color: 0x223366 });
-            const vest = new THREE.Mesh(vestGeo, vestMat);
-            vest.position.set(0, 1.1, 0.3);
-            vest.castShadow = true;
-            group.add(vest);
-            
-            const headGeo = new THREE.SphereGeometry(0.4, 8);
-            const headMat = new THREE.MeshStandardMaterial({ color: 0x404040 });
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.y = 1.8;
-            head.castShadow = true;
-            group.add(head);
-            
-            const shieldGeo = new THREE.BoxGeometry(1.0, 1.4, 0.2);
-            const shieldMat = new THREE.MeshStandardMaterial({ color: 0x2a4b7c });
-            const shield = new THREE.Mesh(shieldGeo, shieldMat);
-            shield.position.set(0, 1.0, 0.7);
-            shield.castShadow = true;
-            group.add(shield);
-            
-            group.position.set(x, 9, z);
-            group.userData = { health: 100, type: 'ally', lastShot: 0 };
-            return group;
-        }
-
-        // Размещаем врагов на мосту
-        enemies.push(createTerrorist(-4, -50));
-        enemies.push(createTerrorist(3, -20));
-        enemies.push(createTerrorist(-2, 10));
-        enemies.push(createTerrorist(5, 40));
-        enemies.forEach(e => scene.add(e));
-
-        // Союзники на мосту
-        allies.push(createSWAT(2, -40));
-        allies.push(createSWAT(-3, 0));
-        allies.push(createSWAT(4, 30));
-        allies.forEach(a => scene.add(a));
-
-        // Блэкхавк
-        const blackhawk = new THREE.Group();
-        const bhBody = new THREE.Mesh(new THREE.BoxGeometry(2.8, 1.4, 5.5), new THREE.MeshStandardMaterial({ color: 0x1a2b3c }));
-        bhBody.position.y = 0.7;
-        bhBody.castShadow = true;
-        blackhawk.add(bhBody);
-        const rotor = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.1, 5), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
-        rotor.position.set(0, 1.4, 0);
-        blackhawk.add(rotor);
-        blackhawk.position.set(40, 35, 20);
-        scene.add(blackhawk);
-
-        // --- Оружие игрока (ВИДНО) ---
-        const weaponGroup = new THREE.Group();
-        const gunBarrel = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 1.4), new THREE.MeshStandardMaterial({ color: 0x444444 }));
-        gunBarrel.position.set(0.3, -0.2, -0.9);
-        weaponGroup.add(gunBarrel);
-        const gunBody = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.6), new THREE.MeshStandardMaterial({ color: 0x222222 }));
-        gunBody.position.set(0.3, -0.1, -0.3);
-        weaponGroup.add(gunBody);
-        const gunHandle = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.3, 0.2), new THREE.MeshStandardMaterial({ color: 0x8B4513 }));
-        gunHandle.position.set(0.3, -0.2, -0.4);
-        weaponGroup.add(gunHandle);
-        camera.add(weaponGroup);
-
-        // Рация
-        const radioGroup = new THREE.Group();
-        const radioBody = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.2), new THREE.MeshStandardMaterial({ color: 0xaa5533 }));
-        radioBody.position.set(0.5, -0.2, -0.7);
-        radioGroup.add(radioBody);
-        const radioAnt = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.4), new THREE.MeshStandardMaterial({ color: 0xcccccc }));
-        radioAnt.position.set(0.6, 0.0, -0.8);
-        radioGroup.add(radioAnt);
-        radioGroup.visible = false;
-        camera.add(radioGroup);
-
-        // --- Коллизии (стены по краям моста) ---
-        const collisionWalls = [];
-        const wallMat = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0 });
-        
-        const leftWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 160), wallMat);
-        leftWall.position.set(-7.5, 10.5, 0);
-        scene.add(leftWall);
-        collisionWalls.push(leftWall);
-        
-        const rightWall = new THREE.Mesh(new THREE.BoxGeometry(1, 5, 160), wallMat);
-        rightWall.position.set(7.5, 10.5, 0);
-        scene.add(rightWall);
-        collisionWalls.push(rightWall);
-
-        // --- Игровые переменные ---
-        let team = null;
-        let currentWeapon = 0;
-        let health = 100;
-        let ammo = 30;
-        let gameActive = true;
-        let timeLeft = 120;
-        let truckProgress = 0; // от 0 до 100
-        let bombPlanted = false;
-        
-        // Управление
-        const keys = { w: false, a: false, s: false, d: false };
-        const velocity = new THREE.Vector3();
-        let onGround = true;
-        
-        // Поворот камеры мышкой/тачем
-        let pitch = 0;
-        let yaw = 0;
-        const sensitivity = 0.002;
-        
-        document.addEventListener('mousemove', (e) => {
-            if (!gameActive) return;
-            yaw -= e.movementX * sensitivity;
-            pitch -= e.movementY * sensitivity;
-            pitch = Math.max(-1.5, Math.min(1.5, pitch));
-            camera.rotation.y = yaw;
-            camera.rotation.x = pitch;
         });
-        
-        // Мобильный поворот через джойстик
-        let lookJoystick = { active: false, x: 0, y: 0 };
-        const lookArea = document.getElementById('joystick-look');
-        lookArea.addEventListener('touchstart', (e) => {
+
+        // Рисуем NPC (учитель, одноклассники и т.д.)
+        npcs.forEach(npc => {
+            let npcX = npc.x * CELL_SIZE;
+            let npcY = 300; // стоят на полу
+            let type = npc.type;
+            if (type === 'teacher') drawSprite('teacher', npcX, npcY-40);
+            else if (type === 'classmate') drawSprite('classmate', npcX, npcY-40);
+            else if (type === 'friend') drawSprite('friend', npcX, npcY-40);
+            else drawSprite('classmate', npcX, npcY-40);
+
+            // имя над головой (пиксельный шрифт)
+            ctx.font = 'bold 16px "Courier New", monospace';
+            ctx.fillStyle = '#f5e9d8';
+            ctx.shadowColor = '#1e2b3a';
+            ctx.shadowBlur = 0;
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#0a1725';
+            ctx.strokeText(npc.name, npcX, npcY-50);
+            ctx.fillText(npc.name, npcX, npcY-50);
+        });
+
+        // ----- ГЛАВНЫЙ ГЕРОЙ (МОТЯ) поверх всего -----
+        let heroX = motyaX * CELL_SIZE;
+        drawSprite('hero', heroX, 260); // немного на полу
+        ctx.font = 'bold 18px "Courier New", monospace';
+        ctx.fillStyle = '#ffe88c';
+        ctx.shadowColor = '#322f1a';
+        ctx.strokeStyle = '#2b2310';
+        ctx.strokeText('Мотя', heroX, 250);
+        ctx.fillText('Мотя', heroX, 250);
+        ctx.shadowBlur = 0;
+
+        // подсветка, если рядом NPC
+        if (nearbyNPC && !dialogActive) {
+            ctx.beginPath();
+            ctx.strokeStyle = '#ffe88c';
+            ctx.lineWidth = 4;
+            ctx.setLineDash([8, 8]);
+            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 4, 256, CELL_SIZE+8, 60);
+            ctx.setLineDash([]);
+        }
+
+        // статусная строка
+        let place = objects.find(o => o.x === motyaX);
+        document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
+    }
+
+    // диалоговая система
+    function talkTo(npc) {
+        if (!npc) return;
+        currentNPC = npc;
+        dialogActive = true;
+        let overlay = document.getElementById('dialogOverlay');
+        let textDiv = document.getElementById('dialogText');
+        let btn1 = document.getElementById('choice1');
+        let btn2 = document.getElementById('choice2');
+
+        textDiv.innerText = npc.messages[0] + ' ' + npc.name;
+        btn1.innerText = '▶ ' + (npc.options[0] || 'Да');
+        btn2.innerText = '▶ ' + (npc.options[1] || 'Нет');
+
+        overlay.style.display = 'block';
+    }
+
+    function closeDialog() {
+        dialogActive = false;
+        currentNPC = null;
+        document.getElementById('dialogOverlay').style.display = 'none';
+    }
+
+    // обработка выбора диалога
+    document.getElementById('choice1').addEventListener('click', () => {
+        if (currentNPC) {
+            alert('💬 ' + currentNPC.name + ': ' + currentNPC.messages[1]); // простая реакция
+            closeDialog();
+        }
+    });
+    document.getElementById('choice2').addEventListener('click', () => {
+        if (currentNPC) {
+            alert('💬 ' + currentNPC.name + ': ' + (currentNPC.messages[2] || 'Понятно...'));
+            closeDialog();
+        }
+    });
+
+    // перемещение и взаимодействие
+    function move(dx) {
+        if (dialogActive) return;
+        let newX = motyaX + dx;
+        if (newX >= 0 && newX < WORLD_WIDTH) {
+            motyaX = newX;
+        }
+        updateNearbyNPC();
+        renderGame();
+    }
+
+    function updateNearbyNPC() {
+        // ищем NPC на той же клетке, что и Мотя
+        nearbyNPC = npcs.find(npc => npc.x === motyaX) || null;
+    }
+
+    function interact() {
+        if (dialogActive) {
+            closeDialog();
+            return;
+        }
+        if (nearbyNPC) {
+            talkTo(nearbyNPC);
+        } else {
+            // проверим объект
+            let obj = objects.find(o => o.x === motyaX);
+            if (obj) {
+                if (obj.type === 'door') alert('🚪 дверь: ' + obj.name + ' (пока закрыта)');
+                else if (obj.type === 'stairs') alert('🪜 лестница, но пока только 3 этаж');
+                else if (obj.type === 'window') alert('🪟 вид на школьный двор');
+            } else {
+                alert('👣 тут никого...');
+            }
+        }
+        renderGame();
+    }
+
+    // кнопки управления
+    document.getElementById('btnLeft').addEventListener('click', () => move(-1));
+    document.getElementById('btnRight').addEventListener('click', () => move(1));
+    document.getElementById('actionBtn').addEventListener('click', interact);
+
+    // клавиатура
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') move(-1);
+        if (e.key === 'ArrowRight') move(1);
+        if (e.key === ' ' || e.key === 'Space' || e.key === 'e' || e.key === 'E') {
             e.preventDefault();
-            lookJoystick.active = true;
-        });
-        lookArea.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            const touch = e.touches[0];
-            const rect = lookArea.getBoundingClientRect();
-            const centerX = rect.left + rect.width/2;
-            const centerY = rect.top + rect.height/2;
-            lookJoystick.x = (touch.clientX - centerX) / (rect.width/2);
-            lookJoystick.y = (touch.clientY - centerY) / (rect.height/2);
-            lookJoystick.x = Math.max(-1, Math.min(1, lookJoystick.x));
-            lookJoystick.y = Math.max(-1, Math.min(1, lookJoystick.y));
-        });
-        lookArea.addEventListener('touchend', () => {
-            lookJoystick.active = false;
-            lookJoystick.x = 0;
-            lookJoystick.y = 0;
-        });
-
-        // UI элементы
-        const timerEl = document.getElementById('timer');
-        const truckStatusEl = document.getElementById('truck-status');
-        const healthEl = document.getElementById('health');
-        const chatEl = document.getElementById('chat');
-        const storyContainer = document.getElementById('story-container');
-        
-        document.getElementById('toggle-story').addEventListener('click', () => {
-            storyContainer.style.transform = storyContainer.style.transform ? '' : 'translateY(-200px)';
-        });
-
-        // Клавиши
-        window.addEventListener('keydown', (e) => {
-            if (!gameActive) return;
-            switch(e.code) {
-                case 'KeyW': keys.w = true; e.preventDefault(); break;
-                case 'KeyA': keys.a = true; e.preventDefault(); break;
-                case 'KeyS': keys.s = true; e.preventDefault(); break;
-                case 'KeyD': keys.d = true; e.preventDefault(); break;
-                case 'Space': if (onGround) velocity.y = 8; e.preventDefault(); break;
-                case 'Digit1': setWeapon(0); break;
-                case 'Digit2': setWeapon(1); break;
-                case 'Digit3': setWeapon(2); break;
-                case 'Digit1': if (!team) selectTeam(1); break;
-                case 'Digit2': if (!team) selectTeam(2); break;
-            }
-        });
-        window.addEventListener('keyup', (e) => {
-            switch(e.code) {
-                case 'KeyW': keys.w = false; break;
-                case 'KeyA': keys.a = false; break;
-                case 'KeyS': keys.s = false; break;
-                case 'KeyD': keys.d = false; break;
-            }
-        });
-
-        // Мобильные кнопки
-        const setupBtn = (id, key) => {
-            const el = document.getElementById(id);
-            el.addEventListener('mousedown', () => keys[key] = true);
-            el.addEventListener('mouseup', () => keys[key] = false);
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        };
-        setupBtn('btn-w', 'w');
-        setupBtn('btn-s', 's');
-        setupBtn('btn-a', 'a');
-        setupBtn('btn-d', 'd');
-        
-        document.getElementById('btn-jump').addEventListener('click', () => { if (onGround) velocity.y = 8; });
-
-        function selectTeam(t) {
-            team = t === 1 ? 'CT' : 'T';
-            chatEl.innerHTML = team === 'CT' ? '🚁 Вы за SWAT! Защитите грузовик!' : '💣 Вы за T! Удерживайте мост!';
+            interact();
         }
+        if (e.key === 'Escape' && dialogActive) closeDialog();
+    });
 
-        function setWeapon(idx) {
-            if (idx === 1 && team !== 'T') {
-                chatEl.innerHTML = '❌ Только T используют C4';
-                return;
-            }
-            currentWeapon = idx;
-            document.querySelectorAll('.weapon-slot').forEach((el, i) => {
-                if (i === idx) el.classList.add('active');
-                else el.classList.remove('active');
-            });
-            weaponGroup.visible = (idx !== 2);
-            radioGroup.visible = (idx === 2);
-        }
-
-        // Стрельба
-        document.getElementById('btn-shoot').addEventListener('click', shoot);
-        function shoot() {
-            if (!gameActive || currentWeapon !== 0 || ammo <= 0) return;
-            ammo--;
-            chatEl.innerHTML = `🔫 Выстрел! ${ammo} патронов`;
-            
-            const raycaster = new THREE.Raycaster();
-            raycaster.set(camera.position, camera.getWorldDirection(new THREE.Vector3()));
-            const targets = [...enemies, ...allies];
-            const intersects = raycaster.intersectObjects(targets, true);
-            
-            if (intersects.length > 0) {
-                const hit = intersects[0].object.parent;
-                if (hit && hit.userData) {
-                    hit.userData.health -= 35;
-                    if (hit.userData.health <= 0) {
-                        scene.remove(hit);
-                        if (hit.userData.type === 'enemy') {
-                            enemies.splice(enemies.indexOf(hit), 1);
-                            chatEl.innerHTML = '👮 Террорист уничтожен!';
-                        } else {
-                            allies.splice(allies.indexOf(hit), 1);
-                            chatEl.innerHTML = '💔 Дружественный огонь!';
-                        }
-                    }
-                }
-            }
-        }
-
-        // Рация
-        document.getElementById('weap3').addEventListener('click', () => {
-            if (currentWeapon === 2 && gameActive) {
-                chatEl.innerHTML = '📡 Вызов подмоги...';
-                setTimeout(() => {
-                    const newSWAT = createSWAT(camera.position.x + 2, camera.position.z + 3);
-                    scene.add(newSWAT);
-                    allies.push(newSWAT);
-                    chatEl.innerHTML = '🚁 Подмога прибыла!';
-                }, 3000);
-            }
+    // подгрузка картинок и старт
+    window.onload = () => {
+        // предзагрузка изображений (чрез new Image)
+        let preload = Object.values(TEXTURES).map(src => {
+            let img = new Image();
+            img.src = src;
         });
+        updateNearbyNPC();
+        renderGame();
+    };
 
-        // Камеры
-        let camMode = 0;
-        document.getElementById('btn-cam').addEventListener('click', () => {
-            camMode = (camMode + 1) % 4;
-            if (camMode === 0) camera.position.set(0, 12, 25);
-            else if (camMode === 1) camera.position.set(-15, 18, -30);
-            else if (camMode === 2) camera.position.set(20, 18, 10);
-            else camera.position.set(0, 25, 0);
-        });
-
-        // Перезарядка
-        document.getElementById('btn-reload').addEventListener('click', () => {
-            ammo = 30;
-            chatEl.innerHTML = '🔄 Перезарядка';
-        });
-
-        // --- Игровой таймер и грузовик ---
-        setInterval(() => {
-            if (!gameActive) return;
-            
-            timeLeft -= 1;
-            const mins = Math.floor(timeLeft / 60);
-            const secs = timeLeft % 60;
-            timerEl.innerHTML = `${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
-            
-            // Грузовик движется ПО МОСТУ (в положительном направлении Z)
-            if (truckProgress < 100) {
-                truckProgress += 0.7; // скорость
-                truckGroup.position.z = -120 + (truckProgress * 2.2); // от -120 до +100 примерно
-            }
-            
-            truckStatusEl.innerHTML = `🚚 Грузовик: ${Math.floor(100 - truckProgress)}м до финиша`;
-            
-            // Проверка условий победы
-            if (truckProgress >= 100 && !bombPlanted) {
-                chatEl.innerHTML = '🏆 Грузовик проехал! Победа спецназа!';
-                gameActive = false;
-            }
-            
-            if (timeLeft <= 0 && bombPlanted) {
-                chatEl.innerHTML = '💥 Бомба взорвалась! Террористы победили!';
-                gameActive = false;
-            }
-            
-            if (bombPlanted && truckProgress >= 100) {
-                chatEl.innerHTML = '💥 Бомба взорвалась на мосту! Грузовик уничтожен! Победа Т!';
-                gameActive = false;
-            }
-        }, 1000);
-
-        // C4
-        document.getElementById('weap2').addEventListener('click', () => {
-            if (currentWeapon === 1 && team === 'T' && !bombPlanted) {
-                bombPlanted = true;
-                chatEl.innerHTML = '💣 Бомба заложена! Взрыв через 2 мин';
-                setTimeout(() => {
-                    if (bombPlanted && gameActive) {
-                        chatEl.innerHTML = '💥 Бомба взорвалась! Террористы победили!';
-                        gameActive = false;
-                    }
-                }, 120000);
-            }
-        });
-
-        // --- AI для NPC ---
-        function updateAI() {
-            if (!gameActive) return;
-            
-            enemies.forEach(enemy => {
-                // Патрулирование по мосту
-                enemy.position.z += enemy.userData.patrolDir * 0.1;
-                if (enemy.position.z > 70 || enemy.position.z < -70) {
-                    enemy.userData.patrolDir *= -1;
-                }
-                
-                // Стрельба по игроку
-                const dist = enemy.position.distanceTo(camera.position);
-                if (dist < 25 && Math.random() < 0.02) {
-                    health -= 5;
-                    healthEl.innerHTML = `❤️ ${health}`;
-                    if (health <= 0) {
-                        chatEl.innerHTML = '💀 Вы погибли...';
-                        gameActive = false;
-                    }
-                }
-            });
-            
-            allies.forEach(ally => {
-                enemies.forEach(enemy => {
-                    const dist = ally.position.distanceTo(enemy.position);
-                    if (dist < 30 && Math.random() < 0.01) {
-                        enemy.userData.health -= 15;
-                        if (enemy.userData.health <= 0) {
-                            scene.remove(enemy);
-                            enemies.splice(enemies.indexOf(enemy), 1);
-                        }
-                    }
-                });
-            });
-        }
-
-        // --- Коллизии ---
-        function checkCollisions() {
-            const playerPos = camera.position.clone();
-            
-            for (let wall of collisionWalls) {
-                const wallBox = new THREE.Box3().setFromObject(wall);
-                if (playerPos.x > -7 && playerPos.x < 7 && playerPos.z > -75 && playerPos.z < 75) {
-                    // Внутри моста - ок
-                } else {
-                    // Отталкивание
-                    if (playerPos.x <= -7) camera.position.x = -6.5;
-                    if (playerPos.x >= 7) camera.position.x = 6.5;
-                }
-            }
-        }
-
-        // --- Анимация ---
-        let lastTime = performance.now();
-        function animate() {
-            const delta = Math.min(0.05, (performance.now() - lastTime) / 1000);
-            lastTime = performance.now();
-
-            if (gameActive) {
-                // Поворот от джойстика
-                if (lookJoystick.active) {
-                    yaw -= lookJoystick.x * 0.05;
-                    pitch -= lookJoystick.y * 0.05;
-                    pitch = Math.max(-1.5, Math.min(1.5, pitch));
-                    camera.rotation.y = yaw;
-                    camera.rotation.x = pitch;
-                }
-                
-                // Движение
-                const speed = 5 * delta;
-                const forward = new THREE.Vector3(0, 0, -1).applyEuler(camera.rotation);
-                const right = new THREE.Vector3(1, 0, 0).applyEuler(camera.rotation);
-                forward.y = 0;
-                right.y = 0;
-                forward.normalize();
-                right.normalize();
-                
-                if (keys.w) camera.position.addScaledVector(forward, speed);
-                if (keys.s) camera.position.addScaledVector(forward, -speed);
-                if (keys.a) camera.position.addScaledVector(right, -speed);
-                if (keys.d) camera.position.addScaledVector(right, speed);
-
-                // Гравитация (держим на мосту)
-                camera.position.y = 11; // Фиксированная высота моста
-                
-                // Ограничитель моста
-                camera.position.x = Math.max(-6, Math.min(6, camera.position.x));
-                camera.position.z = Math.max(-70, Math.min(70, camera.position.z));
-
-                // AI
-                updateAI();
-
-                // Вертолет
-                blackhawk.position.x = 40 + Math.sin(Date.now() * 0.001) * 30;
-                blackhawk.position.z = 20 + Math.cos(Date.now() * 0.001) * 40;
-                blackhawk.rotation.y = Math.sin(Date.now() * 0.0005) * 0.3;
-            }
-
-            // UI
-            healthEl.innerHTML = `❤️ ${health}`;
-            document.getElementById('weap1').innerHTML = `🔫 M4 (${ammo}/90)`;
-
-            renderer.render(scene, camera);
-            requestAnimationFrame(animate);
-        }
-        animate();
-
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
+    // ---- простейший способ замены картинок: отредактируй объект TEXTURES выше ---
+    // Например, TEXTURES.hero = 'ссылка_на_твоего_мотю';
+})();
+</script>
 </body>
 </html>
