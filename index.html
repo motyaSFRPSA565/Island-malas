@@ -31,10 +31,10 @@
             display: block;
             margin: 0 auto;
             width: 900px;
-            height: 500px;
+            height: 600px;
             border-radius: 12px;
             box-shadow: inset 0 0 0 2px #7f8c9a, 0 0 0 3px #2c3e50;
-            background: #3a4e62;  /* цвет фона для неба/стены */
+            background: #2a3f54;
             image-rendering: pixelated;
         }
         .control-panel {
@@ -153,7 +153,7 @@
 </head>
 <body>
 <div class="game-wrapper">
-    <canvas id="gameCanvas" width="900" height="500"></canvas>
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
 
     <!-- Диалоговое окно -->
     <div id="dialogOverlay" class="dialog-box">
@@ -178,16 +178,27 @@
 <script>
 (function() {
     // -------------------------------------------------
-    // ТВОИ ТЕКСТУРЫ
+    // ТВОИ ТЕКСТУРЫ - ВСТАВЛЯЙ СЮДА СВОИ КАРТИНКИ
     // -------------------------------------------------
     const TEXTURES = {
-        hero: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAP0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwPj4+fO7cOQMdA7VdwEDtF8DwgQbVq1evRkZGBl9fXwb6Gc5AawAAy38dDy8zrI8AAAAASUVORK5CYII=',
-        teacher: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAQ0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwbty48eHh4YyMjAw4DaeGAdQFDQ0NUVFRUQwMDLdv34ZRBgYGdDdQUfUAANIoI70IGz9CAAAAAElFTkSuQmCC',
-        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwNDQ0PD09fUZGBm6DqWl4Q0NDVFhY2IyGhgY8BjPQ3gVUNAMAoqWlBRgYGBiobgYA2pQfPx2KbsoAAAAASUVORK5CYII=',
-        friend: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAASklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQzAwsLC4O3tPaOhoQGn4dQwgLqA0d7e/mR1dTUDIwMDLsOp4YLqAgYGBgYqRgEAkkAfP2+Q+1QAAAAASUVORK5CYII=',
-        door: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIbDnNnQ0BAVFRXFwMBAzSgAAKB5Hz8NxUMrAAAAAElFTkSuQmCC',
-        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjLOqKioYGBgYKBiFADX+R8/ikBgdQAAAABJRU5ErkJggg==',
-        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjKeDA0NZaC6GQBE5R8/7I9eXgAAAABJRU5ErkJggg=='
+        // Моя (нужны 3 кадра: стоячий, шаг левой, шаг правой)
+        hero_idle: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAP0lEQVRo3u3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
+        hero_walk1: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAP0lEQVRo3u3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
+        hero_walk2: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAAP0lEQVRo3u3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxvw3FgMBMInUe0EAAAAASUVORK5CYII=',
+        
+        // Учитель (большой, 64x64)
+        teacher: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        
+        // Одноклассница (большая)
+        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        
+        // Друг (большой)
+        friend: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        
+        // Дверь, окно, лестница
+        door: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII=',
+        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAARklEQVR4nO3asQ0AIAwDwQzM/z+LhQUSUliK4O5aN5muu1qStcSJMcYYY4wxxhhjjDHGGGOMMcYYY4wxxhhjjDHGGGOMMcY8k4UBe+6lDVMAAAAASUVORK5CYII='
     };
 
     // ---------- НАСТРОЙКИ ----------
@@ -195,21 +206,27 @@
     const ctx = canvas.getContext('2d');
     ctx.imageSmoothingEnabled = false;
 
-    let motyaX = 8;
-    const WORLD_WIDTH = 22;  // больше клеток для широкого экрана
-    const CELL_SIZE = 40;
+    let motyaX = 10;  // позиция
+    let motyaFrame = 0;  // для анимации ходьбы (0 - idle, 1 - шаг1, 2 - шаг2)
+    let motyaDirection = 0;  // 0 - стоял, 1 - шаг влево, 2 - шаг вправо
+    let walkTimer = 0;
+    
+    const WORLD_WIDTH = 24;  // 24 клетки
+    const CELL_SIZE = 64;    // клетки 64x64 для больших персонажей
 
     let dialogActive = false;
     let currentNPC = null;
     let nearbyNPC = null;
 
-    // ---------- ПЕРСОНАЖИ ----------
+    // ---------- ПЕРСОНАЖИ (БОЛЬШИЕ, С РАЗНЫМИ ПОЗИЦИЯМИ) ----------
     const npcs = [
         { 
             id: 'teacher1', 
             name: 'учитель', 
             type: 'teacher', 
             x: 4,
+            depth: 'wall',  // стоит у стены (ближе к фону)
+            yOffset: 20,     // смещение по Y
             dialog: {
                 text: 'Мотя, когда будешь уроки делать?',
                 options: ['Сегодня', 'Завтра'],
@@ -221,6 +238,8 @@
             name: 'одноклассница', 
             type: 'classmate', 
             x: 9,
+            depth: 'center',  // посередине
+            yOffset: 40,
             dialog: {
                 text: 'Привет! Как каникулы прошли?',
                 options: ['Отлично!', 'Так себе'],
@@ -232,6 +251,8 @@
             name: 'друг Юки', 
             type: 'friend', 
             x: 14,
+            depth: 'front',   // близко к игроку
+            yOffset: 60,
             dialog: {
                 text: 'Мотя! В новую игру рубились?',
                 options: ['Ага', 'Не, не было времени'],
@@ -242,7 +263,9 @@
             id: 'teacher2', 
             name: 'завуч', 
             type: 'teacher', 
-            x: 18,
+            x: 19,
+            depth: 'wall',    // у стены
+            yOffset: 20,
             dialog: {
                 text: 'Опять по коридору бегаешь?',
                 options: ['Я не бегал', 'Извините'],
@@ -251,131 +274,213 @@
         }
     ];
 
-    // ---------- ОБЪЕКТЫ ----------
+    // ---------- ОБЪЕКТЫ НА СТЕНЕ ----------
     const objects = [
         { type: 'door', x: 2, name: 'кабинет 210' },
         { type: 'door', x: 6, name: 'кабинет 211' },
-        { type: 'stairs', x: 11, name: 'лестница' },
+        { type: 'stairs', x: 12, name: 'лестница' },
         { type: 'window', x: 16, name: 'окно' },
-        { type: 'door', x: 20, name: 'кабинет 212' }
+        { type: 'door', x: 21, name: 'кабинет 212' }
     ];
 
-    // ---------- ОТРИСОВКА (НАСТОЯЩИЙ ВИД СБОКУ) ----------
-    function drawSprite(type, dx, dy) {
-        let img = new Image();
-        img.src = TEXTURES[type] || TEXTURES.wall;
-        ctx.drawImage(img, dx, dy, CELL_SIZE, CELL_SIZE);
+    // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЙ ----------
+    const images = {};
+    function loadImages() {
+        for (let key in TEXTURES) {
+            let img = new Image();
+            img.src = TEXTURES[key];
+            images[key] = img;
+        }
+    }
+    loadImages();
+
+    // ---------- ОТРИСОВКА ----------
+    function drawSprite(type, dx, dy, width = CELL_SIZE, height = CELL_SIZE) {
+        if (images[type]) {
+            ctx.drawImage(images[type], dx, dy, width, height);
+        } else {
+            // Заглушка если картинка не загрузилась
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillRect(dx, dy, width, height);
+        }
     }
 
     function renderGame() {
-        ctx.clearRect(0, 0, 900, 500);
+        ctx.clearRect(0, 0, 900, 600);
 
-        // --- ФОН (ДАЛЬНЯЯ СТЕНА) ---
-        ctx.fillStyle = '#4f6f8f';  // цвет дальней стены
-        ctx.fillRect(0, 0, 900, 220);
-
-        // --- ЛИНИЯ ГОРИЗОНТА (стык стены и пола) ---
-        ctx.fillStyle = '#2c3e50';
-        ctx.fillRect(0, 210, 900, 10);
-
-        // --- ПОЛ (СВЕТЛЫЙ ДЕРЕВЯННЫЙ) ---
-        ctx.fillStyle = '#b8a27b';  // светлый деревянный пол
-        ctx.fillRect(0, 220, 900, 280);
+        // --- СТЕНА (2/3 экрана) ---
+        ctx.fillStyle = '#3a5f7a';  // цвет стены
+        ctx.fillRect(0, 0, 900, 380);
         
-        // Текстура пола (доски)
-        ctx.strokeStyle = '#9b8460';
+        // Текстура стены (панели)
+        ctx.strokeStyle = '#2c4055';
         ctx.lineWidth = 2;
-        for (let i = 0; i < 15; i++) {
+        for (let i = 0; i < 8; i++) {
             ctx.beginPath();
-            ctx.moveTo(0, 240 + i * 18);
-            ctx.lineTo(900, 240 + i * 18);
-            ctx.strokeStyle = '#9b8460';
+            ctx.moveTo(0, 100 + i * 40);
+            ctx.lineTo(900, 100 + i * 40);
+            ctx.strokeStyle = '#2c4055';
             ctx.stroke();
         }
 
-        // --- ПЛИНТУС (где пол встречается со стеной) ---
+        // --- ЛИНИЯ ГОРИЗОНТА (стык стены и пола) ---
         ctx.fillStyle = '#6b4f3a';
-        ctx.fillRect(0, 210, 900, 10);
+        ctx.fillRect(0, 370, 900, 10);
 
-        // --- ПРЕДМЕТЫ (стоят на полу, прислонены к стене) ---
+        // --- ПОЛ (1/3 экрана) ---
+        ctx.fillStyle = '#c9b27c';  // деревянный пол
+        ctx.fillRect(0, 380, 900, 220);
+        
+        // Текстура пола (доски)
+        ctx.strokeStyle = '#a58e62';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 8; i++) {
+            ctx.beginPath();
+            ctx.moveTo(0, 400 + i * 27);
+            ctx.lineTo(900, 400 + i * 27);
+            ctx.strokeStyle = '#a58e62';
+            ctx.stroke();
+        }
+
+        // --- ПРЕДМЕТЫ НА СТЕНЕ (двери, окна) ---
         objects.forEach(obj => {
             let x = obj.x * CELL_SIZE;
             
             if (obj.type === 'door') {
                 // Дверь (на стене)
                 ctx.fillStyle = '#8b6e4c';
-                ctx.fillRect(x, 140, 35, 80);  // дверь
+                ctx.fillRect(x, 190, 55, 180);  // большая дверь
                 ctx.fillStyle = '#c9b27c';
-                ctx.fillRect(x + 10, 170, 15, 30);  // окошко в двери
+                ctx.fillRect(x + 15, 250, 25, 50);  // окошко
                 ctx.fillStyle = '#f0d090';
-                ctx.fillRect(x + 25, 175, 5, 5);  // ручка
+                ctx.fillRect(x + 40, 280, 8, 8);  // ручка
             } 
             else if (obj.type === 'stairs') {
-                // Лестница (на полу)
+                // Лестница (прислонена к стене)
                 ctx.fillStyle = '#8b7a5a';
-                ctx.fillRect(x, 150, 40, 60);
-                for (let i = 0; i < 4; i++) {
+                ctx.fillRect(x, 230, 55, 140);
+                for (let i = 0; i < 5; i++) {
                     ctx.fillStyle = '#6b5a3a';
-                    ctx.fillRect(x + 5 + i*8, 160 + i*12, 5, 30);
+                    ctx.fillRect(x + 8 + i*8, 240 + i*25, 6, 50);
                 }
             } 
             else if (obj.type === 'window') {
-                // Окно
+                // Окно (на стене)
                 ctx.fillStyle = '#a5d0ff';
-                ctx.fillRect(x + 5, 140, 30, 50);
+                ctx.fillRect(x + 5, 200, 50, 120);
                 ctx.fillStyle = '#2c3e50';
-                ctx.fillRect(x + 18, 140, 4, 50);  // перекладина
-                ctx.fillRect(x + 5, 165, 30, 4);    // перекладина
+                ctx.fillRect(x + 25, 200, 6, 120);  // перекладина
+                ctx.fillRect(x + 5, 260, 50, 6);    // перекладина
             }
         });
 
-        // --- NPC (СТОЯТ НА ПОЛУ, ВИД СБОКУ) ---
+        // --- NPC (БОЛЬШИЕ, НА РАЗНОМ РАССТОЯНИИ) ---
         npcs.forEach(npc => {
             let npcX = npc.x * CELL_SIZE;
+            let npcY = 280;  // базовая позиция Y
             
-            // Тело (вид сбоку)
-            ctx.fillStyle = npc.type === 'teacher' ? '#3a6790' : (npc.type === 'friend' ? '#7fb07f' : '#c96b8b');
-            ctx.fillRect(npcX + 5, 160, 30, 60);  // тело
-            ctx.fillStyle = '#f0d5b0';
-            ctx.fillRect(npcX + 12, 150, 16, 16);  // голова
+            // Смещение в зависимости от глубины (ближе/дальше)
+            let depthOffset = 0;
+            if (npc.depth === 'wall') {
+                depthOffset = -20;  // выше (ближе к стене)
+            } else if (npc.depth === 'center') {
+                depthOffset = 20;   // по центру
+            } else if (npc.depth === 'front') {
+                depthOffset = 50;   // ниже (ближе к игроку)
+            }
+            
+            // Рисуем спрайт персонажа (64x64 или больше)
+            if (npc.type === 'teacher') {
+                drawSprite('teacher', npcX, npcY - 40 + depthOffset, 64, 96);
+            } else if (npc.type === 'classmate') {
+                drawSprite('classmate', npcX, npcY - 40 + depthOffset, 64, 96);
+            } else if (npc.type === 'friend') {
+                drawSprite('friend', npcX, npcY - 40 + depthOffset, 64, 96);
+            }
             
             // Имя над головой
-            ctx.font = 'bold 14px "Courier New"';
+            ctx.font = 'bold 16px "Courier New"';
             ctx.fillStyle = 'white';
             ctx.strokeStyle = 'black';
-            ctx.lineWidth = 3;
-            ctx.strokeText(npc.name, npcX, 140);
-            ctx.fillText(npc.name, npcX, 140);
+            ctx.lineWidth = 4;
+            ctx.strokeText(npc.name, npcX, npcY - 50 + depthOffset);
+            ctx.fillText(npc.name, npcX, npcY - 50 + depthOffset);
         });
 
-        // --- МОТЯ (ВИД СБОКУ) ---
+        // --- МОТЯ (С АНИМАЦИЕЙ ХОДЬБЫ) ---
         let heroX = motyaX * CELL_SIZE;
+        let heroY = 330;  // чуть ниже NPC (ближе к игроку)
         
-        // Тело Моти
-        ctx.fillStyle = '#d97706';  // оранжевый
-        ctx.fillRect(heroX + 5, 160, 30, 60);
-        ctx.fillStyle = '#f0d5b0';
-        ctx.fillRect(heroX + 12, 150, 16, 16);  // голова
+        // Выбор кадра анимации
+        let heroSprite = 'hero_idle';
+        if (motyaDirection === 1) {  // шаг влево
+            heroSprite = 'hero_walk1';
+        } else if (motyaDirection === 2) {  // шаг вправо
+            heroSprite = 'hero_walk2';
+        }
+        
+        drawSprite(heroSprite, heroX, heroY - 40, 64, 96);
         
         // Имя
-        ctx.font = 'bold 16px "Courier New"';
+        ctx.font = 'bold 18px "Courier New"';
         ctx.fillStyle = '#ffd966';
         ctx.strokeStyle = 'black';
-        ctx.strokeText('Мотя', heroX, 130);
-        ctx.fillText('Мотя', heroX, 130);
+        ctx.strokeText('Мотя', heroX, heroY - 50);
+        ctx.fillText('Мотя', heroX, heroY - 50);
 
-        // --- ПОДСВЕТКА ЕСЛИ РЯДОМ NPC ---
+        // --- ПОДСВЕТКА NPC РЯДОМ ---
         if (nearbyNPC && !dialogActive) {
             ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 4;
-            ctx.setLineDash([8, 8]);
-            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 5, 140, 50, 90);
+            ctx.lineWidth = 5;
+            ctx.setLineDash([10, 10]);
+            
+            let npc = nearbyNPC;
+            let npcX = npc.x * CELL_SIZE;
+            let depthOffset = npc.depth === 'wall' ? -20 : (npc.depth === 'center' ? 20 : 50);
+            
+            ctx.strokeRect(npcX - 5, 230 + depthOffset, 74, 110);
             ctx.setLineDash([]);
         }
 
         // Статус
         let place = objects.find(o => o.x === motyaX);
         document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
+    }
+
+    // ---------- АНИМАЦИЯ ХОДЬБЫ ----------
+    function updateWalkAnimation(direction) {
+        if (direction !== 0) {
+            motyaDirection = direction;
+            walkTimer++;
+            if (walkTimer > 5) {  // смена кадра каждые 5 кадров
+                motyaFrame = (motyaFrame + 1) % 2;
+                walkTimer = 0;
+            }
+        } else {
+            motyaDirection = 0;
+            motyaFrame = 0;
+        }
+    }
+
+    // ---------- ДВИЖЕНИЕ ----------
+    function move(dx) {
+        if (dialogActive) return;
+        let newX = motyaX + dx;
+        if (newX >= 0 && newX < WORLD_WIDTH) {
+            motyaX = newX;
+            if (dx > 0) {
+                updateWalkAnimation(2);  // шаг вправо
+            } else {
+                updateWalkAnimation(1);  // шаг влево
+            }
+        }
+        updateNearbyNPC();
+        renderGame();
+    }
+
+    function stopWalking() {
+        updateWalkAnimation(0);
+        renderGame();
     }
 
     // ---------- ДИАЛОГИ ----------
@@ -416,17 +521,6 @@
         }
     });
 
-    // ---------- УПРАВЛЕНИЕ ----------
-    function move(dx) {
-        if (dialogActive) return;
-        let newX = motyaX + dx;
-        if (newX >= 0 && newX < WORLD_WIDTH) {
-            motyaX = newX;
-        }
-        updateNearbyNPC();
-        renderGame();
-    }
-
     function updateNearbyNPC() {
         nearbyNPC = npcs.find(npc => npc.x === motyaX) || null;
     }
@@ -448,15 +542,27 @@
         }
     }
 
-    // Кнопки
-    document.getElementById('btnLeft').addEventListener('click', () => move(-1));
-    document.getElementById('btnRight').addEventListener('click', () => move(1));
+    // ---------- УПРАВЛЕНИЕ ----------
+    document.getElementById('btnLeft').addEventListener('mousedown', () => move(-1));
+    document.getElementById('btnLeft').addEventListener('mouseup', stopWalking);
+    document.getElementById('btnLeft').addEventListener('mouseleave', stopWalking);
+    
+    document.getElementById('btnRight').addEventListener('mousedown', () => move(1));
+    document.getElementById('btnRight').addEventListener('mouseup', stopWalking);
+    document.getElementById('btnRight').addEventListener('mouseleave', stopWalking);
+    
     document.getElementById('actionBtn').addEventListener('click', interact);
 
     // Клавиши
     window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') move(-1);
-        if (e.key === 'ArrowRight') move(1);
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            move(-1);
+        }
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            move(1);
+        }
         if (e.key === ' ' || e.key === 'e') {
             e.preventDefault();
             interact();
@@ -464,10 +570,30 @@
         if (e.key === 'Escape' && dialogActive) closeDialog();
     });
 
+    window.addEventListener('keyup', (e) => {
+        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+            stopWalking();
+        }
+    });
+
+    // Анимационный цикл
+    function gameLoop() {
+        if (!dialogActive && motyaDirection !== 0) {
+            // продолжаем анимацию ходьбы
+            walkTimer++;
+            if (walkTimer > 5) {
+                motyaFrame = (motyaFrame + 1) % 2;
+                walkTimer = 0;
+            }
+        }
+        renderGame();
+        requestAnimationFrame(gameLoop);
+    }
+
     // Старт
     window.onload = () => {
         updateNearbyNPC();
-        renderGame();
+        gameLoop();
     };
 })();
 </script>
