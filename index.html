@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школа Моти • 90-е аниме квест</title>
+    <title>Школа Моти • 90-е аниме RPG</title>
     <style>
         * {
             box-sizing: border-box;
@@ -65,8 +65,6 @@
             box-shadow: 0 5px 0 #1e2f3f, 0 6px 10px black;
             cursor: pointer;
             font-family: 'Courier New', monospace;
-            transition: 0.03s linear;
-            line-height: 1;
             border: 2px solid #8098b0;
         }
         .dpad button:active {
@@ -85,7 +83,6 @@
             font-family: 'Courier New', monospace;
             border: 2px solid #ffe29c;
             color: #252017;
-            letter-spacing: 1px;
         }
         .action-btn:active {
             transform: translateY(5px);
@@ -100,19 +97,6 @@
             font-weight: bold;
             border: 2px solid #4b6e88;
             box-shadow: inset 0 -2px 0 #0f1f2c;
-            text-shadow: 2px 2px 0 #0f1a24;
-        }
-        .info-text {
-            color: #cdddee;
-            font-size: 16px;
-            padding: 0 10px;
-            background: #152b39;
-            border-radius: 30px;
-            line-height: 40px;
-            border: 1px solid #567;
-        }
-        a {
-            color: #aac7ff;
         }
         .dialog-box {
             position: absolute;
@@ -128,43 +112,38 @@
             color: #e9f2ff;
             font-size: 22px;
             font-family: 'Courier New', monospace;
-            font-weight: bold;
-            text-shadow: 3px 3px 0 #1f374b;
             display: none;
-            pointer-events: none;
             z-index: 10;
+        }
+        .speaker-name {
+            color: #ffd966;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        .dialog-text {
+            min-height: 60px;
+            margin: 10px 0;
         }
         .dialog-options {
             display: flex;
             gap: 40px;
             justify-content: center;
             margin-top: 20px;
-            pointer-events: auto;
         }
         .dialog-options button {
             background: #3a506b;
             border: 3px solid #7d9ec0;
             color: white;
-            font-size: 24px;
-            padding: 10px 30px;
+            font-size: 22px;
+            padding: 8px 25px;
             border-radius: 50px;
             font-family: 'Courier New', monospace;
-            font-weight: bold;
             box-shadow: 0 5px 0 #1f2f3f;
             cursor: pointer;
-            transition: 0.03s;
-            text-shadow: 2px 2px 0 #1a2835;
         }
         .dialog-options button:active {
             transform: translateY(5px);
             box-shadow: none;
-        }
-        .hint {
-            font-size: 16px;
-            background: #0a1b28;
-            padding: 6px 18px;
-            border-radius: 30px;
-            border: 1px solid #5f8bb2;
         }
     </style>
 </head>
@@ -172,12 +151,13 @@
 <div class="game-wrapper">
     <canvas id="gameCanvas" width="800" height="500"></canvas>
 
-    <!-- Диалоговое окно (появляется при разговоре) -->
+    <!-- Диалоговое окно -->
     <div id="dialogOverlay" class="dialog-box">
-        <div id="dialogText">Привет, Мотя! Как дела?</div>
+        <div id="speakerName" class="speaker-name">Персонаж</div>
+        <div id="dialogText" class="dialog-text">Текст диалога</div>
         <div class="dialog-options">
-            <button id="choice1">▶ Нормально</button>
-            <button id="choice2">▶ Кто ты?</button>
+            <button id="choice1">Вариант 1</button>
+            <button id="choice2">Вариант 2</button>
         </div>
     </div>
 
@@ -186,201 +166,218 @@
             <button id="btnLeft">←</button>
             <button id="btnRight">→</button>
         </div>
-        <div class="status" id="statusText">3 этаж • коридор</div>
+        <div class="status" id="statusText">3 этаж</div>
         <button class="action-btn" id="actionBtn">💬 говорить</button>
-    </div>
-    <div style="display: flex; justify-content: space-between; margin-top: 10px; color:#bcd5f0; padding:0 10px;">
-        <span class="hint">←→ ходить | 💬 рядом с персонажем</span>
-        <span class="hint">✨ картинки ставь в код 👇</span>
-    </div>
-    <div style="text-align: center; color: #6e8fb0; margin-top: 8px; font-size: 15px;">
-        ⚡ сами текстуры — в массиве TEXTURES (открой код)
     </div>
 </div>
 
 <script>
 (function() {
-    // ---------- НАСТРОЙКА ТЕКСТУР (ТЫ СМОЖЕШЬ ЛЕГКО ЗАМЕНИТЬ) ----------
-    // просто меняй строки data:image... на свои картинки в base64 или ссылки
+    // -------------------------------------------------
+    // ТВОИ ТЕКСТУРЫ - СЮДА ВСТАВЛЯЙ СВОИ КАРТИНКИ
+    // -------------------------------------------------
     const TEXTURES = {
-        // главный герой Мотя (идол-пиксель)
-        hero: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAP0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwPj4+fO7cOQMdA7VdwEDtF8DwgQbVq1evRkZGBl9fXwb6Gc5AawAAy38dDy8zrI8AAAAASUVORK5CYII=', // розовый пиксель-чел
-        // учитель (очки, пиджак)
+        hero: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAP0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwPj4+fO7cOQMdA7VdwEDtF8DwgQbVq1evRkZGBl9fXwb6Gc5AawAAy38dDy8zrI8AAAAASUVORK5CYII=',
         teacher: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAQ0lEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwbty48eHh4YyMjAw4DaeGAdQFDQ0NUVFRUQwMDLdv34ZRBgYGdDdQUfUAANIoI70IGz9CAAAAAElFTkSuQmCC',
-        // одноклассник (кепка)
-        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwNDR0PD09fUZGBm6DqWl4Q0NDVFhY2IyGhgY8BjPQ3gVUNAMAoqWlBRgYGBiobgYA2pQfPx2KbsoAAAAASUVORK5CYII=',
-        // друг (светлые волосы)
+        classmate: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwNDQ0PD09fUZGBm6DqWl4Q0NDVFhY2IyGhgY8BjPQ3gVUNAMAoqWlBRgYGBiobgYA2pQfPx2KbsoAAAAASUVORK5CYII=',
         friend: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAASklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQzAwsLC4O3tPaOhoQGn4dQwgLqA0d7e/mR1dTUDIwMDLsOp4YLqAgYGBgYqRgEAkkAfP2+Q+1QAAAAASUVORK5CYII=',
-        // стена/пол (тайл школы)
-        wall: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAAQklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwbty48eHh4YyMjAw4DaeGAdQFjIyMMyoqKhgYGBhwGU4NF1AXMDAwMFAxCgDodB8/ggNwUwAAAABJRU5ErkJgggAA',
-        // дверь
         door: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIbDnNnQ0BAVFRXFwMBAzSgAAKB5Hz8NxUMrAAAAAElFTkSuQmCC',
-        // лестница
-        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjLOqKioYGBgYKBiFADX+R8/ikBgdQAAAABJRU5ErkJgggAA',
-        // окно
-        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjKeDA0NZaC6GQBE5R8/7I9eXgAAAABJRU5ErkJgggAA'
+        stairs: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARUlEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjLOqKioYGBgYKBiFADX+R8/ikBgdQAAAABJRU5ErkJggg==',
+        window: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAARklEQVRIS2NkoDFgpLH5/0Mtm4G6ABeGjQwwf/78Y8eOHWNgYGDAbTg1DKAuYGRkZJw9e/YMBgYGXIYzMjKeDA0NZaC6GQBE5R8/7I9eXgAAAABJRU5ErkJggg=='
     };
 
-    // ---------- ИГРОВОЙ МИР ----------
+    // ---------- НАСТРОЙКИ ----------
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;   // пиксельный стиль
+    ctx.imageSmoothingEnabled = false;
 
-    // положение Моти (в клетках, 0 — левая стена)
-    let motyaX = 8;        // индекс по коридору
-    const WORLD_WIDTH = 20; // 20 "клеток" этажа
-    const CELL_SIZE = 40;   // 40x40 пикселей (пиксельно, красиво)
+    let motyaX = 8;  // позиция слева-направо
+    const WORLD_WIDTH = 20;
+    const CELL_SIZE = 40;
 
-    // Состояния
-    let currentFloor = 'floor3';
     let dialogActive = false;
-    let currentNPC = null;   // кто говорит
-    let nearbyNPC = null;    // индекс npc рядом
+    let currentNPC = null;
+    let nearbyNPC = null;
 
-    // NPC на 3 этаже: { name, type, x, dialogTree }
+    // ---------- ПЕРСОНАЖИ (меняй как хочешь) ----------
     const npcs = [
-        { id: 'teacher1', name: 'учитель', type: 'teacher', x: 4, messages: ['Мотя, уроки сделаны?', 'Сделал', 'Забыл...'], options: ['✅ Сделал', '❌ Не сделал'] },
-        { id: 'classmate1', name: 'Одноклассница', type: 'classmate', x: 9, messages: ['Привет! Как каникулы?', 'Круто', 'Скучно'], options: ['😎 Круто', '😴 Скучно'] },
-        { id: 'friend1', name: 'Юки (друг)', type: 'friend', x: 13, messages: ['Мотя! В RPG новую играл?', 'Да', 'Нет пока'], options: ['🎮 Да', '📖 Нет'] },
-        { id: 'teacher2', name: 'завуч', type: 'teacher', x: 17, messages: ['По коридору не бегай', 'Ладно', 'Я тихо'], options: ['👌 Ладно', '🤫 Я тихо'] },
+        { 
+            id: 'teacher1', 
+            name: 'учитель', 
+            type: 'teacher', 
+            x: 4,
+            dialog: {
+                text: 'Мотя, когда будешь уроки делать?',
+                options: ['Сегодня', 'Завтра'],
+                responses: ['Ну смотри, не затягивай.', 'Лентяй...']
+            }
+        },
+        { 
+            id: 'classmate1', 
+            name: 'одноклассница', 
+            type: 'classmate', 
+            x: 9,
+            dialog: {
+                text: 'Привет! Как каникулы прошли?',
+                options: ['Отлично!', 'Так себе'],
+                responses: ['Круто, я тоже отдохнула!', 'Бывает... в школе увидимся']
+            }
+        },
+        { 
+            id: 'friend1', 
+            name: 'друг Юки', 
+            type: 'friend', 
+            x: 13,
+            dialog: {
+                text: 'Мотя! В новую игру рубились?',
+                options: ['Ага', 'Не, не было времени'],
+                responses: ['Я тебе дам поиграть!', 'Жалко, крутая игра']
+            }
+        },
+        { 
+            id: 'teacher2', 
+            name: 'завуч', 
+            type: 'teacher', 
+            x: 17,
+            dialog: {
+                text: 'Опять по коридору бегаешь?',
+                options: ['Я не бегал', 'Извините'],
+                responses: ['Смотри мне...', 'Так-то лучше']
+            }
+        }
     ];
 
-    // Карта объектов (двери, лестницы, окна)
+    // ---------- ОБЪЕКТЫ (двери, окна, лестницы) ----------
     const objects = [
-        { type: 'door', x: 2, name: 'дверь 210' },
-        { type: 'door', x: 6, name: 'дверь 211' },
+        { type: 'door', x: 2, name: 'кабинет 210' },
+        { type: 'door', x: 6, name: 'кабинет 211' },
         { type: 'stairs', x: 11, name: 'лестница' },
         { type: 'window', x: 15, name: 'окно' },
-        { type: 'door', x: 19, name: 'дверь 212' },
+        { type: 'door', x: 19, name: 'кабинет 212' }
     ];
 
-    // вспомогательные функции отрисовки пиксель-арта
+    // ---------- ОТРИСОВКА ----------
     function drawSprite(type, dx, dy) {
         let img = new Image();
         img.src = TEXTURES[type] || TEXTURES.wall;
         ctx.drawImage(img, dx, dy, CELL_SIZE, CELL_SIZE);
     }
 
-    // Отрисовка всего этажа
     function renderGame() {
         ctx.clearRect(0, 0, 800, 500);
 
-        // пол и стены (задний фон)
+        // Пол и стены
         for (let col = 0; col < WORLD_WIDTH; col++) {
-            // пол
-            ctx.fillStyle = '#4f6d8c';
-            ctx.fillRect(col * CELL_SIZE, 300, CELL_SIZE, 120);
-            // стена
+            // Пол
+            ctx.fillStyle = '#5f7d9c';
+            ctx.fillRect(col * CELL_SIZE, 320, CELL_SIZE, 100);
+            // Cтена
             ctx.fillStyle = '#3f5568';
-            ctx.fillRect(col * CELL_SIZE, 200, CELL_SIZE, 100);
-            // окна-полосы (пиксельные тени)
+            ctx.fillRect(col * CELL_SIZE, 200, CELL_SIZE, 120);
+            // Полоска на стене
             ctx.fillStyle = '#2c4055';
-            ctx.fillRect(col * CELL_SIZE, 260, CELL_SIZE, 4);
+            ctx.fillRect(col * CELL_SIZE, 280, CELL_SIZE, 4);
         }
 
-        // Рисуем детали: окна, двери, лестницы (поверх фона)
+        // Рисуем объекты
         objects.forEach(obj => {
             let x = obj.x * CELL_SIZE;
             if (obj.type === 'door') {
-                drawSprite('door', x, 200); // дверь на стене
-                ctx.fillStyle = '#ab8e5c';
-                ctx.fillRect(x+5, 200, 6, 40);
+                drawSprite('door', x, 200);
+                ctx.fillStyle = '#8b6e4c';
+                ctx.fillRect(x+12, 220, 15, 35);
             } else if (obj.type === 'stairs') {
                 drawSprite('stairs', x, 300);
-                ctx.fillStyle = '#7b6b4a';
-                ctx.fillRect(x, 300, CELL_SIZE, 15);
+                ctx.fillStyle = '#7b6a4a';
+                ctx.fillRect(x+5, 330, 30, 10);
             } else if (obj.type === 'window') {
                 drawSprite('window', x, 200);
-                ctx.fillStyle = '#c9e2ff';
-                ctx.fillRect(x+8, 210, 24, 30);
+                ctx.fillStyle = '#a5d0ff';
+                ctx.fillRect(x+8, 220, 24, 30);
             }
         });
 
-        // Рисуем NPC (учитель, одноклассники и т.д.)
+        // Рисуем NPC
         npcs.forEach(npc => {
             let npcX = npc.x * CELL_SIZE;
-            let npcY = 300; // стоят на полу
             let type = npc.type;
-            if (type === 'teacher') drawSprite('teacher', npcX, npcY-40);
-            else if (type === 'classmate') drawSprite('classmate', npcX, npcY-40);
-            else if (type === 'friend') drawSprite('friend', npcX, npcY-40);
-            else drawSprite('classmate', npcX, npcY-40);
-
-            // имя над головой (пиксельный шрифт)
-            ctx.font = 'bold 16px "Courier New", monospace';
-            ctx.fillStyle = '#f5e9d8';
-            ctx.shadowColor = '#1e2b3a';
-            ctx.shadowBlur = 0;
+            
+            if (type === 'teacher') drawSprite('teacher', npcX, 270);
+            else if (type === 'classmate') drawSprite('classmate', npcX, 270);
+            else if (type === 'friend') drawSprite('friend', npcX, 270);
+            
+            // Имя
+            ctx.font = 'bold 14px "Courier New"';
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = 'black';
             ctx.lineWidth = 3;
-            ctx.strokeStyle = '#0a1725';
-            ctx.strokeText(npc.name, npcX, npcY-50);
-            ctx.fillText(npc.name, npcX, npcY-50);
+            ctx.strokeText(npc.name, npcX, 260);
+            ctx.fillText(npc.name, npcX, 260);
         });
 
-        // ----- ГЛАВНЫЙ ГЕРОЙ (МОТЯ) поверх всего -----
+        // Мотя
         let heroX = motyaX * CELL_SIZE;
-        drawSprite('hero', heroX, 260); // немного на полу
-        ctx.font = 'bold 18px "Courier New", monospace';
-        ctx.fillStyle = '#ffe88c';
-        ctx.shadowColor = '#322f1a';
-        ctx.strokeStyle = '#2b2310';
-        ctx.strokeText('Мотя', heroX, 250);
-        ctx.fillText('Мотя', heroX, 250);
-        ctx.shadowBlur = 0;
+        drawSprite('hero', heroX, 280);
+        ctx.font = 'bold 16px "Courier New"';
+        ctx.fillStyle = '#ffd966';
+        ctx.strokeStyle = 'black';
+        ctx.strokeText('Мотя', heroX, 260);
+        ctx.fillText('Мотя', heroX, 260);
 
-        // подсветка, если рядом NPC
+        // Подсветка если рядом NPC
         if (nearbyNPC && !dialogActive) {
-            ctx.beginPath();
-            ctx.strokeStyle = '#ffe88c';
-            ctx.lineWidth = 4;
-            ctx.setLineDash([8, 8]);
-            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 4, 256, CELL_SIZE+8, 60);
+            ctx.strokeStyle = '#ffd966';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(nearbyNPC.x * CELL_SIZE - 5, 260, CELL_SIZE + 10, 70);
             ctx.setLineDash([]);
         }
 
-        // статусная строка
+        // Статус
         let place = objects.find(o => o.x === motyaX);
-        document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
+        document.getElementById('statusText').innerText = place ? place.name : 'коридор';
     }
 
-    // диалоговая система
+    // ---------- ДИАЛОГИ (БЕЗ БАГОВ) ----------
     function talkTo(npc) {
         if (!npc) return;
+        
         currentNPC = npc;
         dialogActive = true;
-        let overlay = document.getElementById('dialogOverlay');
-        let textDiv = document.getElementById('dialogText');
-        let btn1 = document.getElementById('choice1');
-        let btn2 = document.getElementById('choice2');
-
-        textDiv.innerText = npc.messages[0] + ' ' + npc.name;
-        btn1.innerText = '▶ ' + (npc.options[0] || 'Да');
-        btn2.innerText = '▶ ' + (npc.options[1] || 'Нет');
-
-        overlay.style.display = 'block';
+        
+        document.getElementById('speakerName').innerText = npc.name;
+        document.getElementById('dialogText').innerText = npc.dialog.text;
+        document.getElementById('choice1').innerText = '▶ ' + npc.dialog.options[0];
+        document.getElementById('choice2').innerText = '▶ ' + npc.dialog.options[1];
+        
+        document.getElementById('dialogOverlay').style.display = 'block';
     }
 
     function closeDialog() {
         dialogActive = false;
         currentNPC = null;
         document.getElementById('dialogOverlay').style.display = 'none';
+        renderGame();
     }
 
-    // обработка выбора диалога
+    // Выбор ответа (персонаж отвечает на наш выбор)
     document.getElementById('choice1').addEventListener('click', () => {
         if (currentNPC) {
-            alert('💬 ' + currentNPC.name + ': ' + currentNPC.messages[1]); // простая реакция
-            closeDialog();
-        }
-    });
-    document.getElementById('choice2').addEventListener('click', () => {
-        if (currentNPC) {
-            alert('💬 ' + currentNPC.name + ': ' + (currentNPC.messages[2] || 'Понятно...'));
-            closeDialog();
+            document.getElementById('speakerName').innerText = currentNPC.name;
+            document.getElementById('dialogText').innerText = currentNPC.dialog.responses[0];
+            setTimeout(closeDialog, 1500);
         }
     });
 
-    // перемещение и взаимодействие
+    document.getElementById('choice2').addEventListener('click', () => {
+        if (currentNPC) {
+            document.getElementById('speakerName').innerText = currentNPC.name;
+            document.getElementById('dialogText').innerText = currentNPC.dialog.responses[1];
+            setTimeout(closeDialog, 1500);
+        }
+    });
+
+    // ---------- УПРАВЛЕНИЕ ----------
     function move(dx) {
         if (dialogActive) return;
         let newX = motyaX + dx;
@@ -392,7 +389,6 @@
     }
 
     function updateNearbyNPC() {
-        // ищем NPC на той же клетке, что и Мотя
         nearbyNPC = npcs.find(npc => npc.x === motyaX) || null;
     }
 
@@ -404,48 +400,36 @@
         if (nearbyNPC) {
             talkTo(nearbyNPC);
         } else {
-            // проверим объект
             let obj = objects.find(o => o.x === motyaX);
             if (obj) {
-                if (obj.type === 'door') alert('🚪 дверь: ' + obj.name + ' (пока закрыта)');
-                else if (obj.type === 'stairs') alert('🪜 лестница, но пока только 3 этаж');
-                else if (obj.type === 'window') alert('🪟 вид на школьный двор');
-            } else {
-                alert('👣 тут никого...');
+                if (obj.type === 'door') alert('🚪 ' + obj.name);
+                else if (obj.type === 'stairs') alert('🪜 лестница');
+                else if (obj.type === 'window') alert('🪟 окно');
             }
         }
-        renderGame();
     }
 
-    // кнопки управления
+    // Кнопки
     document.getElementById('btnLeft').addEventListener('click', () => move(-1));
     document.getElementById('btnRight').addEventListener('click', () => move(1));
     document.getElementById('actionBtn').addEventListener('click', interact);
 
-    // клавиатура
+    // Клавиши
     window.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') move(-1);
         if (e.key === 'ArrowRight') move(1);
-        if (e.key === ' ' || e.key === 'Space' || e.key === 'e' || e.key === 'E') {
+        if (e.key === ' ' || e.key === 'e') {
             e.preventDefault();
             interact();
         }
         if (e.key === 'Escape' && dialogActive) closeDialog();
     });
 
-    // подгрузка картинок и старт
+    // Старт
     window.onload = () => {
-        // предзагрузка изображений (чрез new Image)
-        let preload = Object.values(TEXTURES).map(src => {
-            let img = new Image();
-            img.src = src;
-        });
         updateNearbyNPC();
         renderGame();
     };
-
-    // ---- простейший способ замены картинок: отредактируй объект TEXTURES выше ---
-    // Например, TEXTURES.hero = 'ссылка_на_твоего_мотю';
 })();
 </script>
 </body>
