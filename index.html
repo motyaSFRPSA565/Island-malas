@@ -2,657 +2,678 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Школа Моти • 90-е аниме RPG</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TWIFLIX MAX — пиксельный мессенджер</title>
+    <!-- PeerJS for WebRTC -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <!-- Font Awesome 6 (пиксельные иконки) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
-            box-sizing: border-box;
-            user-select: none;
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-        }
-        body {
             margin: 0;
-            min-height: 100vh;
-            background: #0f1a24;
+            padding: 0;
+            box-sizing: border-box;
+            image-rendering: crisp-edges;
+            image-rendering: pixelated;
+            font-family: 'Courier New', 'VT323', monospace;
+        }
+
+        body {
+            background: #0a0a0f;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: 'Courier New', monospace;
-            background-image: radial-gradient(circle at 20% 30%, #1e3a4a 0%, #0a141f 100%);
+            min-height: 100vh;
+            padding: 16px;
         }
-        .game-container {
+
+        /* пиксельный контейнер */
+        .pixel-container {
+            max-width: 1400px;
+            width: 100%;
+            background: #1a1a2e;
+            border: 4px solid #ff3333;
+            box-shadow: 8px 8px 0 #5a1e1e;
             position: relative;
-            padding: 20px;
-            background: linear-gradient(145deg, #122b38 0%, #07121c 100%);
-            border-radius: 32px;
-            box-shadow: 0 20px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(100,180,255,0.2);
-            border: 2px solid #4f7b9e;
+            overflow: hidden;
         }
-        canvas {
-            display: block;
-            width: 1000px;
-            height: 600px;
-            border-radius: 20px;
-            box-shadow: inset 0 0 0 3px #6d8fb0, 0 0 0 4px #2a4055, 0 20px 30px black;
-            background: #1a3243;
-            image-rendering: pixelated;
-        }
-        .control-panel {
-            margin-top: 20px;
+
+        /* хедер */
+        .pixel-header {
+            background: #0f0f1a;
+            padding: 12px 16px;
+            border-bottom: 3px solid #ff3333;
             display: flex;
-            gap: 20px;
-            align-items: center;
             justify-content: space-between;
-            background: linear-gradient(145deg, #1e384b 0%, #10212f 100%);
-            padding: 15px 25px;
-            border-radius: 80px;
-            border: 2px solid #4a789c;
-            box-shadow: inset 0 -3px 0 #0b1a26, 0 10px 20px rgba(0,0,0,0.5);
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .dpad {
+
+        .logo {
+            font-size: 26px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            color: #ff3333;
+            text-shadow: 2px 2px 0 #4a0000;
+        }
+
+        .user-info {
+            background: #00000066;
+            padding: 5px 12px;
+            border: 1px solid #ff3333;
+            font-size: 14px;
+            color: #ffccaa;
+        }
+
+        .pixel-btn {
+            background: #2a2a3a;
+            border: 2px solid #ff3333;
+            color: #ffddbb;
+            padding: 6px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 2px 2px 0 #5a1e1e;
+        }
+
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: none;
+        }
+
+        /* основной layout */
+        .app-layout {
+            display: flex;
+            flex-direction: row;
+            height: 70vh;
+            min-height: 500px;
+        }
+
+        /* боковая панель (друзья + чаты) */
+        .sidebar {
+            width: 280px;
+            background: #11111f;
+            border-right: 3px solid #ff3333;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .sidebar-section {
+            padding: 12px;
+            border-bottom: 1px solid #ff333355;
+        }
+
+        .section-title {
+            color: #ff6666;
+            font-size: 16px;
+            margin-bottom: 10px;
             display: flex;
             gap: 8px;
+            align-items: center;
         }
-        .dpad button {
-            background: linear-gradient(145deg, #3d5e7e 0%, #1f3950 100%);
-            border: none;
-            color: #ddf0ff;
-            font-size: 32px;
-            font-weight: bold;
-            width: 70px;
-            height: 70px;
-            border-radius: 30px;
-            box-shadow: 0 6px 0 #0f202f, 0 8px 15px black;
+
+        .friend-list, .chat-list {
+            list-style: none;
+        }
+
+        .friend-item, .chat-item {
+            background: #1e1e2c;
+            margin: 6px 0;
+            padding: 6px 10px;
+            border-left: 4px solid #ff3333;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            border: 2px solid #7fa6c9;
-            text-shadow: 2px 2px 0 #0a1925;
-            transition: 0.03s linear;
-        }
-        .dpad button:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #0f202f;
-        }
-        .action-btn {
-            background: linear-gradient(145deg, #e8b55a 0%, #c58a2f 100%);
-            border: none;
-            font-size: 28px;
-            padding: 15px 40px;
-            border-radius: 60px;
-            font-weight: bold;
-            box-shadow: 0 6px 0 #8b5f23, 0 8px 15px black;
-            cursor: pointer;
-            font-family: 'Courier New', monospace;
-            border: 3px solid #ffe6a3;
-            color: #221d12;
-            text-shadow: 1px 1px 0 #ffdd99;
-            letter-spacing: 2px;
-        }
-        .action-btn:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #8b5f23;
-        }
-        .status {
-            background: linear-gradient(145deg, #1d3343 0%, #0f202f 100%);
-            padding: 12px 30px;
-            border-radius: 50px;
-            color: #c1e2ff;
-            font-size: 22px;
-            font-weight: bold;
-            border: 2px solid #5588aa;
-            box-shadow: inset 0 -2px 0 #0a1925, inset 0 2px 5px #3c6688;
-            text-shadow: 2px 2px 0 #0a1a2a;
-        }
-        .dialog-box {
-            position: absolute;
-            bottom: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 850px;
-            background: linear-gradient(165deg, #0f2335 0%, #1a3349 100%);
-            border: 4px solid #9bc2e8;
-            border-radius: 40px;
-            padding: 25px 35px;
-            box-shadow: 0 15px 0 #05121e, 0 25px 40px black, inset 0 0 30px #3d6a9f;
-            color: #edf6ff;
-            font-size: 24px;
-            font-family: 'Courier New', monospace;
-            display: none;
-            z-index: 10;
-            backdrop-filter: blur(2px);
-        }
-        .speaker-name {
-            color: #ffdb8e;
-            font-size: 20px;
-            margin-bottom: 8px;
-            border-bottom: 3px solid #5d8fc0;
-            display: inline-block;
-            padding-right: 30px;
-            text-shadow: 2px 2px 0 #2a4058;
-            letter-spacing: 1px;
-        }
-        .dialog-text {
-            min-height: 80px;
-            margin: 15px 0;
-            line-height: 1.5;
-            text-shadow: 3px 3px 0 #0e1f30;
-            color: #eef7ff;
-        }
-        .dialog-options {
             display: flex;
-            gap: 40px;
-            justify-content: center;
-            margin-top: 20px;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
         }
-        .dialog-options button {
-            background: linear-gradient(145deg, #2d4b6b 0%, #1b3147 100%);
-            border: 3px solid #89b6e3;
+
+        .friend-item.online {
+            border-left-color: #33ff33;
+            background: #1e2a1e;
+        }
+
+        .chat-active {
+            background: #ff333322;
+        }
+
+        /* центральный чат */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #12121c;
+        }
+
+        .chat-header {
+            background: #0b0b12;
+            padding: 10px 16px;
+            border-bottom: 2px solid #ff3333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .message-bubble {
+            max-width: 80%;
+            padding: 8px 12px;
+            background: #22223b;
+            border: 1px solid #ff3333;
+            color: #f0f0f0;
+            font-size: 14px;
+            word-break: break-word;
+        }
+
+        .my-message {
+            align-self: flex-end;
+            background: #3a1a2a;
+            border-color: #ff7777;
+        }
+
+        .input-area {
+            display: flex;
+            padding: 12px;
+            gap: 8px;
+            background: #0f0f17;
+            border-top: 2px solid #ff3333;
+            flex-wrap: wrap;
+        }
+
+        .input-area input {
+            flex: 1;
+            background: #000000aa;
+            border: 2px solid #ff3333;
+            padding: 10px;
             color: white;
-            font-size: 26px;
-            padding: 12px 35px;
-            border-radius: 70px;
-            font-family: 'Courier New', monospace;
-            font-weight: bold;
-            box-shadow: 0 6px 0 #112433, 0 8px 15px black;
+            font-size: 14px;
+        }
+
+        /* звонковый модальный */
+        .call-modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000000dd;
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .call-window {
+            background: #1a1a2e;
+            border: 4px solid #ff3333;
+            width: 300px;
+            text-align: center;
+            padding: 20px;
+        }
+        .video-container video {
+            width: 100%;
+            background: black;
+            margin: 8px 0;
+        }
+        .hidden {
+            display: none;
+        }
+        .bear-mascot {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            font-size: 48px;
             cursor: pointer;
-            transition: 0.03s;
-            text-shadow: 2px 2px 0 #0f263a;
+            filter: drop-shadow(2px 2px 0 #ff3333);
+            z-index: 99;
         }
-        .dialog-options button:active {
-            transform: translateY(6px);
-            box-shadow: 0 2px 0 #112433;
-        }
-        .hint {
-            color: #9bc2e8;
-            font-size: 16px;
-            text-shadow: 1px 1px 0 #0b1c2b;
+        @media (max-width: 700px) {
+            .app-layout { flex-direction: column; height: auto; }
+            .sidebar { width: 100%; max-height: 200px; flex-direction: row; overflow-x: auto; }
+            .sidebar-section { min-width: 200px; }
         }
     </style>
 </head>
 <body>
-<div class="game-container">
-    <canvas id="gameCanvas" width="1000" height="600"></canvas>
-
-    <!-- Диалоговое окно -->
-    <div id="dialogOverlay" class="dialog-box">
-        <div id="speakerName" class="speaker-name">Персонаж</div>
-        <div id="dialogText" class="dialog-text">Текст диалога</div>
-        <div class="dialog-options">
-            <button id="choice1">Вариант 1</button>
-            <button id="choice2">Вариант 2</button>
+<div class="pixel-container" id="appRoot">
+    <div class="pixel-header">
+        <div class="logo">📼 TWIFLIX MAX █</div>
+        <div id="authStatusPanel" style="display: flex; gap: 10px; align-items: center;"></div>
+    </div>
+    <div id="mainAppContent" style="display: none;">
+        <div class="app-layout">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="section-title"><i class="fas fa-user-friends"></i> ДРУЗЬЯ (онлайн)</div>
+                    <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                        <input type="text" id="friendAddInput" placeholder="имя пользователя" style="background:#000;border:1px solid red;color:white;">
+                        <button class="pixel-btn" id="addFriendBtn">+ добавить</button>
+                    </div>
+                    <ul id="friendsListUI" class="friend-list"></ul>
+                </div>
+                <div class="sidebar-section">
+                    <div class="section-title"><i class="fas fa-comments"></i> ЧАТЫ</div>
+                    <button class="pixel-btn" id="createGroupBtn" style="width:100%; margin-bottom:8px;">+ СОЗДАТЬ ГРУППУ</button>
+                    <ul id="chatsListUI" class="chat-list"></ul>
+                </div>
+            </div>
+            <div class="chat-area">
+                <div class="chat-header">
+                    <span id="currentChatName">💬 выберите чат</span>
+                    <button class="pixel-btn" id="callBtn" style="background:#4a0000;"><i class="fas fa-phone-alt"></i> ЗВОНОК</button>
+                </div>
+                <div id="chatMessagesContainer" class="chat-messages"></div>
+                <div class="input-area">
+                    <input type="text" id="messageInput" placeholder="сообщение... стикер :dog: или фото ссылкой [img]url[/img]">
+                    <button class="pixel-btn" id="sendMsgBtn">📨 ОТПРАВИТЬ</button>
+                    <button class="pixel-btn" id="emojiBtn">😀</button>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div class="control-panel">
-        <div class="dpad">
-            <button id="btnLeft">←</button>
-            <button id="btnRight">→</button>
+    <div id="authScreen" style="padding: 30px; text-align: center;">
+        <div class="logo" style="margin-bottom: 24px;">⚡ TWIFLIX MAX ⚡</div>
+        <div id="authTabs">
+            <button class="pixel-btn" id="showLoginTab">ВХОД</button>
+            <button class="pixel-btn" id="showRegisterTab">РЕГИСТРАЦИЯ</button>
         </div>
-        <div class="status" id="statusText">3 этаж • коридор</div>
-        <button class="action-btn" id="actionBtn">💬 говорить</button>
+        <div id="loginForm" style="margin-top: 20px;">
+            <input type="text" id="loginUsername" placeholder="имя пользователя" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
+            <input type="password" id="loginPassword" placeholder="пароль" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
+            <button class="pixel-btn" id="doLoginBtn">ВОЙТИ</button>
+        </div>
+        <div id="registerForm" style="margin-top: 20px; display:none;">
+            <input type="text" id="regUsername" placeholder="уникальное имя" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
+            <input type="password" id="regPassword" placeholder="пароль" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
+            <div><label>аватар: </label><input type="color" id="avatarColor" value="#ff3333"> <span>или эмодзи</span> <input id="avatarEmoji" placeholder="🐱" maxlength="2" style="width:50px;"></div>
+            <button class="pixel-btn" id="doRegisterBtn" style="margin-top:12px;">СОЗДАТЬ АККАУНТ</button>
+        </div>
+        <div id="authError" style="color:#ff8888; margin-top:12px;"></div>
     </div>
-    <div style="display: flex; justify-content: space-between; margin-top: 12px; padding: 0 10px;">
-        <span class="hint">←→ ходить | 💬 говорить</span>
-        <span class="hint">✨ персонажи поворачиваются</span>
+</div>
+<div class="bear-mascot" id="bearMascot">🧸🍵</div>
+<div id="callOverlay" class="call-modal hidden">
+    <div class="call-window">
+        <h3>📞 ВЫЗОВ</h3>
+        <div id="localVideoContainer"></div>
+        <div id="remoteVideoContainer"></div>
+        <button class="pixel-btn" id="hangupBtn">ПОЛОЖИТЬ ТРУБКУ</button>
     </div>
 </div>
 
 <script>
-(function() {
-    // ----------------------------------------------------------------
-    // ТВОИ ТЕКСТУРЫ — СЮДА ВСТАВЛЯЙ СВОИ РИСУНКИ
-    // ----------------------------------------------------------------
-    const TEXTURES = {
-        // Мотя (с поворотом)
-        motya_idle_right: '',    // стоит лицом вправо
-        motya_idle_left: '',     // стоит лицом влево
-        motya_walk_right1: '',   // шаг правой (вправо)
-        motya_walk_right2: '',   // шаг левой (вправо)
-        motya_walk_left1: '',    // шаг левой (влево)
-        motya_walk_left2: '',    // шаг правой (влево)
-        
-        // Персонажи (примеры, заменишь на свои)
-        teacher: '',
-        classmate: '',
-        friend: '',
-        
-        // Окружение (можно заменить)
-        door: '',
-        window: '',
-        stairs: ''
-    };
+    // ----------  КОНФИГИ ----------
+    const TELEGRAM_BOT_TOKEN = "8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM";
+    const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
+    let CURRENT_USER = null;      // {username, password, avatar, online: true}
+    let ACTIVE_CHAT = null;       // { id, type, name, participants[] }
+    let FRIENDS = [];              // [{username, avatar, online}]
+    let CHATS = [];               // личные чаты и групповые
+    let onlineUsers = new Set();   // имена онлайн
+    
+    let peer = null;
+    let currentCall = null;
+    let localStream = null;
 
-    // ---------- ТЕСТОВЫЕ ПЕРСОНАЖИ (чтобы не пропадали) ----------
-    // ТЫ ПОТОМ ЗАМЕНИШЬ НА СВОИХ
-    const npcs = [
-        { 
-            id: 'teacher1', 
-            name: 'учитель', 
-            texture: 'teacher', 
-            x: 8,
-            depth: 'wall',  // у стены
-            dialog: {
-                text: 'Мотя, когда будешь уроки делать?',
-                options: ['Сегодня', 'Завтра'],
-                responses: ['Ну смотри, не затягивай.', 'Лентяй...']
-            }
-        },
-        { 
-            id: 'classmate1', 
-            name: 'одноклассница', 
-            texture: 'classmate', 
-            x: 15,
-            depth: 'center',  // посередине
-            dialog: {
-                text: 'Привет! Как каникулы прошли?',
-                options: ['Отлично!', 'Так себе'],
-                responses: ['Круто, я тоже отдохнула!', 'Бывает... в школе увидимся']
-            }
-        },
-        { 
-            id: 'friend1', 
-            name: 'друг Юки', 
-            texture: 'friend', 
-            x: 22,
-            depth: 'front',  // ближе к игроку
-            dialog: {
-                text: 'Мотя! В новую игру рубились?',
-                options: ['Ага', 'Не, не было времени'],
-                responses: ['Я тебе дам поиграть!', 'Жалко, крутая игра']
-            }
-        },
-        { 
-            id: 'teacher2', 
-            name: 'завуч', 
-            texture: 'teacher', 
-            x: 30,
-            depth: 'wall',
-            dialog: {
-                text: 'Опять по коридору бегаешь?',
-                options: ['Я не бегал', 'Извините'],
-                responses: ['Смотри мне...', 'Так-то лучше']
-            }
+    // ----------  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ TELEGRAM (каждый чат = группа/канал) ----------
+    async function tgSendMessage(chatId, text, replyMarkup=null) {
+        try {
+            let url = `${TELEGRAM_API}/sendMessage`;
+            let body = { chat_id: chatId, text: text, parse_mode: "HTML" };
+            if(replyMarkup) body.reply_markup = replyMarkup;
+            let res = await fetch(url, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+            return await res.json();
+        } catch(e){ console.warn(e); }
+    }
+    async function tgGetUpdates(offset=0) { // для хранения сообщений (просто сохраняем историю)
+        // В данной реализации вся история хранится локально, но бот сохраняет сообщения в своих группах
+        // Используем бота для долговременного хранения: при отправке сообщения шлем в канал чата
+        // Идея: каждый чат имеет свой уникальный идентификатор (например "chat_"+chatId), создаем супергруппу или канал
+        // упрощённо: будем использовать форвард, но для демо используем API для отправки и получения последних 50 сообщений в группу
+        // Для надежности мы сохраняем историю в localStorage + синхронизируем через бота
+    }
+    async function ensureChatGroup(chatIdentifier) {
+        // Создаём чат в телеграме если не существует (для хранения истории)
+        // Но т.к. создание групп через бота требует прав, используем просто отправку сообщений в существующий суперчат.
+        // В демо: все сообщения также пишутся в локальный массив + бот хранит в канале по id "tw_chat_"+chatIdentifier
+        // Для упрощения: при отправке сообщения шлем POST запрос к боту, и он сохранит.
+        let groupId = `tw_chat_${chatIdentifier}`;
+        return groupId;
+    }
+    async function sendMessageToBotHistory(chatId, sender, text, timestamp) {
+        let groupName = `chat_hist_${chatId}`;
+        let messageText = `[${timestamp}] ${sender}: ${text}`;
+        await tgSendMessage(groupName, messageText);
+    }
+    
+    // ----------  ЛОКАЛЬНОЕ ХРАНЕНИЕ + РЕЗЕРВ TELEGRAM ----------
+    function saveUserData() {
+        if(CURRENT_USER){
+            let allUsers = JSON.parse(localStorage.getItem("tw_users") || "{}");
+            allUsers[CURRENT_USER.username] = { password: CURRENT_USER.password, avatar: CURRENT_USER.avatar };
+            localStorage.setItem("tw_users", JSON.stringify(allUsers));
+            localStorage.setItem("tw_current_user", CURRENT_USER.username);
+            // резерв в телеграм (отправляем сообщение боту)
+            tgSendMessage("tw_backup", `USER:${CURRENT_USER.username} DATA:${JSON.stringify({avatar:CURRENT_USER.avatar})}`);
         }
-    ];
-
-    // ---------- ОБЪЕКТЫ ----------
-    const objects = [
-        { type: 'door', x: 4, name: 'кабинет 210' },
-        { type: 'door', x: 11, name: 'кабинет 211' },
-        { type: 'window', x: 18, name: 'окно' },
-        { type: 'stairs', x: 25, name: 'лестница' },
-        { type: 'door', x: 32, name: 'кабинет 212' }
-    ];
-
-    // ---------- НАСТРОЙКИ ----------
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    ctx.imageSmoothingEnabled = false;
-
-    let motyaX = 15;
-    let motyaDirection = 'right';  // 'right' или 'left'
-    let motyaWalkState = 0;  // 0 - idle, 1 - шаг1, 2 - шаг2
-    let walkTimer = 0;
-    let isMoving = false;
-    
-    const WORLD_WIDTH = 40;
-    const CELL_SIZE = 64;  // ширина клетки
-    
-    const CAMERA_OFFSET_X = 500;
-
-    let dialogActive = false;
-    let currentNPC = null;
-    let nearbyNPC = null;
-
-    // ---------- ЗАГРУЗКА ИЗОБРАЖЕНИЙ ----------
-    const images = {};
-    function loadImages() {
-        for (let key in TEXTURES) {
-            if (TEXTURES[key]) {
-                let img = new Image();
-                img.src = TEXTURES[key];
-                images[key] = img;
-            }
+        if(CURRENT_USER){
+            let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${CURRENT_USER.username}`) || "[]");
+            FRIENDS = friendsDB;
+            let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${CURRENT_USER.username}`) || "[]");
+            CHATS = chatsDB;
         }
     }
-    loadImages();
-
-    // ---------- КАМЕРА ----------
-    function getScreenX(worldX) {
-        return worldX * CELL_SIZE - (motyaX * CELL_SIZE - CAMERA_OFFSET_X);
+    function loadUserData(username){
+        let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${username}`) || "[]");
+        FRIENDS = friendsDB;
+        let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${username}`) || "[]");
+        CHATS = chatsDB;
+        updateOnlineStatus();
     }
-
-    // ---------- ОТРИСОВКА ----------
-    function renderGame() {
-        ctx.clearRect(0, 0, 1000, 600);
-
-        // --- СТЕНА ---
-        // Основной цвет стены
-        ctx.fillStyle = '#3a5f7a';
-        ctx.fillRect(0, 0, 1000, 350);
-        
-        // Панели на стене
-        ctx.fillStyle = '#2d4c6e';
-        for (let i = 0; i < 5; i++) {
-            ctx.fillRect(0, 70 + i * 60, 1000, 20);
+    function persistAll(){
+        if(CURRENT_USER){
+            localStorage.setItem(`tw_friends_${CURRENT_USER.username}`, JSON.stringify(FRIENDS));
+            localStorage.setItem(`tw_chats_${CURRENT_USER.username}`, JSON.stringify(CHATS));
         }
-        
-        // Верхний свет
-        ctx.fillStyle = '#4f7b9e';
-        ctx.fillRect(0, 0, 1000, 30);
-        
-        // Линия плинтуса
-        ctx.fillStyle = '#5d4a35';
-        ctx.fillRect(0, 340, 1000, 10);
-        ctx.fillStyle = '#7b6242';
-        ctx.fillRect(0, 345, 1000, 5);
-
-        // --- ПОЛ ---
-        ctx.fillStyle = '#bd9f6e';
-        ctx.fillRect(0, 350, 1000, 250);
-        
-        // Доски пола
-        ctx.strokeStyle = '#9f8357';
-        ctx.lineWidth = 3;
-        for (let i = 0; i < 10; i++) {
-            let y = 380 + i * 25;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(1000, y);
-            ctx.stroke();
+    }
+    
+    // обновление статуса онлайн (кто зашел)
+    function updateOnlineStatus(){
+        if(!CURRENT_USER) return;
+        let allOnline = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
+        allOnline[CURRENT_USER.username] = true;
+        localStorage.setItem("tw_online_users", JSON.stringify(allOnline));
+        // проверяем друзей
+        for(let f of FRIENDS){
+            f.online = !!allOnline[f.username];
         }
-        
-        // Тени на полу
-        ctx.fillStyle = '#00000020';
-        ctx.fillRect(0, 350, 1000, 10);
-
-        // --- ОБЪЕКТЫ (ДВЕРИ, ОКНА) ---
-        objects.forEach(obj => {
-            let screenX = getScreenX(obj.x);
-            if (screenX > -100 && screenX < 1100) {
-                
-                if (obj.type === 'door') {
-                    // Дверь (нормальной ширины)
-                    ctx.fillStyle = '#8b6e4c';
-                    ctx.fillRect(screenX, 190, 64, 160);  // ширина 64 как клетка
-                    
-                    // Ручка
-                    ctx.fillStyle = '#f0d090';
-                    ctx.fillRect(screenX + 50, 270, 8, 8);
-                    
-                    // Окошко в двери
-                    ctx.fillStyle = '#c0d8f0';
-                    ctx.fillRect(screenX + 15, 230, 30, 30);
-                }
-                else if (obj.type === 'window') {
-                    // Окно
-                    ctx.fillStyle = '#a5d0ff';
-                    ctx.fillRect(screenX + 5, 200, 54, 120);
-                    
-                    // Перекладины
-                    ctx.fillStyle = '#2c3e50';
-                    ctx.fillRect(screenX + 28, 200, 8, 120);
-                    ctx.fillRect(screenX + 5, 260, 54, 8);
-                }
-                else if (obj.type === 'stairs') {
-                    // Лестница
-                    ctx.fillStyle = '#8b7a5a';
-                    ctx.fillRect(screenX, 240, 64, 120);
-                    
-                    for (let i = 0; i < 4; i++) {
-                        ctx.fillStyle = '#6b5a3a';
-                        ctx.fillRect(screenX + 8 + i*12, 250 + i*25, 8, 40);
-                    }
-                }
+        renderFriendsList();
+        // слушаем других через интервал (эмуляция realtime)
+    }
+    function refreshOnlineUsers(){
+        let allOnline = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
+        for(let f of FRIENDS){
+            f.online = !!allOnline[f.username];
+        }
+        renderFriendsList();
+        renderChatsList();
+    }
+    setInterval(()=>{
+        if(CURRENT_USER){
+            updateOnlineStatus(); // обновляем свой онлайн
+            refreshOnlineUsers();
+            // каждые 2 сек обновление сообщений (имитация realtime)
+            if(ACTIVE_CHAT) loadMessagesForChat(ACTIVE_CHAT);
+        }
+    }, 2000);
+    
+    // сообщения по чатам
+    let messagesCache = {};
+    function getMessages(chatId){
+        if(!messagesCache[chatId]) messagesCache[chatId]=[];
+        return messagesCache[chatId];
+    }
+    function addMessage(chatId, msg){
+        let arr = getMessages(chatId);
+        arr.push(msg);
+        messagesCache[chatId]=arr;
+        if(ACTIVE_CHAT && ACTIVE_CHAT.id===chatId) renderMessages();
+        // пасхалка "Драго" 
+        if(msg.sender.toLowerCase().includes("драго") || (msg.text && msg.text.toLowerCase().includes("драго"))){
+            setTimeout(()=>{
+                let last = getMessages(chatId);
+                last.push({sender:"🐉 ДРАГО", text:"Я должен!", timestamp:Date.now(), system:true});
+                if(ACTIVE_CHAT && ACTIVE_CHAT.id===chatId) renderMessages();
+            },100);
+        }
+        persistMessage(chatId,msg);
+    }
+    function persistMessage(chatId,msg){
+        let store = JSON.parse(localStorage.getItem(`msgs_${chatId}_${CURRENT_USER?.username}`) || "[]");
+        store.push(msg);
+        localStorage.setItem(`msgs_${chatId}_${CURRENT_USER?.username}`, JSON.stringify(store));
+        // через бот резерв
+        sendMessageToBotHistory(chatId, msg.sender, msg.text, msg.timestamp);
+    }
+    function loadMessagesForChat(chat){
+        if(!chat) return;
+        let store = JSON.parse(localStorage.getItem(`msgs_${chat.id}_${CURRENT_USER?.username}`) || "[]");
+        messagesCache[chat.id] = store;
+        renderMessages();
+    }
+    
+    function sendMessageToChat(text){
+        if(!ACTIVE_CHAT || !text.trim()) return;
+        let msg = { sender: CURRENT_USER.username, text: text, timestamp: Date.now() };
+        addMessage(ACTIVE_CHAT.id, msg);
+        // если личный чат с другом и группа
+    }
+    
+    // UI рендеры
+    function renderFriendsList(){
+        let container = document.getElementById("friendsListUI");
+        if(!container) return;
+        container.innerHTML = FRIENDS.map(f=>`<li class="friend-item ${f.online?'online':''}" data-user="${f.username}">${f.avatar||'👤'} ${f.username} ${f.online?'🟢':'⚫'}</li>`).join("");
+        document.querySelectorAll(".friend-item").forEach(el=>{
+            el.addEventListener("click",()=>{
+                let uname = el.dataset.user;
+                openPrivateChat(uname);
+            });
+        });
+    }
+    function renderChatsList(){
+        let container = document.getElementById("chatsListUI");
+        if(!container) return;
+        container.innerHTML = CHATS.map(ch=>`<li class="chat-item ${ACTIVE_CHAT?.id===ch.id?'chat-active':''}" data-chatid="${ch.id}">${ch.type==='group'?'👥':'💬'} ${ch.name}</li>`).join("");
+        document.querySelectorAll(".chat-item").forEach(el=>{
+            el.addEventListener("click",()=>{
+                let cid = el.dataset.chatid;
+                let chat = CHATS.find(c=>c.id==cid);
+                if(chat) setActiveChat(chat);
+            });
+        });
+    }
+    function setActiveChat(chat){
+        ACTIVE_CHAT = chat;
+        document.getElementById("currentChatName").innerText = chat.name;
+        loadMessagesForChat(chat);
+        renderChatsList();
+    }
+    function openPrivateChat(username){
+        let existing = CHATS.find(c=>c.type==='private' && c.participants.includes(username) && c.participants.includes(CURRENT_USER.username));
+        if(existing){
+            setActiveChat(existing);
+        } else {
+            let newChat = { id: `priv_${Date.now()}`, type:"private", name: username, participants: [CURRENT_USER.username, username] };
+            CHATS.push(newChat);
+            persistAll();
+            setActiveChat(newChat);
+        }
+    }
+    function createGroup(){
+        let name = prompt("Название группы (до 10 чел):");
+        if(!name) return;
+        let newGroup = { id: `grp_${Date.now()}`, type:"group", name: name, participants: [CURRENT_USER.username] };
+        CHATS.push(newGroup);
+        persistAll();
+        renderChatsList();
+    }
+    function addFriendByUsername(username){
+        if(username===CURRENT_USER.username) return alert("Нельзя добавить себя");
+        let exists = FRIENDS.find(f=>f.username===username);
+        if(exists) return alert("Уже в друзьях");
+        let usersDb = JSON.parse(localStorage.getItem("tw_users")||"{}");
+        if(!usersDb[username]) return alert("Пользователь не найден");
+        let avatar = usersDb[username].avatar || "🧸";
+        FRIENDS.push({username, avatar, online:false});
+        persistAll();
+        renderFriendsList();
+    }
+    
+    function renderMessages(){
+        let container = document.getElementById("chatMessagesContainer");
+        if(!container || !ACTIVE_CHAT) return;
+        let msgs = getMessages(ACTIVE_CHAT.id);
+        container.innerHTML = msgs.map(m=>`<div class="message-bubble ${m.sender===CURRENT_USER.username?'my-message':''}"><b>${m.sender}</b> ${m.text} <span style="font-size:10px;">${new Date(m.timestamp).toLocaleTimeString()}</span></div>`).join("");
+        container.scrollTop = container.scrollHeight;
+    }
+    
+    // WebRTC звонки
+    async function initPeer(){
+        peer = new Peer(CURRENT_USER.username+Date.now());
+        peer.on('call', async call=>{
+            if(confirm(`Входящий звонок от ${call.peer}?`)){
+                localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+                call.answer(localStream);
+                currentCall = call;
+                document.getElementById("callOverlay").classList.remove("hidden");
+                call.on('stream', remoteStream=>{
+                    // аудио
+                    let audio = new Audio();
+                    audio.srcObject = remoteStream;
+                    audio.play();
+                });
+            } else {
+                call.close();
             }
         });
-
-        // --- NPC (ТЕПЕРЬ ОНИ ЕСТЬ) ---
-        npcs.forEach(npc => {
-            let screenX = getScreenX(npc.x);
-            if (screenX > -100 && screenX < 1100) {
-                
-                // Смещение по глубине
-                let depthOffset = 0;
-                if (npc.depth === 'wall') depthOffset = -10;
-                else if (npc.depth === 'center') depthOffset = 15;
-                else if (npc.depth === 'front') depthOffset = 35;
-                
-                let npcY = 280 + depthOffset;  // Стоят на полу
-                
-                // Если есть текстура - рисуем, если нет - заглушку
-                if (images[npc.texture]) {
-                    ctx.drawImage(images[npc.texture], screenX, npcY - 40, 64, 96);
-                } else {
-                    // Заглушка чтобы было видно
-                    ctx.fillStyle = '#6b8cff';
-                    ctx.fillRect(screenX + 10, npcY - 30, 44, 70);
-                    ctx.fillStyle = '#f0d5b0';
-                    ctx.fillRect(screenX + 20, npcY - 40, 24, 24);
-                }
-                
-                // Имя
-                ctx.font = 'bold 16px "Courier New"';
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = 'black';
-                ctx.lineWidth = 3;
-                ctx.strokeText(npc.name, screenX, npcY - 50);
-                ctx.fillText(npc.name, screenX, npcY - 50);
+    }
+    async function startCall(targetUsername){
+        if(!peer) await initPeer();
+        let friendPeerId = `${targetUsername}${Date.now()}`; // упрощенно
+        localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
+        let call = peer.call(friendPeerId, localStream);
+        currentCall = call;
+        document.getElementById("callOverlay").classList.remove("hidden");
+        call.on('stream', remoteStream=>{
+            let audio = new Audio();
+            audio.srcObject = remoteStream;
+            audio.play();
+        });
+    }
+    function endCall(){
+        if(currentCall) currentCall.close();
+        if(localStream) localStream.getTracks().forEach(t=>t.stop());
+        document.getElementById("callOverlay").classList.add("hidden");
+        currentCall = null;
+    }
+    
+    // Аутентификация
+    function register(username, password, avatarData){
+        let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
+        if(users[username]) return "Имя занято";
+        let avatar = avatarData.color ? `<span style="background:${avatarData.color};padding:4px;">⬤</span>` : (avatarData.emoji || "🐱");
+        users[username] = { password, avatar };
+        localStorage.setItem("tw_users", JSON.stringify(users));
+        CURRENT_USER = { username, password, avatar };
+        localStorage.setItem("tw_current_user", username);
+        FRIENDS = [];
+        CHATS = [];
+        persistAll();
+        return "ok";
+    }
+    function login(username, password){
+        let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
+        if(!users[username] || users[username].password !== password) return "Неверные данные";
+        CURRENT_USER = { username, password, avatar: users[username].avatar };
+        localStorage.setItem("tw_current_user", username);
+        loadUserData(username);
+        return "ok";
+    }
+    function logout(){
+        let allOnline = JSON.parse(localStorage.getItem("tw_online_users")||"{}");
+        delete allOnline[CURRENT_USER?.username];
+        localStorage.setItem("tw_online_users", JSON.stringify(allOnline));
+        CURRENT_USER=null;
+        location.reload();
+    }
+    
+    // инициализация UI
+    window.onload = ()=>{
+        let saved = localStorage.getItem("tw_current_user");
+        if(saved){
+            let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
+            if(users[saved]){
+                CURRENT_USER = { username:saved, password:users[saved].password, avatar:users[saved].avatar };
+                loadUserData(saved);
+                document.getElementById("authScreen").style.display="none";
+                document.getElementById("mainAppContent").style.display="block";
+                updateOnlineStatus();
+                initPeer();
+                renderFriendsList();
+                renderChatsList();
+                setInterval(()=>refreshOnlineUsers(),3000);
+            }
+        }
+        document.getElementById("showLoginTab").onclick=()=>{ document.getElementById("loginForm").style.display="block"; document.getElementById("registerForm").style.display="none"; };
+        document.getElementById("showRegisterTab").onclick=()=>{ document.getElementById("loginForm").style.display="none"; document.getElementById("registerForm").style.display="block"; };
+        document.getElementById("doLoginBtn").onclick=()=>{
+            let un = document.getElementById("loginUsername").value;
+            let pw = document.getElementById("loginPassword").value;
+            let res = login(un,pw);
+            if(res==="ok") location.reload();
+            else document.getElementById("authError").innerText=res;
+        };
+        document.getElementById("doRegisterBtn").onclick=()=>{
+            let un = document.getElementById("regUsername").value;
+            let pw = document.getElementById("regPassword").value;
+            let color = document.getElementById("avatarColor").value;
+            let emoji = document.getElementById("avatarEmoji").value;
+            let avatar = emoji?{emoji}:{color};
+            let res = register(un,pw,avatar);
+            if(res==="ok") location.reload();
+            else document.getElementById("authError").innerText=res;
+        };
+        document.getElementById("sendMsgBtn").onclick=()=>{
+            let inp = document.getElementById("messageInput");
+            let txt = inp.value;
+            if(txt.startsWith("[img]") && txt.endsWith("[/img]")){
+                let url = txt.slice(5,-6);
+                txt = `📷 ФОТО: ${url}`;
+            }
+            sendMessageToChat(txt);
+            inp.value="";
+        };
+        document.getElementById("createGroupBtn").onclick=createGroup;
+        document.getElementById("addFriendBtn").onclick=()=>{
+            let name = document.getElementById("friendAddInput").value;
+            addFriendByUsername(name);
+        };
+        document.getElementById("callBtn").onclick=()=>{
+            if(ACTIVE_CHAT && ACTIVE_CHAT.type==='private'){
+                let friendName = ACTIVE_CHAT.participants.find(p=>p!==CURRENT_USER.username);
+                if(friendName) startCall(friendName);
+                else alert("Не удалось определить друга");
+            } else alert("Звонки только в личных чатах");
+        };
+        document.getElementById("hangupBtn").onclick=endCall;
+        document.getElementById("emojiBtn").onclick=()=>{
+            let em = prompt("вставьте эмодзи или стикер:","😎");
+            if(em) document.getElementById("messageInput").value+=em;
+        };
+        // пасхалка медведь
+        let bear = document.getElementById("bearMascot");
+        bear.onclick=()=>alert("🧸 Чай будешь? 🍵");
+        // код 67 (клавиша 'C')
+        window.addEventListener("keydown",(e)=>{
+            if(e.keyCode===67){
+                alert("СЕКРЕТНАЯ ТЕМА: ПИКСЕЛЬНЫЙ КОТ ВАС ПРИВЕТСТВУЕТ! 🐱‍👤");
             }
         });
-
-        // --- МОТЯ (БОЛЬШОЙ, С ПОВОРОТОМ) ---
-        let heroScreenX = CAMERA_OFFSET_X - 32;  // центрируем
-        let heroY = 310;  // Стоит на полу
-        
-        // Выбираем текстуру в зависимости от направления и анимации
-        let motyaTexture = '';
-        if (!isMoving) {
-            // Стоит
-            motyaTexture = motyaDirection === 'right' ? 'motya_idle_right' : 'motya_idle_left';
-        } else {
-            // Идёт
-            if (motyaDirection === 'right') {
-                motyaTexture = motyaWalkState === 1 ? 'motya_walk_right1' : 'motya_walk_right2';
-            } else {
-                motyaTexture = motyaWalkState === 1 ? 'motya_walk_left1' : 'motya_walk_left2';
-            }
+        if(!saved){
+            document.getElementById("authScreen").style.display="block";
+            document.getElementById("mainAppContent").style.display="none";
         }
-        
-        // Рисуем Мотю
-        if (images[motyaTexture]) {
-            ctx.drawImage(images[motyaTexture], heroScreenX, heroY - 40, 64, 96);
-        } else {
-            // Заглушка (чтобы было видно)
-            ctx.fillStyle = '#d97706';
-            ctx.fillRect(heroScreenX + 12, heroY - 30, 40, 70);
-            ctx.fillStyle = '#f0d5b0';
-            ctx.fillRect(heroScreenX + 22, heroY - 40, 20, 20);
-            
-            // Глаза в зависимости от направления
-            ctx.fillStyle = 'black';
-            if (motyaDirection === 'right') {
-                ctx.fillRect(heroScreenX + 32, heroY - 34, 4, 4);
-                ctx.fillRect(heroScreenX + 44, heroY - 34, 4, 4);
-            } else {
-                ctx.fillRect(heroScreenX + 22, heroY - 34, 4, 4);
-                ctx.fillRect(heroScreenX + 34, heroY - 34, 4, 4);
-            }
-        }
-        
-        // Имя Моти
-        ctx.font = 'bold 20px "Courier New"';
-        ctx.fillStyle = '#ffd966';
-        ctx.strokeStyle = 'black';
-        ctx.lineWidth = 4;
-        ctx.strokeText('Мотя', heroScreenX, heroY - 50);
-        ctx.fillText('Мотя', heroScreenX, heroY - 50);
-
-        // Подсветка NPC рядом
-        if (nearbyNPC && !dialogActive) {
-            ctx.strokeStyle = '#ffd966';
-            ctx.lineWidth = 4;
-            ctx.setLineDash([8, 8]);
-            
-            let npc = nearbyNPC;
-            let screenX = getScreenX(npc.x);
-            let depthOffset = 0;
-            if (npc.depth === 'wall') depthOffset = -10;
-            else if (npc.depth === 'center') depthOffset = 15;
-            else if (npc.depth === 'front') depthOffset = 35;
-            
-            ctx.strokeRect(screenX - 5, 230 + depthOffset, 74, 110);
-            ctx.setLineDash([]);
-        }
-
-        // Статус
-        let place = objects.find(o => o.x === motyaX);
-        document.getElementById('statusText').innerText = place ? place.name : 'коридор 3 этажа';
-    }
-
-    // ---------- АНИМАЦИЯ ХОДЬБЫ ----------
-    function updateWalkAnimation(direction) {
-        isMoving = true;
-        motyaDirection = direction;
-        walkTimer++;
-        if (walkTimer > 6) {
-            motyaWalkState = motyaWalkState === 1 ? 2 : 1;
-            walkTimer = 0;
-        }
-    }
-
-    function stopWalking() {
-        isMoving = false;
-        motyaWalkState = 0;
-        walkTimer = 0;
-    }
-
-    // ---------- ДВИЖЕНИЕ ----------
-    function move(dx) {
-        if (dialogActive) return;
-        let newX = motyaX + dx;
-        if (newX >= 0 && newX < WORLD_WIDTH) {
-            motyaX = newX;
-            if (dx > 0) {
-                updateWalkAnimation('right');
-            } else {
-                updateWalkAnimation('left');
-            }
-        }
-        updateNearbyNPC();
-    }
-
-    // ---------- ДИАЛОГИ ----------
-    function talkTo(npc) {
-        if (!npc) return;
-        
-        currentNPC = npc;
-        dialogActive = true;
-        
-        document.getElementById('speakerName').innerText = npc.name;
-        document.getElementById('dialogText').innerText = npc.dialog.text;
-        document.getElementById('choice1').innerText = '▶ ' + npc.dialog.options[0];
-        document.getElementById('choice2').innerText = '▶ ' + npc.dialog.options[1];
-        
-        document.getElementById('dialogOverlay').style.display = 'block';
-    }
-
-    function closeDialog() {
-        dialogActive = false;
-        currentNPC = null;
-        document.getElementById('dialogOverlay').style.display = 'none';
-    }
-
-    document.getElementById('choice1').addEventListener('click', () => {
-        if (currentNPC) {
-            document.getElementById('speakerName').innerText = currentNPC.name;
-            document.getElementById('dialogText').innerText = currentNPC.dialog.responses[0];
-            setTimeout(closeDialog, 1500);
-        }
-    });
-
-    document.getElementById('choice2').addEventListener('click', () => {
-        if (currentNPC) {
-            document.getElementById('speakerName').innerText = currentNPC.name;
-            document.getElementById('dialogText').innerText = currentNPC.dialog.responses[1];
-            setTimeout(closeDialog, 1500);
-        }
-    });
-
-    function updateNearbyNPC() {
-        nearbyNPC = npcs.find(npc => npc.x === motyaX) || null;
-    }
-
-    function interact() {
-        if (dialogActive) {
-            closeDialog();
-            return;
-        }
-        if (nearbyNPC) {
-            talkTo(nearbyNPC);
-        } else {
-            let obj = objects.find(o => o.x === motyaX);
-            if (obj) {
-                if (obj.type === 'door') alert('🚪 ' + obj.name);
-                else if (obj.type === 'stairs') alert('🪜 лестница');
-                else if (obj.type === 'window') alert('🪟 окно');
-            }
-        }
-    }
-
-    // ---------- УПРАВЛЕНИЕ ----------
-    document.getElementById('btnLeft').addEventListener('mousedown', () => move(-1));
-    document.getElementById('btnLeft').addEventListener('mouseup', stopWalking);
-    document.getElementById('btnLeft').addEventListener('mouseleave', stopWalking);
-    
-    document.getElementById('btnRight').addEventListener('mousedown', () => move(1));
-    document.getElementById('btnRight').addEventListener('mouseup', stopWalking);
-    document.getElementById('btnRight').addEventListener('mouseleave', stopWalking);
-    
-    document.getElementById('actionBtn').addEventListener('click', interact);
-
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'ArrowLeft') {
-            e.preventDefault();
-            move(-1);
-        }
-        if (e.key === 'ArrowRight') {
-            e.preventDefault();
-            move(1);
-        }
-        if (e.key === ' ' || e.key === 'e') {
-            e.preventDefault();
-            interact();
-        }
-        if (e.key === 'Escape' && dialogActive) closeDialog();
-    });
-
-    window.addEventListener('keyup', (e) => {
-        if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
-            stopWalking();
-        }
-    });
-
-    // Анимационный цикл
-    function gameLoop() {
-        if (!dialogActive && isMoving) {
-            walkTimer++;
-            if (walkTimer > 6) {
-                motyaWalkState = motyaWalkState === 1 ? 2 : 1;
-                walkTimer = 0;
-            }
-        }
-        renderGame();
-        requestAnimationFrame(gameLoop);
-    }
-
-    // Старт
-    window.onload = () => {
-        updateNearbyNPC();
-        gameLoop();
     };
-})();
 </script>
 </body>
 </html>
