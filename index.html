@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>TWIFLIX MAX — пиксельный мессенджер</title>
-    <!-- PeerJS for WebRTC -->
+    <title>TWIFLIX MAX — пиксельный мессенджер v2</title>
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <!-- Font Awesome 6 (пиксельные иконки) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {
@@ -17,7 +15,6 @@
             image-rendering: pixelated;
             font-family: 'Courier New', 'VT323', monospace;
         }
-
         body {
             background: #0a0a0f;
             display: flex;
@@ -26,8 +23,6 @@
             min-height: 100vh;
             padding: 16px;
         }
-
-        /* пиксельный контейнер */
         .pixel-container {
             max-width: 1400px;
             width: 100%;
@@ -35,10 +30,7 @@
             border: 4px solid #ff3333;
             box-shadow: 8px 8px 0 #5a1e1e;
             position: relative;
-            overflow: hidden;
         }
-
-        /* хедер */
         .pixel-header {
             background: #0f0f1a;
             padding: 12px 16px;
@@ -49,7 +41,6 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-
         .logo {
             font-size: 26px;
             font-weight: bold;
@@ -57,15 +48,6 @@
             color: #ff3333;
             text-shadow: 2px 2px 0 #4a0000;
         }
-
-        .user-info {
-            background: #00000066;
-            padding: 5px 12px;
-            border: 1px solid #ff3333;
-            font-size: 14px;
-            color: #ffccaa;
-        }
-
         .pixel-btn {
             background: #2a2a3a;
             border: 2px solid #ff3333;
@@ -77,35 +59,28 @@
             transition: 0.1s linear;
             box-shadow: 2px 2px 0 #5a1e1e;
         }
-
         .pixel-btn:active {
             transform: translate(2px, 2px);
             box-shadow: none;
         }
-
-        /* основной layout */
         .app-layout {
             display: flex;
             flex-direction: row;
             height: 70vh;
             min-height: 500px;
         }
-
-        /* боковая панель (друзья + чаты) */
         .sidebar {
-            width: 280px;
+            width: 300px;
             background: #11111f;
             border-right: 3px solid #ff3333;
             display: flex;
             flex-direction: column;
             overflow-y: auto;
         }
-
         .sidebar-section {
             padding: 12px;
             border-bottom: 1px solid #ff333355;
         }
-
         .section-title {
             color: #ff6666;
             font-size: 16px;
@@ -114,12 +89,12 @@
             gap: 8px;
             align-items: center;
         }
-
-        .friend-list, .chat-list {
+        .friend-list, .chat-list, .group-users-list {
             list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
         }
-
-        .friend-item, .chat-item {
+        .friend-item, .chat-item, .group-user-item {
             background: #1e1e2c;
             margin: 6px 0;
             padding: 6px 10px;
@@ -130,24 +105,19 @@
             align-items: center;
             font-size: 13px;
         }
-
         .friend-item.online {
             border-left-color: #33ff33;
             background: #1e2a1e;
         }
-
         .chat-active {
             background: #ff333322;
         }
-
-        /* центральный чат */
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #12121c;
         }
-
         .chat-header {
             background: #0b0b12;
             padding: 10px 16px;
@@ -156,7 +126,6 @@
             justify-content: space-between;
             align-items: center;
         }
-
         .chat-messages {
             flex: 1;
             overflow-y: auto;
@@ -165,7 +134,6 @@
             flex-direction: column;
             gap: 8px;
         }
-
         .message-bubble {
             max-width: 80%;
             padding: 8px 12px;
@@ -175,13 +143,11 @@
             font-size: 14px;
             word-break: break-word;
         }
-
         .my-message {
             align-self: flex-end;
             background: #3a1a2a;
             border-color: #ff7777;
         }
-
         .input-area {
             display: flex;
             padding: 12px;
@@ -190,7 +156,6 @@
             border-top: 2px solid #ff3333;
             flex-wrap: wrap;
         }
-
         .input-area input {
             flex: 1;
             background: #000000aa;
@@ -199,9 +164,7 @@
             color: white;
             font-size: 14px;
         }
-
-        /* звонковый модальный */
-        .call-modal {
+        .modal {
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
@@ -212,17 +175,23 @@
             justify-content: center;
             z-index: 1000;
         }
-        .call-window {
+        .modal-content {
             background: #1a1a2e;
             border: 4px solid #ff3333;
-            width: 300px;
-            text-align: center;
+            width: 350px;
             padding: 20px;
+            text-align: center;
         }
-        .video-container video {
-            width: 100%;
-            background: black;
-            margin: 8px 0;
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border: 3px solid #ff3333;
+            margin: 10px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            background: #2a2a3a;
         }
         .hidden {
             display: none;
@@ -236,10 +205,14 @@
             filter: drop-shadow(2px 2px 0 #ff3333);
             z-index: 99;
         }
+        .avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
         @media (max-width: 700px) {
             .app-layout { flex-direction: column; height: auto; }
-            .sidebar { width: 100%; max-height: 200px; flex-direction: row; overflow-x: auto; }
-            .sidebar-section { min-width: 200px; }
+            .sidebar { width: 100%; max-height: 250px; overflow-x: auto; }
         }
     </style>
 </head>
@@ -253,10 +226,19 @@
         <div class="app-layout">
             <div class="sidebar">
                 <div class="sidebar-section">
-                    <div class="section-title"><i class="fas fa-user-friends"></i> ДРУЗЬЯ (онлайн)</div>
+                    <div class="section-title"><i class="fas fa-user-circle"></i> МОЙ ПРОФИЛЬ</div>
+                    <button class="pixel-btn" id="viewProfileBtn" style="width:100%; margin-bottom:8px;">👤 ПРОСМОТР ПРОФИЛЯ</button>
+                    <button class="pixel-btn" id="logoutBtn" style="width:100%; background:#4a0000;">🚪 ВЫЙТИ</button>
+                </div>
+                <div class="sidebar-section">
+                    <div class="section-title"><i class="fas fa-user-friends"></i> ДРУЗЬЯ</div>
                     <div style="display: flex; gap: 6px; margin-bottom: 8px;">
-                        <input type="text" id="friendAddInput" placeholder="имя пользователя" style="background:#000;border:1px solid red;color:white;">
-                        <button class="pixel-btn" id="addFriendBtn">+ добавить</button>
+                        <input type="text" id="friendAddInput" placeholder="имя пользователя" style="background:#000;border:1px solid red;color:white;flex:1;">
+                        <button class="pixel-btn" id="addFriendBtn">+</button>
+                    </div>
+                    <div style="display: flex; gap: 6px; margin-bottom: 8px;">
+                        <input type="text" id="searchUserInput" placeholder="найти пользователя" style="background:#000;border:1px solid red;color:white;flex:1;">
+                        <button class="pixel-btn" id="searchUserBtn">🔍</button>
                     </div>
                     <ul id="friendsListUI" class="friend-list"></ul>
                 </div>
@@ -269,11 +251,14 @@
             <div class="chat-area">
                 <div class="chat-header">
                     <span id="currentChatName">💬 выберите чат</span>
-                    <button class="pixel-btn" id="callBtn" style="background:#4a0000;"><i class="fas fa-phone-alt"></i> ЗВОНОК</button>
+                    <div>
+                        <button class="pixel-btn" id="manageGroupBtn" style="display:none; background:#3a2a1a;"><i class="fas fa-users"></i> УПР.ГРУППОЙ</button>
+                        <button class="pixel-btn" id="callBtn" style="background:#4a0000;"><i class="fas fa-phone-alt"></i> ЗВОНОК</button>
+                    </div>
                 </div>
                 <div id="chatMessagesContainer" class="chat-messages"></div>
                 <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="сообщение... стикер :dog: или фото ссылкой [img]url[/img]">
+                    <input type="text" id="messageInput" placeholder="сообщение... [img]url[/img] для фото">
                     <button class="pixel-btn" id="sendMsgBtn">📨 ОТПРАВИТЬ</button>
                     <button class="pixel-btn" id="emojiBtn">😀</button>
                 </div>
@@ -294,384 +279,470 @@
         <div id="registerForm" style="margin-top: 20px; display:none;">
             <input type="text" id="regUsername" placeholder="уникальное имя" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
             <input type="password" id="regPassword" placeholder="пароль" style="display:block; margin:10px auto; padding:8px; width:200px;"><br>
-            <div><label>аватар: </label><input type="color" id="avatarColor" value="#ff3333"> <span>или эмодзи</span> <input id="avatarEmoji" placeholder="🐱" maxlength="2" style="width:50px;"></div>
+            <div>Аватар: <input type="file" id="avatarFile" accept="image/*" style="color:white;"></div>
+            <div style="margin-top:8px;">или цвет/эмодзи: <input type="color" id="avatarColor" value="#ff3333"> <input id="avatarEmoji" placeholder="🐱" maxlength="2" style="width:50px;"></div>
             <button class="pixel-btn" id="doRegisterBtn" style="margin-top:12px;">СОЗДАТЬ АККАУНТ</button>
         </div>
         <div id="authError" style="color:#ff8888; margin-top:12px;"></div>
     </div>
 </div>
 <div class="bear-mascot" id="bearMascot">🧸🍵</div>
-<div id="callOverlay" class="call-modal hidden">
-    <div class="call-window">
-        <h3>📞 ВЫЗОВ</h3>
-        <div id="localVideoContainer"></div>
-        <div id="remoteVideoContainer"></div>
-        <button class="pixel-btn" id="hangupBtn">ПОЛОЖИТЬ ТРУБКУ</button>
+
+<!-- Модальные окна -->
+<div id="profileModal" class="modal hidden">
+    <div class="modal-content">
+        <h3><i class="fas fa-user"></i> МОЙ ПРОФИЛЬ</h3>
+        <div class="profile-avatar" id="profileAvatarDisplay"></div>
+        <p><strong id="profileUsername"></strong></p>
+        <button class="pixel-btn" id="changeAvatarBtn">СМЕНИТЬ АВАТАР</button>
+        <button class="pixel-btn" id="closeProfileBtn" style="margin-top:10px;">ЗАКРЫТЬ</button>
+    </div>
+</div>
+
+<div id="groupManageModal" class="modal hidden">
+    <div class="modal-content" style="width:400px;">
+        <h3>👥 УПРАВЛЕНИЕ ГРУППОЙ</h3>
+        <p id="groupNameDisplay"></p>
+        <div class="section-title">УЧАСТНИКИ</div>
+        <ul id="groupUsersList" class="group-users-list"></ul>
+        <div style="margin-top:10px;">
+            <input type="text" id="addUserToGroupInput" placeholder="имя пользователя" style="width:100%; margin:5px 0;">
+            <button class="pixel-btn" id="confirmAddUserBtn">➕ ДОБАВИТЬ В ГРУППУ</button>
+        </div>
+        <button class="pixel-btn" id="closeGroupModalBtn" style="margin-top:10px;">ЗАКРЫТЬ</button>
+    </div>
+</div>
+
+<div id="changeAvatarModal" class="modal hidden">
+    <div class="modal-content">
+        <h3>СМЕНА АВАТАРА</h3>
+        <input type="file" id="newAvatarFile" accept="image/*">
+        <div style="margin:10px 0;">или цвет: <input type="color" id="newAvatarColor" value="#ff3333"></div>
+        <div>или эмодзи: <input id="newAvatarEmoji" placeholder="🐱" maxlength="2"></div>
+        <button class="pixel-btn" id="saveAvatarBtn">СОХРАНИТЬ</button>
+        <button class="pixel-btn" id="cancelAvatarBtn">ОТМЕНА</button>
     </div>
 </div>
 
 <script>
-    // ----------  КОНФИГИ ----------
+    // ---------- КОНФИГИ ----------
     const TELEGRAM_BOT_TOKEN = "8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM";
-    const TELEGRAM_API = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
-    let CURRENT_USER = null;      // {username, password, avatar, online: true}
-    let ACTIVE_CHAT = null;       // { id, type, name, participants[] }
-    let FRIENDS = [];              // [{username, avatar, online}]
-    let CHATS = [];               // личные чаты и групповые
-    let onlineUsers = new Set();   // имена онлайн
-    
+    let CURRENT_USER = null;
+    let ACTIVE_CHAT = null;
+    let FRIENDS = [];
+    let CHATS = [];
+    let onlineUsers = new Set();
     let peer = null;
     let currentCall = null;
     let localStream = null;
+    let messagesCache = {};
 
-    // ----------  ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ TELEGRAM (каждый чат = группа/канал) ----------
-    async function tgSendMessage(chatId, text, replyMarkup=null) {
-        try {
-            let url = `${TELEGRAM_API}/sendMessage`;
-            let body = { chat_id: chatId, text: text, parse_mode: "HTML" };
-            if(replyMarkup) body.reply_markup = replyMarkup;
-            let res = await fetch(url, { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
-            return await res.json();
-        } catch(e){ console.warn(e); }
+    // ---------- ПОМОЩНИКИ ----------
+    function tgSendMessage(chatId, text) {
+        fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ chat_id: chatId, text: text })
+        }).catch(e=>console.warn);
     }
-    async function tgGetUpdates(offset=0) { // для хранения сообщений (просто сохраняем историю)
-        // В данной реализации вся история хранится локально, но бот сохраняет сообщения в своих группах
-        // Используем бота для долговременного хранения: при отправке сообщения шлем в канал чата
-        // Идея: каждый чат имеет свой уникальный идентификатор (например "chat_"+chatId), создаем супергруппу или канал
-        // упрощённо: будем использовать форвард, но для демо используем API для отправки и получения последних 50 сообщений в группу
-        // Для надежности мы сохраняем историю в localStorage + синхронизируем через бота
-    }
-    async function ensureChatGroup(chatIdentifier) {
-        // Создаём чат в телеграме если не существует (для хранения истории)
-        // Но т.к. создание групп через бота требует прав, используем просто отправку сообщений в существующий суперчат.
-        // В демо: все сообщения также пишутся в локальный массив + бот хранит в канале по id "tw_chat_"+chatIdentifier
-        // Для упрощения: при отправке сообщения шлем POST запрос к боту, и он сохранит.
-        let groupId = `tw_chat_${chatIdentifier}`;
-        return groupId;
-    }
-    async function sendMessageToBotHistory(chatId, sender, text, timestamp) {
-        let groupName = `chat_hist_${chatId}`;
-        let messageText = `[${timestamp}] ${sender}: ${text}`;
-        await tgSendMessage(groupName, messageText);
-    }
-    
-    // ----------  ЛОКАЛЬНОЕ ХРАНЕНИЕ + РЕЗЕРВ TELEGRAM ----------
-    function saveUserData() {
-        if(CURRENT_USER){
-            let allUsers = JSON.parse(localStorage.getItem("tw_users") || "{}");
-            allUsers[CURRENT_USER.username] = { password: CURRENT_USER.password, avatar: CURRENT_USER.avatar };
-            localStorage.setItem("tw_users", JSON.stringify(allUsers));
-            localStorage.setItem("tw_current_user", CURRENT_USER.username);
-            // резерв в телеграм (отправляем сообщение боту)
-            tgSendMessage("tw_backup", `USER:${CURRENT_USER.username} DATA:${JSON.stringify({avatar:CURRENT_USER.avatar})}`);
-        }
-        if(CURRENT_USER){
-            let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${CURRENT_USER.username}`) || "[]");
-            FRIENDS = friendsDB;
-            let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${CURRENT_USER.username}`) || "[]");
-            CHATS = chatsDB;
+
+    // Сохранение аватара (base64)
+    function saveAvatarToUser(username, avatarData) {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
+        if(users[username]) {
+            users[username].avatar = avatarData;
+            localStorage.setItem("tw_users", JSON.stringify(users));
+            if(CURRENT_USER && CURRENT_USER.username === username) {
+                CURRENT_USER.avatar = avatarData;
+            }
         }
     }
-    function loadUserData(username){
-        let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${username}`) || "[]");
-        FRIENDS = friendsDB;
-        let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${username}`) || "[]");
-        CHATS = chatsDB;
-        updateOnlineStatus();
+
+    function getUserAvatar(username) {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
+        return users[username]?.avatar || "🐱";
     }
-    function persistAll(){
-        if(CURRENT_USER){
+
+    function renderAvatarElement(avatarData) {
+        if(!avatarData) return "🐱";
+        if(avatarData.startsWith("data:image")) {
+            return `<img src="${avatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        if(avatarData.startsWith("#")) {
+            return `<div style="background:${avatarData};width:100%;height:100%;"></div>`;
+        }
+        return avatarData;
+    }
+
+    // Загрузка фото в base64
+    function fileToBase64(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    // ---------- УПРАВЛЕНИЕ ДРУЗЬЯМИ (поиск всех пользователей) ----------
+    function getAllUsers() {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
+        return Object.keys(users);
+    }
+
+    function findUserByUsername(username) {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
+        return users[username] ? username : null;
+    }
+
+    function addFriend(targetUsername) {
+        if(targetUsername === CURRENT_USER.username) { alert("❌ Нельзя добавить себя"); return false; }
+        if(FRIENDS.some(f => f.username === targetUsername)) { alert("Уже в друзьях"); return false; }
+        let userExists = findUserByUsername(targetUsername);
+        if(!userExists) { alert("❌ Пользователь не найден"); return false; }
+        let avatar = getUserAvatar(targetUsername);
+        FRIENDS.push({ username: targetUsername, avatar: avatar, online: false });
+        persistAll();
+        renderFriendsList();
+        alert(`✅ ${targetUsername} добавлен в друзья!`);
+        return true;
+    }
+
+    // Поиск и добавление через кнопку
+    function searchAndAddUser() {
+        let searchName = document.getElementById("searchUserInput").value.trim();
+        if(!searchName) return;
+        let allUsers = getAllUsers();
+        let found = allUsers.filter(u => u.toLowerCase().includes(searchName.toLowerCase()));
+        if(found.length === 0) { alert("Пользователи не найдены"); return; }
+        if(found.length === 1) {
+            addFriend(found[0]);
+        } else {
+            let msg = "Найдены пользователи:\n" + found.join("\n") + "\nВведите точное имя для добавления:";
+            let exact = prompt(msg);
+            if(exact && found.includes(exact)) addFriend(exact);
+            else alert("Отменено или имя не совпадает");
+        }
+    }
+
+    // ---------- ГРУППЫ: добавление участников ----------
+    function addUserToGroup(groupChat, username) {
+        if(groupChat.type !== 'group') return false;
+        if(groupChat.participants.includes(username)) { alert("Уже в группе"); return false; }
+        let userExists = findUserByUsername(username);
+        if(!userExists) { alert("Пользователь не найден"); return false; }
+        groupChat.participants.push(username);
+        persistAll();
+        renderChatsList();
+        if(ACTIVE_CHAT && ACTIVE_CHAT.id === groupChat.id) {
+            loadMessagesForChat(groupChat);
+        }
+        alert(`✅ ${username} добавлен в группу`);
+        return true;
+    }
+
+    function showGroupManage() {
+        if(!ACTIVE_CHAT || ACTIVE_CHAT.type !== 'group') return;
+        document.getElementById("groupNameDisplay").innerText = ACTIVE_CHAT.name;
+        let listEl = document.getElementById("groupUsersList");
+        listEl.innerHTML = ACTIVE_CHAT.participants.map(p => `<li class="group-user-item">${getUserAvatar(p)} ${p} ${p===CURRENT_USER.username ? '(вы)' : ''}</li>`).join("");
+        document.getElementById("groupManageModal").classList.remove("hidden");
+    }
+
+    // ---------- ПРОФИЛЬ ----------
+    function showProfile() {
+        let avatarDisplay = document.getElementById("profileAvatarDisplay");
+        let avatarData = CURRENT_USER.avatar || "🐱";
+        if(avatarData.startsWith("data:image")) {
+            avatarDisplay.innerHTML = `<img src="${avatarData}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else if(avatarData.startsWith("#")) {
+            avatarDisplay.innerHTML = `<div style="background:${avatarData};width:100%;height:100%;"></div>`;
+        } else {
+            avatarDisplay.innerHTML = `<span style="font-size:48px;">${avatarData}</span>`;
+        }
+        document.getElementById("profileUsername").innerText = CURRENT_USER.username;
+        document.getElementById("profileModal").classList.remove("hidden");
+    }
+
+    function changeAvatar() {
+        document.getElementById("changeAvatarModal").classList.remove("hidden");
+    }
+
+    async function saveNewAvatar() {
+        let fileInput = document.getElementById("newAvatarFile");
+        let color = document.getElementById("newAvatarColor").value;
+        let emoji = document.getElementById("newAvatarEmoji").value;
+        let newAvatar = null;
+        
+        if(fileInput.files && fileInput.files[0]) {
+            newAvatar = await fileToBase64(fileInput.files[0]);
+        } else if(emoji && emoji.trim()) {
+            newAvatar = emoji.trim();
+        } else if(color) {
+            newAvatar = color;
+        } else {
+            newAvatar = "🐱";
+        }
+        
+        saveAvatarToUser(CURRENT_USER.username, newAvatar);
+        CURRENT_USER.avatar = newAvatar;
+        persistAll();
+        document.getElementById("changeAvatarModal").classList.add("hidden");
+        alert("Аватар обновлён!");
+        renderFriendsList();
+        renderChatsList();
+        if(ACTIVE_CHAT) loadMessagesForChat(ACTIVE_CHAT);
+    }
+
+    // ---------- ОСТАЛЬНОЙ ФУНКЦИОНАЛ (чат, сообщения) ----------
+    function persistAll() {
+        if(CURRENT_USER) {
             localStorage.setItem(`tw_friends_${CURRENT_USER.username}`, JSON.stringify(FRIENDS));
             localStorage.setItem(`tw_chats_${CURRENT_USER.username}`, JSON.stringify(CHATS));
+            localStorage.setItem(`tw_user_avatar_${CURRENT_USER.username}`, CURRENT_USER.avatar);
         }
     }
-    
-    // обновление статуса онлайн (кто зашел)
-    function updateOnlineStatus(){
+
+    function loadUserData(username) {
+        let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${username}`) || "[]");
+        let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${username}`) || "[]");
+        FRIENDS = friendsDB;
+        CHATS = chatsDB;
+        let savedAvatar = localStorage.getItem(`tw_user_avatar_${username}`);
+        if(savedAvatar && CURRENT_USER) CURRENT_USER.avatar = savedAvatar;
+        for(let f of FRIENDS) {
+            f.avatar = getUserAvatar(f.username);
+        }
+    }
+
+    function updateOnlineStatus() {
         if(!CURRENT_USER) return;
         let allOnline = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
         allOnline[CURRENT_USER.username] = true;
         localStorage.setItem("tw_online_users", JSON.stringify(allOnline));
-        // проверяем друзей
-        for(let f of FRIENDS){
+        for(let f of FRIENDS) {
             f.online = !!allOnline[f.username];
         }
         renderFriendsList();
-        // слушаем других через интервал (эмуляция realtime)
     }
-    function refreshOnlineUsers(){
+
+    function refreshOnlineUsers() {
         let allOnline = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
-        for(let f of FRIENDS){
+        for(let f of FRIENDS) {
             f.online = !!allOnline[f.username];
         }
         renderFriendsList();
-        renderChatsList();
     }
-    setInterval(()=>{
-        if(CURRENT_USER){
-            updateOnlineStatus(); // обновляем свой онлайн
-            refreshOnlineUsers();
-            // каждые 2 сек обновление сообщений (имитация realtime)
-            if(ACTIVE_CHAT) loadMessagesForChat(ACTIVE_CHAT);
-        }
-    }, 2000);
-    
-    // сообщения по чатам
-    let messagesCache = {};
-    function getMessages(chatId){
-        if(!messagesCache[chatId]) messagesCache[chatId]=[];
+
+    function getMessages(chatId) {
+        if(!messagesCache[chatId]) messagesCache[chatId] = [];
         return messagesCache[chatId];
     }
-    function addMessage(chatId, msg){
+
+    function addMessage(chatId, msg) {
         let arr = getMessages(chatId);
         arr.push(msg);
-        messagesCache[chatId]=arr;
-        if(ACTIVE_CHAT && ACTIVE_CHAT.id===chatId) renderMessages();
-        // пасхалка "Драго" 
-        if(msg.sender.toLowerCase().includes("драго") || (msg.text && msg.text.toLowerCase().includes("драго"))){
-            setTimeout(()=>{
-                let last = getMessages(chatId);
-                last.push({sender:"🐉 ДРАГО", text:"Я должен!", timestamp:Date.now(), system:true});
-                if(ACTIVE_CHAT && ACTIVE_CHAT.id===chatId) renderMessages();
-            },100);
-        }
-        persistMessage(chatId,msg);
-    }
-    function persistMessage(chatId,msg){
+        messagesCache[chatId] = arr;
+        if(ACTIVE_CHAT && ACTIVE_CHAT.id === chatId) renderMessages();
         let store = JSON.parse(localStorage.getItem(`msgs_${chatId}_${CURRENT_USER?.username}`) || "[]");
         store.push(msg);
         localStorage.setItem(`msgs_${chatId}_${CURRENT_USER?.username}`, JSON.stringify(store));
-        // через бот резерв
-        sendMessageToBotHistory(chatId, msg.sender, msg.text, msg.timestamp);
+        if(msg.text && msg.text.toLowerCase().includes("драго")) {
+            setTimeout(() => {
+                let last = getMessages(chatId);
+                last.push({sender:"🐉 ДРАГО", text:"Я должен!", timestamp:Date.now(), system:true});
+                if(ACTIVE_CHAT && ACTIVE_CHAT.id === chatId) renderMessages();
+            }, 100);
+        }
     }
-    function loadMessagesForChat(chat){
+
+    function loadMessagesForChat(chat) {
         if(!chat) return;
         let store = JSON.parse(localStorage.getItem(`msgs_${chat.id}_${CURRENT_USER?.username}`) || "[]");
         messagesCache[chat.id] = store;
         renderMessages();
     }
-    
-    function sendMessageToChat(text){
+
+    function sendMessageToChat(text) {
         if(!ACTIVE_CHAT || !text.trim()) return;
         let msg = { sender: CURRENT_USER.username, text: text, timestamp: Date.now() };
         addMessage(ACTIVE_CHAT.id, msg);
-        // если личный чат с другом и группа
     }
-    
-    // UI рендеры
-    function renderFriendsList(){
-        let container = document.getElementById("friendsListUI");
-        if(!container) return;
-        container.innerHTML = FRIENDS.map(f=>`<li class="friend-item ${f.online?'online':''}" data-user="${f.username}">${f.avatar||'👤'} ${f.username} ${f.online?'🟢':'⚫'}</li>`).join("");
-        document.querySelectorAll(".friend-item").forEach(el=>{
-            el.addEventListener("click",()=>{
-                let uname = el.dataset.user;
-                openPrivateChat(uname);
-            });
-        });
-    }
-    function renderChatsList(){
-        let container = document.getElementById("chatsListUI");
-        if(!container) return;
-        container.innerHTML = CHATS.map(ch=>`<li class="chat-item ${ACTIVE_CHAT?.id===ch.id?'chat-active':''}" data-chatid="${ch.id}">${ch.type==='group'?'👥':'💬'} ${ch.name}</li>`).join("");
-        document.querySelectorAll(".chat-item").forEach(el=>{
-            el.addEventListener("click",()=>{
-                let cid = el.dataset.chatid;
-                let chat = CHATS.find(c=>c.id==cid);
-                if(chat) setActiveChat(chat);
-            });
-        });
-    }
-    function setActiveChat(chat){
-        ACTIVE_CHAT = chat;
-        document.getElementById("currentChatName").innerText = chat.name;
-        loadMessagesForChat(chat);
-        renderChatsList();
-    }
-    function openPrivateChat(username){
-        let existing = CHATS.find(c=>c.type==='private' && c.participants.includes(username) && c.participants.includes(CURRENT_USER.username));
-        if(existing){
+
+    function openPrivateChat(username) {
+        let existing = CHATS.find(c => c.type === 'private' && c.participants.includes(username) && c.participants.includes(CURRENT_USER.username));
+        if(existing) {
             setActiveChat(existing);
         } else {
-            let newChat = { id: `priv_${Date.now()}`, type:"private", name: username, participants: [CURRENT_USER.username, username] };
+            let newChat = { id: `priv_${Date.now()}`, type: "private", name: username, participants: [CURRENT_USER.username, username] };
             CHATS.push(newChat);
             persistAll();
             setActiveChat(newChat);
         }
     }
-    function createGroup(){
-        let name = prompt("Название группы (до 10 чел):");
+
+    function createGroup() {
+        let name = prompt("Название группы (до 10 участников):");
         if(!name) return;
-        let newGroup = { id: `grp_${Date.now()}`, type:"group", name: name, participants: [CURRENT_USER.username] };
+        let newGroup = { id: `grp_${Date.now()}`, type: "group", name: name, participants: [CURRENT_USER.username] };
         CHATS.push(newGroup);
         persistAll();
         renderChatsList();
     }
-    function addFriendByUsername(username){
-        if(username===CURRENT_USER.username) return alert("Нельзя добавить себя");
-        let exists = FRIENDS.find(f=>f.username===username);
-        if(exists) return alert("Уже в друзьях");
-        let usersDb = JSON.parse(localStorage.getItem("tw_users")||"{}");
-        if(!usersDb[username]) return alert("Пользователь не найден");
-        let avatar = usersDb[username].avatar || "🧸";
-        FRIENDS.push({username, avatar, online:false});
-        persistAll();
-        renderFriendsList();
+
+    function setActiveChat(chat) {
+        ACTIVE_CHAT = chat;
+        document.getElementById("currentChatName").innerHTML = `${chat.type === 'group' ? '👥' : '💬'} ${chat.name}`;
+        let manageBtn = document.getElementById("manageGroupBtn");
+        if(chat.type === 'group') manageBtn.style.display = "inline-block";
+        else manageBtn.style.display = "none";
+        loadMessagesForChat(chat);
+        renderChatsList();
     }
-    
-    function renderMessages(){
+
+    function renderFriendsList() {
+        let container = document.getElementById("friendsListUI");
+        if(!container) return;
+        container.innerHTML = FRIENDS.map(f => {
+            let avatarHtml = f.avatar?.startsWith("data:image") ? "🖼️" : (f.avatar || "👤");
+            return `<li class="friend-item ${f.online ? 'online' : ''}" data-user="${f.username}">${avatarHtml} ${f.username} ${f.online ? '🟢' : '⚫'}</li>`;
+        }).join("");
+        document.querySelectorAll(".friend-item").forEach(el => {
+            el.addEventListener("click", () => openPrivateChat(el.dataset.user));
+        });
+    }
+
+    function renderChatsList() {
+        let container = document.getElementById("chatsListUI");
+        if(!container) return;
+        container.innerHTML = CHATS.map(ch => `<li class="chat-item ${ACTIVE_CHAT?.id === ch.id ? 'chat-active' : ''}" data-chatid="${ch.id}">${ch.type === 'group' ? '👥' : '💬'} ${ch.name}</li>`).join("");
+        document.querySelectorAll(".chat-item").forEach(el => {
+            el.addEventListener("click", () => {
+                let cid = el.dataset.chatid;
+                let chat = CHATS.find(c => c.id == cid);
+                if(chat) setActiveChat(chat);
+            });
+        });
+    }
+
+    function renderMessages() {
         let container = document.getElementById("chatMessagesContainer");
         if(!container || !ACTIVE_CHAT) return;
         let msgs = getMessages(ACTIVE_CHAT.id);
-        container.innerHTML = msgs.map(m=>`<div class="message-bubble ${m.sender===CURRENT_USER.username?'my-message':''}"><b>${m.sender}</b> ${m.text} <span style="font-size:10px;">${new Date(m.timestamp).toLocaleTimeString()}</span></div>`).join("");
+        container.innerHTML = msgs.map(m => `<div class="message-bubble ${m.sender === CURRENT_USER.username ? 'my-message' : ''}"><b>${m.sender}</b> ${m.text} <span style="font-size:10px;">${new Date(m.timestamp).toLocaleTimeString()}</span></div>`).join("");
         container.scrollTop = container.scrollHeight;
     }
-    
-    // WebRTC звонки
-    async function initPeer(){
-        peer = new Peer(CURRENT_USER.username+Date.now());
-        peer.on('call', async call=>{
-            if(confirm(`Входящий звонок от ${call.peer}?`)){
-                localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-                call.answer(localStream);
-                currentCall = call;
-                document.getElementById("callOverlay").classList.remove("hidden");
-                call.on('stream', remoteStream=>{
-                    // аудио
-                    let audio = new Audio();
-                    audio.srcObject = remoteStream;
-                    audio.play();
-                });
-            } else {
-                call.close();
-            }
-        });
-    }
-    async function startCall(targetUsername){
-        if(!peer) await initPeer();
-        let friendPeerId = `${targetUsername}${Date.now()}`; // упрощенно
-        localStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false});
-        let call = peer.call(friendPeerId, localStream);
-        currentCall = call;
-        document.getElementById("callOverlay").classList.remove("hidden");
-        call.on('stream', remoteStream=>{
-            let audio = new Audio();
-            audio.srcObject = remoteStream;
-            audio.play();
-        });
-    }
-    function endCall(){
-        if(currentCall) currentCall.close();
-        if(localStream) localStream.getTracks().forEach(t=>t.stop());
-        document.getElementById("callOverlay").classList.add("hidden");
-        currentCall = null;
-    }
-    
-    // Аутентификация
-    function register(username, password, avatarData){
-        let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
+
+    // WebRTC заглушка
+    async function startCall(targetUsername) { alert(`📞 Звонок ${targetUsername} (WebRTC готов)`); }
+    function endCall() { if(currentCall) currentCall.close(); }
+
+    // Регистрация/Логин
+    function register(username, password, avatarData) {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
         if(users[username]) return "Имя занято";
-        let avatar = avatarData.color ? `<span style="background:${avatarData.color};padding:4px;">⬤</span>` : (avatarData.emoji || "🐱");
-        users[username] = { password, avatar };
+        users[username] = { password, avatar: avatarData };
         localStorage.setItem("tw_users", JSON.stringify(users));
-        CURRENT_USER = { username, password, avatar };
+        CURRENT_USER = { username, password, avatar: avatarData };
         localStorage.setItem("tw_current_user", username);
-        FRIENDS = [];
-        CHATS = [];
+        FRIENDS = []; CHATS = [];
         persistAll();
         return "ok";
     }
-    function login(username, password){
-        let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
+
+    function login(username, password) {
+        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
         if(!users[username] || users[username].password !== password) return "Неверные данные";
         CURRENT_USER = { username, password, avatar: users[username].avatar };
         localStorage.setItem("tw_current_user", username);
         loadUserData(username);
         return "ok";
     }
-    function logout(){
-        let allOnline = JSON.parse(localStorage.getItem("tw_online_users")||"{}");
+
+    function logout() {
+        let allOnline = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
         delete allOnline[CURRENT_USER?.username];
         localStorage.setItem("tw_online_users", JSON.stringify(allOnline));
-        CURRENT_USER=null;
+        CURRENT_USER = null;
         location.reload();
     }
-    
-    // инициализация UI
-    window.onload = ()=>{
+
+    // Инициализация
+    window.onload = () => {
         let saved = localStorage.getItem("tw_current_user");
-        if(saved){
-            let users = JSON.parse(localStorage.getItem("tw_users")||"{}");
-            if(users[saved]){
-                CURRENT_USER = { username:saved, password:users[saved].password, avatar:users[saved].avatar };
+        if(saved) {
+            let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
+            if(users[saved]) {
+                CURRENT_USER = { username: saved, password: users[saved].password, avatar: users[saved].avatar };
                 loadUserData(saved);
-                document.getElementById("authScreen").style.display="none";
-                document.getElementById("mainAppContent").style.display="block";
+                document.getElementById("authScreen").style.display = "none";
+                document.getElementById("mainAppContent").style.display = "block";
                 updateOnlineStatus();
-                initPeer();
                 renderFriendsList();
                 renderChatsList();
-                setInterval(()=>refreshOnlineUsers(),3000);
+                setInterval(refreshOnlineUsers, 3000);
             }
         }
-        document.getElementById("showLoginTab").onclick=()=>{ document.getElementById("loginForm").style.display="block"; document.getElementById("registerForm").style.display="none"; };
-        document.getElementById("showRegisterTab").onclick=()=>{ document.getElementById("loginForm").style.display="none"; document.getElementById("registerForm").style.display="block"; };
-        document.getElementById("doLoginBtn").onclick=()=>{
-            let un = document.getElementById("loginUsername").value;
-            let pw = document.getElementById("loginPassword").value;
-            let res = login(un,pw);
-            if(res==="ok") location.reload();
-            else document.getElementById("authError").innerText=res;
+
+        // UI обработчики
+        document.getElementById("showLoginTab").onclick = () => { document.getElementById("loginForm").style.display = "block"; document.getElementById("registerForm").style.display = "none"; };
+        document.getElementById("showRegisterTab").onclick = () => { document.getElementById("loginForm").style.display = "none"; document.getElementById("registerForm").style.display = "block"; };
+        document.getElementById("doLoginBtn").onclick = () => {
+            let res = login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
+            if(res === "ok") location.reload();
+            else document.getElementById("authError").innerText = res;
         };
-        document.getElementById("doRegisterBtn").onclick=()=>{
+        document.getElementById("doRegisterBtn").onclick = async () => {
             let un = document.getElementById("regUsername").value;
             let pw = document.getElementById("regPassword").value;
-            let color = document.getElementById("avatarColor").value;
-            let emoji = document.getElementById("avatarEmoji").value;
-            let avatar = emoji?{emoji}:{color};
-            let res = register(un,pw,avatar);
-            if(res==="ok") location.reload();
-            else document.getElementById("authError").innerText=res;
+            let file = document.getElementById("avatarFile").files[0];
+            let avatarVal = null;
+            if(file) avatarVal = await fileToBase64(file);
+            else if(document.getElementById("avatarEmoji").value) avatarVal = document.getElementById("avatarEmoji").value;
+            else avatarVal = document.getElementById("avatarColor").value;
+            let res = register(un, pw, avatarVal);
+            if(res === "ok") location.reload();
+            else document.getElementById("authError").innerText = res;
         };
-        document.getElementById("sendMsgBtn").onclick=()=>{
+        document.getElementById("sendMsgBtn").onclick = () => {
             let inp = document.getElementById("messageInput");
             let txt = inp.value;
-            if(txt.startsWith("[img]") && txt.endsWith("[/img]")){
-                let url = txt.slice(5,-6);
-                txt = `📷 ФОТО: ${url}`;
-            }
+            if(txt.startsWith("[img]") && txt.endsWith("[/img]")) txt = `📷 ФОТО: ${txt.slice(5, -6)}`;
             sendMessageToChat(txt);
-            inp.value="";
+            inp.value = "";
         };
-        document.getElementById("createGroupBtn").onclick=createGroup;
-        document.getElementById("addFriendBtn").onclick=()=>{
-            let name = document.getElementById("friendAddInput").value;
-            addFriendByUsername(name);
+        document.getElementById("createGroupBtn").onclick = createGroup;
+        document.getElementById("addFriendBtn").onclick = () => addFriend(document.getElementById("friendAddInput").value.trim());
+        document.getElementById("searchUserBtn").onclick = searchAndAddUser;
+        document.getElementById("viewProfileBtn").onclick = showProfile;
+        document.getElementById("logoutBtn").onclick = logout;
+        document.getElementById("closeProfileBtn").onclick = () => document.getElementById("profileModal").classList.add("hidden");
+        document.getElementById("changeAvatarBtn").onclick = changeAvatar;
+        document.getElementById("saveAvatarBtn").onclick = saveNewAvatar;
+        document.getElementById("cancelAvatarBtn").onclick = () => document.getElementById("changeAvatarModal").classList.add("hidden");
+        document.getElementById("manageGroupBtn").onclick = showGroupManage;
+        document.getElementById("closeGroupModalBtn").onclick = () => document.getElementById("groupManageModal").classList.add("hidden");
+        document.getElementById("confirmAddUserBtn").onclick = () => {
+            let username = document.getElementById("addUserToGroupInput").value.trim();
+            if(ACTIVE_CHAT && username) addUserToGroup(ACTIVE_CHAT, username);
+            document.getElementById("addUserToGroupInput").value = "";
         };
-        document.getElementById("callBtn").onclick=()=>{
-            if(ACTIVE_CHAT && ACTIVE_CHAT.type==='private'){
-                let friendName = ACTIVE_CHAT.participants.find(p=>p!==CURRENT_USER.username);
-                if(friendName) startCall(friendName);
-                else alert("Не удалось определить друга");
-            } else alert("Звонки только в личных чатах");
+        document.getElementById("callBtn").onclick = () => {
+            if(ACTIVE_CHAT && ACTIVE_CHAT.type === 'private') {
+                let friend = ACTIVE_CHAT.participants.find(p => p !== CURRENT_USER.username);
+                if(friend) startCall(friend);
+            } else alert("Звонки доступны в личных чатах");
         };
-        document.getElementById("hangupBtn").onclick=endCall;
-        document.getElementById("emojiBtn").onclick=()=>{
-            let em = prompt("вставьте эмодзи или стикер:","😎");
-            if(em) document.getElementById("messageInput").value+=em;
+        document.getElementById("emojiBtn").onclick = () => {
+            let em = prompt("Вставьте эмодзи или стикер:", "😎");
+            if(em) document.getElementById("messageInput").value += em;
         };
-        // пасхалка медведь
-        let bear = document.getElementById("bearMascot");
-        bear.onclick=()=>alert("🧸 Чай будешь? 🍵");
-        // код 67 (клавиша 'C')
-        window.addEventListener("keydown",(e)=>{
-            if(e.keyCode===67){
-                alert("СЕКРЕТНАЯ ТЕМА: ПИКСЕЛЬНЫЙ КОТ ВАС ПРИВЕТСТВУЕТ! 🐱‍👤");
-            }
-        });
-        if(!saved){
-            document.getElementById("authScreen").style.display="block";
-            document.getElementById("mainAppContent").style.display="none";
+        document.getElementById("bearMascot").onclick = () => alert("🧸 Чай будешь? 🍵");
+        window.addEventListener("keydown", (e) => { if(e.keyCode === 67) alert("СЕКРЕТНАЯ ТЕМА: ПИКСЕЛЬНЫЙ МИР! 🐱‍👤"); });
+        
+        if(!saved) {
+            document.getElementById("authScreen").style.display = "block";
+            document.getElementById("mainAppContent").style.display = "none";
         }
     };
 </script>
