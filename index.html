@@ -5,433 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TWIFLIX MAX — Мессенджер Сан-Фиерро</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-        }
-
-        body {
-            background: #0a0a0a;
-            font-family: 'Courier New', monospace;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .app {
-            width: 1300px;
-            max-width: 100%;
-            height: 85vh;
-            background: #0f0f0f;
-            border: 3px solid #ff3333;
-            display: flex;
-            overflow: hidden;
-            box-shadow: 8px 8px 0 rgba(255,51,51,0.3);
-        }
-
-        .sidebar {
-            width: 320px;
-            background: #080808;
-            border-right: 2px solid #ff3333;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .user-info {
-            padding: 20px;
-            background: #0a0a0a;
-            border-bottom: 2px solid #ff3333;
-            text-align: center;
-        }
-
-        .avatar-preview {
-            width: 80px;
-            height: 80px;
-            background: #1a1a1a;
-            border: 2px solid #ff3333;
-            margin: 0 auto 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-        }
-
-        .username-display {
-            font-size: 16px;
-            color: #ff3333;
-            font-weight: bold;
-        }
-
-        .user-tag {
-            font-size: 11px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        .status-dot {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: #33ff33;
-            margin-right: 6px;
-            box-shadow: 0 0 4px #33ff33;
-        }
-
-        .nav-buttons {
-            display: flex;
-            padding: 12px;
-            gap: 8px;
-            border-bottom: 1px solid #ff3333;
-        }
-
-        .nav-btn {
-            flex: 1;
-            background: #0f0f0f;
-            border: 1px solid #ff3333;
-            color: #ccc;
-            padding: 10px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-
-        .nav-btn.active {
-            background: #ff3333;
-            color: #0a0a0a;
-            font-weight: bold;
-        }
-
-        .contacts-list {
-            flex: 1;
-            overflow-y: auto;
-            padding: 8px;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            margin-bottom: 4px;
-            background: #0c0c0c;
-            border-left: 3px solid #ff3333;
-            cursor: pointer;
-        }
-
-        .contact-item:hover {
-            background: #141414;
-        }
-
-        .contact-avatar {
-            width: 40px;
-            height: 40px;
-            background: #1a1a1a;
-            border: 1px solid #ff3333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .contact-info {
-            flex: 1;
-        }
-
-        .contact-name {
-            color: #fff;
-            font-size: 13px;
-            font-weight: bold;
-        }
-
-        .contact-tag {
-            font-size: 10px;
-            color: #ff6666;
-        }
-
-        .add-friend {
-            padding: 12px;
-            border-top: 1px solid #ff3333;
-            display: flex;
-            gap: 8px;
-        }
-
-        .add-friend input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #ff3333;
-            padding: 10px;
-            color: #fff;
-            font-size: 12px;
-        }
-
-        .add-friend button {
-            background: #ff3333;
-            border: none;
-            padding: 10px 16px;
-            color: #0a0a0a;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: #0a0a0a;
-        }
-
-        .chat-header {
-            padding: 16px 20px;
-            background: #0c0c0c;
-            border-bottom: 2px solid #ff3333;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .chat-with {
-            font-size: 16px;
-            color: #ff5555;
-            font-weight: bold;
-        }
-
-        .chat-tag {
-            font-size: 11px;
-            color: #888;
-            margin-left: 8px;
-        }
-
-        .call-btn {
-            background: #0f0f0f;
-            border: 1px solid #ff3333;
-            padding: 8px 18px;
-            color: #ff5555;
-            cursor: pointer;
-            font-size: 12px;
-        }
-
-        .messages-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            background: #080808;
-        }
-
-        .message {
-            max-width: 75%;
-            padding: 10px 14px;
-            font-size: 13px;
-            word-break: break-word;
-        }
-
-        .message.outgoing {
-            background: #ff3333;
-            color: #0a0a0a;
-            align-self: flex-end;
-            border-left: 4px solid #fff;
-        }
-
-        .message.incoming {
-            background: #141414;
-            color: #eee;
-            align-self: flex-start;
-            border-left: 4px solid #ff3333;
-        }
-
-        .message-name {
-            font-size: 10px;
-            margin-bottom: 5px;
-            opacity: 0.8;
-        }
-
-        .message-time {
-            font-size: 9px;
-            margin-top: 5px;
-            opacity: 0.6;
-            text-align: right;
-        }
-
-        .message-input-area {
-            padding: 16px;
-            background: #0c0c0c;
-            border-top: 1px solid #ff3333;
-            display: flex;
-            gap: 10px;
-        }
-
-        .message-input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #ff3333;
-            padding: 12px;
-            color: #fff;
-            font-size: 13px;
-            resize: none;
-        }
-
-        .send-btn {
-            background: #ff3333;
-            border: none;
-            padding: 12px 24px;
-            color: #0a0a0a;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .settings-panel {
-            display: none;
-            flex-direction: column;
-            padding: 20px;
-            gap: 20px;
-        }
-
-        .settings-row {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            background: #0c0c0c;
-            padding: 15px;
-            border-left: 3px solid #ff3333;
-        }
-
-        .settings-row label {
-            width: 120px;
-            color: #ff6666;
-        }
-
-        .settings-row input {
-            flex: 1;
-            background: #0a0a0a;
-            border: 1px solid #ff3333;
-            padding: 10px;
-            color: #fff;
-        }
-
-        .settings-row button {
-            background: #ff3333;
-            border: none;
-            padding: 8px 20px;
-            color: #0a0a0a;
-            cursor: pointer;
-        }
-
-        .call-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-
-        .call-modal-content {
-            background: #0f0f0f;
-            border: 3px solid #ff3333;
-            padding: 40px;
-            text-align: center;
-            width: 350px;
-        }
-
-        .call-avatar {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-
-        .call-name {
-            font-size: 20px;
-            color: #ff5555;
-            margin-bottom: 15px;
-        }
-
-        .call-status {
-            color: #aaa;
-            margin-bottom: 30px;
-        }
-
-        .end-call-btn {
-            background: #ff3333;
-            border: none;
-            padding: 12px 35px;
-            color: #0a0a0a;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .auth-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #050505;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 3000;
-        }
-
-        .auth-box {
-            background: #0f0f0f;
-            border: 3px solid #ff3333;
-            padding: 40px;
-            width: 380px;
-            text-align: center;
-        }
-
-        .auth-logo {
-            font-size: 40px;
-            color: #ff3333;
-            margin-bottom: 20px;
-        }
-
-        .auth-title {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 25px;
-        }
-
-        .auth-input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 15px;
-            background: #0a0a0a;
-            border: 1px solid #ff3333;
-            color: #fff;
-        }
-
-        .auth-btn {
-            width: 100%;
-            padding: 12px;
-            background: #ff3333;
-            border: none;
-            color: #0a0a0a;
-            cursor: pointer;
-            margin-top: 5px;
-        }
-
-        .auth-switch {
-            margin-top: 18px;
-            color: #888;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        .hidden {
-            display: none;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; image-rendering: crisp-edges; image-rendering: pixelated; }
+        body { background: #0a0a0a; font-family: 'Courier New', monospace; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .app { width: 1300px; max-width: 100%; height: 85vh; background: #0f0f0f; border: 3px solid #ff3333; display: flex; overflow: hidden; box-shadow: 8px 8px 0 rgba(255,51,51,0.3); }
+        .sidebar { width: 320px; background: #080808; border-right: 2px solid #ff3333; display: flex; flex-direction: column; }
+        .user-info { padding: 20px; background: #0a0a0a; border-bottom: 2px solid #ff3333; text-align: center; }
+        .avatar-preview { width: 80px; height: 80px; background: #1a1a1a; border: 2px solid #ff3333; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+        .username-display { font-size: 16px; color: #ff3333; font-weight: bold; }
+        .user-tag { font-size: 11px; color: #666; margin-top: 5px; }
+        .status-dot { display: inline-block; width: 8px; height: 8px; background: #33ff33; margin-right: 6px; box-shadow: 0 0 4px #33ff33; }
+        .nav-buttons { display: flex; padding: 12px; gap: 8px; border-bottom: 1px solid #ff3333; }
+        .nav-btn { flex: 1; background: #0f0f0f; border: 1px solid #ff3333; color: #ccc; padding: 10px; text-align: center; cursor: pointer; font-size: 12px; text-transform: uppercase; }
+        .nav-btn.active { background: #ff3333; color: #0a0a0a; font-weight: bold; }
+        .contacts-list { flex: 1; overflow-y: auto; padding: 8px; }
+        .contact-item { display: flex; align-items: center; gap: 12px; padding: 12px; margin-bottom: 4px; background: #0c0c0c; border-left: 3px solid #ff3333; cursor: pointer; }
+        .contact-item:hover { background: #141414; }
+        .contact-avatar { width: 40px; height: 40px; background: #1a1a1a; border: 1px solid #ff3333; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .contact-info { flex: 1; }
+        .contact-name { color: #fff; font-size: 13px; font-weight: bold; }
+        .contact-tag { font-size: 10px; color: #ff6666; }
+        .add-friend { padding: 12px; border-top: 1px solid #ff3333; display: flex; gap: 8px; }
+        .add-friend input { flex: 1; background: #0a0a0a; border: 1px solid #ff3333; padding: 10px; color: #fff; font-size: 12px; }
+        .add-friend button { background: #ff3333; border: none; padding: 10px 16px; color: #0a0a0a; cursor: pointer; font-weight: bold; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: #0a0a0a; }
+        .chat-header { padding: 16px 20px; background: #0c0c0c; border-bottom: 2px solid #ff3333; display: flex; justify-content: space-between; align-items: center; }
+        .chat-with { font-size: 16px; color: #ff5555; font-weight: bold; }
+        .chat-tag { font-size: 11px; color: #888; margin-left: 8px; }
+        .call-btn { background: #0f0f0f; border: 1px solid #ff3333; padding: 8px 18px; color: #ff5555; cursor: pointer; font-size: 12px; }
+        .messages-area { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 12px; background: #080808; }
+        .message { max-width: 75%; padding: 10px 14px; font-size: 13px; word-break: break-word; }
+        .message.outgoing { background: #ff3333; color: #0a0a0a; align-self: flex-end; border-left: 4px solid #fff; }
+        .message.incoming { background: #141414; color: #eee; align-self: flex-start; border-left: 4px solid #ff3333; }
+        .message-name { font-size: 10px; margin-bottom: 5px; opacity: 0.8; }
+        .message-time { font-size: 9px; margin-top: 5px; opacity: 0.6; text-align: right; }
+        .message-input-area { padding: 16px; background: #0c0c0c; border-top: 1px solid #ff3333; display: flex; gap: 10px; }
+        .message-input { flex: 1; background: #0a0a0a; border: 1px solid #ff3333; padding: 12px; color: #fff; font-size: 13px; resize: none; }
+        .send-btn { background: #ff3333; border: none; padding: 12px 24px; color: #0a0a0a; cursor: pointer; font-weight: bold; }
+        .settings-panel { display: none; flex-direction: column; padding: 20px; gap: 20px; }
+        .settings-row { display: flex; gap: 12px; align-items: center; background: #0c0c0c; padding: 15px; border-left: 3px solid #ff3333; }
+        .settings-row label { width: 120px; color: #ff6666; }
+        .settings-row input { flex: 1; background: #0a0a0a; border: 1px solid #ff3333; padding: 10px; color: #fff; }
+        .settings-row button { background: #ff3333; border: none; padding: 8px 20px; color: #0a0a0a; cursor: pointer; }
+        .call-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 2000; }
+        .call-modal-content { background: #0f0f0f; border: 3px solid #ff3333; padding: 40px; text-align: center; width: 350px; }
+        .call-avatar { font-size: 64px; margin-bottom: 20px; }
+        .call-name { font-size: 20px; color: #ff5555; margin-bottom: 15px; }
+        .call-status { color: #aaa; margin-bottom: 30px; }
+        .end-call-btn { background: #ff3333; border: none; padding: 12px 35px; color: #0a0a0a; cursor: pointer; font-weight: bold; }
+        .auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #050505; display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .auth-box { background: #0f0f0f; border: 3px solid #ff3333; padding: 40px; width: 380px; text-align: center; }
+        .auth-logo { font-size: 40px; color: #ff3333; margin-bottom: 20px; }
+        .auth-title { font-size: 20px; color: #fff; margin-bottom: 25px; }
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; background: #0a0a0a; border: 1px solid #ff3333; color: #fff; }
+        .auth-btn { width: 100%; padding: 12px; background: #ff3333; border: none; color: #0a0a0a; cursor: pointer; margin-top: 5px; }
+        .auth-switch { margin-top: 18px; color: #888; font-size: 12px; cursor: pointer; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -482,25 +110,11 @@
     </div>
 
     <div class="settings-panel" id="settingsPanel">
-        <div class="settings-row">
-            <label>ИМЯ:</label>
-            <input type="text" id="settingsName" placeholder="Новое имя">
-        </div>
-        <div class="settings-row">
-            <label>ТЕГ:</label>
-            <input type="text" id="settingsTag" placeholder="@новыйтег">
-        </div>
-        <div class="settings-row">
-            <label>АВАТАР (😎):</label>
-            <input type="text" id="settingsAvatar" placeholder="😎">
-        </div>
-        <div class="settings-row">
-            <label>ПАРОЛЬ:</label>
-            <input type="password" id="settingsPassword" placeholder="Новый пароль">
-        </div>
-        <div class="settings-row">
-            <button id="saveSettingsBtn">СОХРАНИТЬ</button>
-        </div>
+        <div class="settings-row"><label>ИМЯ:</label><input type="text" id="settingsName" placeholder="Новое имя"></div>
+        <div class="settings-row"><label>ТЕГ:</label><input type="text" id="settingsTag" placeholder="@новыйтег"></div>
+        <div class="settings-row"><label>АВАТАР (😎):</label><input type="text" id="settingsAvatar" placeholder="😎"></div>
+        <div class="settings-row"><label>ПАРОЛЬ:</label><input type="password" id="settingsPassword" placeholder="Новый пароль"></div>
+        <div class="settings-row"><button id="saveSettingsBtn">СОХРАНИТЬ</button></div>
     </div>
 </div>
 
@@ -514,109 +128,48 @@
 </div>
 
 <script>
-    // ===== GENSEK КОНФИГ =====
-    const BOT_TOKEN = '8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM';
-    const MAIN_CHAT_ID = '6763299388';
-    const GENSEK_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-    
-    // Глобальная база всех пользователей (синхронизируется через Telegram)
-    let globalUsers = JSON.parse(localStorage.getItem('twifflix_global_users')) || {};
-    let localMessages = JSON.parse(localStorage.getItem('twifflix_local_messages')) || {};
+    // Глобальная база всех пользователей (синхронизируется через localStorage между вкладками)
+    let allUsers = JSON.parse(localStorage.getItem('twifflix_all_users')) || {};
+    let allMessages = JSON.parse(localStorage.getItem('twifflix_all_messages')) || {};
     let currentUser = null;
     let currentChat = null;
     let callActive = false;
     let localStream = null;
     let peerConnection = null;
     let remoteAudio = null;
-    let lastUpdateId = parseInt(localStorage.getItem('twifflix_last_update')) || 0;
-
-    // ===== ОТПРАВКА В TELEGRAM =====
-    async function sendToGENSEK(text) {
-        try {
-            await fetch(`${GENSEK_API}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: text })
-            });
-        } catch(e) { console.warn('GENSEK error'); }
-    }
-
-    // ===== СИНХРОНИЗАЦИЯ ВСЕХ АККАУНТОВ =====
-    async function syncAllUsers() {
-        try {
-            // Отправляем свой аккаунт в облако
-            if (currentUser) {
-                const userData = {
-                    fullId: currentUser,
-                    username: parseFullTag(currentUser).username,
-                    tag: parseFullTag(currentUser).tag,
-                    avatar: globalUsers[currentUser]?.avatar || '👤'
-                };
-                await sendToGENSEK(`🆕 USER_SYNC:${JSON.stringify(userData)}`);
-            }
-            
-            // Получаем обновления из Telegram
-            const response = await fetch(`${GENSEK_API}/getUpdates?offset=${lastUpdateId}&timeout=10`);
-            const data = await response.json();
-            
-            if (data.ok && data.result) {
-                data.result.forEach(update => {
-                    if (update.message && update.message.text) {
-                        const text = update.message.text;
-                        if (text.startsWith('🆕 USER_SYNC:')) {
-                            try {
-                                const userJson = text.replace('🆕 USER_SYNC:', '');
-                                const user = JSON.parse(userJson);
-                                if (!globalUsers[user.fullId]) {
-                                    globalUsers[user.fullId] = {
-                                        username: user.username,
-                                        tag: user.tag,
-                                        avatar: user.avatar,
-                                        friends: globalUsers[user.fullId]?.friends || []
-                                    };
-                                }
-                            } catch(e) {}
-                        }
-                    }
-                    if (update.update_id) lastUpdateId = Math.max(lastUpdateId, update.update_id + 1);
-                });
-                localStorage.setItem('twifflix_global_users', JSON.stringify(globalUsers));
-                localStorage.setItem('twifflix_last_update', lastUpdateId);
-            }
-        } catch(e) { console.warn('Sync error'); }
-    }
-
-    // ===== ПОИСК ПОЛЬЗОВАТЕЛЯ В ГЛОБАЛЬНОЙ БАЗЕ =====
-    function findUserByTag(tag) {
-        for (let userId in globalUsers) {
-            if (userId.includes(tag)) {
-                return userId;
-            }
-        }
-        return null;
-    }
 
     // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
-    function fullTag(username, tag) {
-        return `${username}${tag}`;
-    }
-
+    function fullTag(username, tag) { return `${username}${tag}`; }
     function parseFullTag(full) {
         const match = full.match(/^([^@]+)(@.+)$/);
         if (match) return { username: match[1], tag: match[2] };
         return { username: full, tag: '' };
     }
-
     function saveAll() {
-        localStorage.setItem('twifflix_global_users', JSON.stringify(globalUsers));
-        localStorage.setItem('twifflix_local_messages', JSON.stringify(localMessages));
+        localStorage.setItem('twifflix_all_users', JSON.stringify(allUsers));
+        localStorage.setItem('twifflix_all_messages', JSON.stringify(allMessages));
+        // Уведомляем другие вкладки
+        localStorage.setItem('twifflix_sync', Date.now().toString());
     }
+
+    // Синхронизация между вкладками
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'twifflix_all_users' || e.key === 'twifflix_all_messages' || e.key === 'twifflix_sync') {
+            allUsers = JSON.parse(localStorage.getItem('twifflix_all_users')) || {};
+            allMessages = JSON.parse(localStorage.getItem('twifflix_all_messages')) || {};
+            if (currentUser) {
+                updateUserUI();
+                renderFriendsList();
+                if (currentChat) renderMessages(currentChat);
+            }
+        }
+    });
 
     // ===== РЕГИСТРАЦИЯ =====
     function register(username, tag, password) {
         const fullId = fullTag(username, tag);
-        if (globalUsers[fullId]) return false;
-        globalUsers[fullId] = {
+        if (allUsers[fullId]) return false;
+        allUsers[fullId] = {
             username: username,
             tag: tag,
             password: password,
@@ -624,16 +177,14 @@
             friends: []
         };
         saveAll();
-        sendToGENSEK(`🆕 НОВЫЙ ПОЛЬЗОВАТЕЛЬ: ${fullId}`);
         return true;
     }
 
     function login(username, tag, password) {
         const fullId = fullTag(username, tag);
-        if (globalUsers[fullId] && globalUsers[fullId].password === password) {
+        if (allUsers[fullId] && allUsers[fullId].password === password) {
             currentUser = fullId;
             localStorage.setItem('twifflix_current', currentUser);
-            sendToGENSEK(`✅ ВХОД: ${currentUser}`);
             return true;
         }
         return false;
@@ -642,10 +193,9 @@
     // ===== СООБЩЕНИЯ =====
     function sendMessage(toFull, text) {
         if (!text.trim()) return;
-        
         const chatId = [currentUser, toFull].sort().join('_');
-        if (!localMessages[chatId]) localMessages[chatId] = [];
-        localMessages[chatId].push({
+        if (!allMessages[chatId]) allMessages[chatId] = [];
+        allMessages[chatId].push({
             from: currentUser,
             to: toFull,
             text: text,
@@ -653,14 +203,12 @@
             timestamp: Date.now()
         });
         saveAll();
-        sendToGENSEK(`💬 [${currentUser}] → [${toFull}]: ${text}`);
-        
         if (currentChat === toFull) renderMessages(toFull);
     }
 
     function getMessagesWith(fullId) {
         const chatId = [currentUser, fullId].sort().join('_');
-        return localMessages[chatId] || [];
+        return allMessages[chatId] || [];
     }
 
     function renderMessages(fullId) {
@@ -670,7 +218,7 @@
         msgs.forEach(msg => {
             const div = document.createElement('div');
             div.className = `message ${msg.from === currentUser ? 'outgoing' : 'incoming'}`;
-            const name = msg.from === currentUser ? 'ВЫ' : parseFullTag(msg.from).username;
+            const name = msg.from === currentUser ? 'ВЫ' : (allUsers[msg.from]?.username || parseFullTag(msg.from).username);
             div.innerHTML = `
                 <div class="message-name">${name}</div>
                 <div>${escapeHtml(msg.text)}</div>
@@ -681,28 +229,26 @@
         container.scrollTop = container.scrollHeight;
     }
 
-    function escapeHtml(str) {
-        return str.replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
+    function escapeHtml(str) { return str.replace(/[&<>]/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;'})[m] || m); }
 
     // ===== ДРУЗЬЯ =====
-    function addFriend(fullTagFriend) {
-        // Сначала ищем в глобальной базе
-        let foundUser = findUserByTag(fullTagFriend);
+    function addFriend(tag) {
+        if (!tag.startsWith('@')) tag = '@' + tag;
+        let foundUser = null;
+        for (let userId in allUsers) {
+            if (userId.includes(tag)) {
+                foundUser = userId;
+                break;
+            }
+        }
         if (!foundUser) {
-            alert('Пользователь не найден в глобальной базе. Ждём синхронизацию...');
+            alert('Пользователь не найден!');
             return false;
         }
         if (foundUser === currentUser) { alert('Нельзя добавить себя'); return false; }
-        if (globalUsers[currentUser].friends.includes(foundUser)) { alert('Уже в друзьях'); return false; }
-        globalUsers[currentUser].friends.push(foundUser);
+        if (allUsers[currentUser].friends.includes(foundUser)) { alert('Уже в друзьях'); return false; }
+        allUsers[currentUser].friends.push(foundUser);
         saveAll();
-        sendToGENSEK(`➕ ${currentUser} добавил друга: ${foundUser}`);
         renderFriendsList();
         return true;
     }
@@ -710,7 +256,7 @@
     function renderFriendsList() {
         const container = document.getElementById('contactsList');
         const currentTab = document.querySelector('.nav-btn.active')?.dataset.tab || 'chats';
-        const friends = globalUsers[currentUser]?.friends || [];
+        const friends = allUsers[currentUser]?.friends || [];
         container.innerHTML = '';
         
         if (currentTab === 'friends') {
@@ -719,7 +265,7 @@
                 return;
             }
             friends.forEach(full => {
-                const user = globalUsers[full];
+                const user = allUsers[full];
                 if (!user) return;
                 const div = document.createElement('div');
                 div.className = 'contact-item';
@@ -735,7 +281,7 @@
             });
         } else if (currentTab === 'chats') {
             const recent = new Set();
-            for (let chatId in localMessages) {
+            for (let chatId in allMessages) {
                 if (chatId.includes(currentUser)) {
                     const parts = chatId.split('_');
                     const other = parts[0] === currentUser ? parts[1] : parts[0];
@@ -747,7 +293,7 @@
                 return;
             }
             recent.forEach(full => {
-                const user = globalUsers[full];
+                const user = allUsers[full];
                 if (!user) return;
                 const div = document.createElement('div');
                 div.className = 'contact-item';
@@ -766,7 +312,7 @@
 
     function openChat(fullId) {
         currentChat = fullId;
-        const user = globalUsers[fullId];
+        const user = allUsers[fullId];
         if (!user) return;
         document.getElementById('chatWith').innerHTML = user.username;
         document.getElementById('chatTag').innerHTML = user.tag;
@@ -777,7 +323,7 @@
 
     // ===== НАСТРОЙКИ =====
     function updateUserUI() {
-        const user = globalUsers[currentUser];
+        const user = allUsers[currentUser];
         if (!user) return;
         document.getElementById('userDisplayName').innerHTML = user.username;
         document.getElementById('userTagDisplay').innerHTML = user.tag;
@@ -792,41 +338,37 @@
         const newTag = document.getElementById('settingsTag').value.trim();
         const newAvatar = document.getElementById('settingsAvatar').value.trim();
         const newPassword = document.getElementById('settingsPassword').value.trim();
-        
         if (newName && newTag) {
             const oldFull = currentUser;
             const newFull = fullTag(newName, newTag);
-            if (oldFull !== newFull && globalUsers[newFull]) {
+            if (oldFull !== newFull && allUsers[newFull]) {
                 alert('Пользователь с таким тегом уже существует');
                 return;
             }
-            const userData = globalUsers[oldFull];
-            globalUsers[newFull] = { ...userData, username: newName, tag: newTag, avatar: newAvatar };
-            if (newPassword) globalUsers[newFull].password = newPassword;
-            delete globalUsers[oldFull];
-            
-            for (let u in globalUsers) {
-                const idx = globalUsers[u].friends.indexOf(oldFull);
-                if (idx !== -1) globalUsers[u].friends[idx] = newFull;
+            const userData = allUsers[oldFull];
+            allUsers[newFull] = { ...userData, username: newName, tag: newTag, avatar: newAvatar };
+            if (newPassword) allUsers[newFull].password = newPassword;
+            delete allUsers[oldFull];
+            for (let u in allUsers) {
+                const idx = allUsers[u].friends.indexOf(oldFull);
+                if (idx !== -1) allUsers[u].friends[idx] = newFull;
             }
-            
             const newMessages = {};
-            for (let chatId in localMessages) {
+            for (let chatId in allMessages) {
                 if (chatId.includes(oldFull)) {
                     const newId = chatId.replace(oldFull, newFull);
-                    newMessages[newId] = localMessages[chatId];
+                    newMessages[newId] = allMessages[chatId];
                 } else {
-                    newMessages[chatId] = localMessages[chatId];
+                    newMessages[chatId] = allMessages[chatId];
                 }
             }
-            Object.assign(localMessages, newMessages);
+            allMessages = newMessages;
             currentUser = newFull;
             localStorage.setItem('twifflix_current', currentUser);
             saveAll();
             updateUserUI();
             renderFriendsList();
             if (currentChat) openChat(currentChat);
-            sendToGENSEK(`⚙️ ${oldFull} изменил профиль → ${newFull}`);
             alert('Настройки сохранены');
         }
     }
@@ -835,9 +377,7 @@
     async function startRealCall(fullId) {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            peerConnection = new RTCPeerConnection({
-                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-            });
+            peerConnection = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
             localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
             peerConnection.ontrack = (event) => {
                 if (!remoteAudio) {
@@ -848,17 +388,12 @@
             };
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            
-            const user = globalUsers[fullId];
+            const user = allUsers[fullId];
             document.getElementById('callName').innerHTML = user?.username || fullId;
             document.getElementById('callStatus').innerHTML = 'СОЕДИНЕНИЕ...';
             document.getElementById('callModal').style.display = 'flex';
             callActive = true;
-            sendToGENSEK(`📞 ЗВОНОК: ${currentUser} → ${fullId}`);
-        } catch(e) {
-            console.error(e);
-            alert('Нет доступа к микрофону');
-        }
+        } catch(e) { alert('Нет доступа к микрофону'); }
     }
 
     function endRealCall() {
@@ -867,30 +402,26 @@
         if (remoteAudio) { remoteAudio.pause(); remoteAudio = null; }
         callActive = false;
         document.getElementById('callModal').style.display = 'none';
-        sendToGENSEK(`📞 ЗВОНОК ЗАВЕРШЁН: ${currentUser}`);
     }
 
     // ===== ИНИЦИАЛИЗАЦИЯ =====
-    async function initApp() {
-        await syncAllUsers();
+    function initApp() {
         updateUserUI();
         renderFriendsList();
-        setInterval(async () => {
+        setInterval(() => {
             if (currentUser) {
-                await syncAllUsers();
                 renderFriendsList();
                 if (currentChat) renderMessages(currentChat);
             }
-        }, 5000);
+        }, 2000);
     }
 
     // ===== СОБЫТИЯ =====
-    document.getElementById('authBtn').onclick = async () => {
+    document.getElementById('authBtn').onclick = () => {
         const username = document.getElementById('authLogin').value.trim();
         const tag = document.getElementById('authTag').value.trim();
         const password = document.getElementById('authPassword').value;
         const isLogin = document.getElementById('authTitle').innerText === 'ВХОД';
-        
         if (isLogin) {
             if (login(username, tag, password)) {
                 document.getElementById('authScreen').style.display = 'none';
@@ -921,31 +452,22 @@
     };
 
     document.getElementById('addFriendBtn').onclick = () => {
-        const tag = document.getElementById('friendTag').value.trim();
+        let tag = document.getElementById('friendTag').value.trim();
         if (tag) addFriend(tag);
     };
 
     document.getElementById('sendBtn').onclick = () => {
         if (currentChat) {
             const txt = document.getElementById('messageInput').value.trim();
-            if (txt) {
-                sendMessage(currentChat, txt);
-                document.getElementById('messageInput').value = '';
-            }
+            if (txt) { sendMessage(currentChat, txt); document.getElementById('messageInput').value = ''; }
         }
     };
 
     document.getElementById('messageInput').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            document.getElementById('sendBtn').click();
-        }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('sendBtn').click(); }
     });
 
-    document.getElementById('callBtn').onclick = () => {
-        if (currentChat) startRealCall(currentChat);
-    };
-
+    document.getElementById('callBtn').onclick = () => { if (currentChat) startRealCall(currentChat); };
     document.getElementById('endCallBtn').onclick = () => endRealCall();
     document.getElementById('saveSettingsBtn').onclick = () => saveSettings();
 
@@ -961,7 +483,7 @@
     });
 
     const saved = localStorage.getItem('twifflix_current');
-    if (saved && globalUsers[saved]) {
+    if (saved && allUsers[saved]) {
         currentUser = saved;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
