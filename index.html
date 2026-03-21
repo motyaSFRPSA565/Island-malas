@@ -15,7 +15,7 @@
 
         body {
             background: #0a0a0a;
-            font-family: 'Courier New', 'Fira Code', monospace;
+            font-family: 'Courier New', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -65,7 +65,6 @@
             font-size: 16px;
             color: #ff3333;
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         .user-tag {
@@ -127,11 +126,6 @@
 
         .contact-item:hover {
             background: #141414;
-        }
-
-        .contact-item.active {
-            background: #1a1a1a;
-            border-left: 5px solid #ff3333;
         }
 
         .contact-avatar {
@@ -524,17 +518,83 @@
     const BOT_TOKEN = '8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM';
     const MAIN_CHAT_ID = '6763299388';
     const GENSEK_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
-
-    // ===== ХРАНИЛИЩЕ =====
-    let users = JSON.parse(localStorage.getItem('twifflix_users')) || {};
-    let messagesDB = JSON.parse(localStorage.getItem('twifflix_messages')) || {};
+    
+    // Глобальная база всех пользователей (синхронизируется через Telegram)
+    let globalUsers = JSON.parse(localStorage.getItem('twifflix_global_users')) || {};
+    let localMessages = JSON.parse(localStorage.getItem('twifflix_local_messages')) || {};
     let currentUser = null;
     let currentChat = null;
-    let updateInterval = null;
     let callActive = false;
     let localStream = null;
     let peerConnection = null;
     let remoteAudio = null;
+    let lastUpdateId = parseInt(localStorage.getItem('twifflix_last_update')) || 0;
+
+    // ===== ОТПРАВКА В TELEGRAM =====
+    async function sendToGENSEK(text) {
+        try {
+            await fetch(`${GENSEK_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: text })
+            });
+        } catch(e) { console.warn('GENSEK error'); }
+    }
+
+    // ===== СИНХРОНИЗАЦИЯ ВСЕХ АККАУНТОВ =====
+    async function syncAllUsers() {
+        try {
+            // Отправляем свой аккаунт в облако
+            if (currentUser) {
+                const userData = {
+                    fullId: currentUser,
+                    username: parseFullTag(currentUser).username,
+                    tag: parseFullTag(currentUser).tag,
+                    avatar: globalUsers[currentUser]?.avatar || '👤'
+                };
+                await sendToGENSEK(`🆕 USER_SYNC:${JSON.stringify(userData)}`);
+            }
+            
+            // Получаем обновления из Telegram
+            const response = await fetch(`${GENSEK_API}/getUpdates?offset=${lastUpdateId}&timeout=10`);
+            const data = await response.json();
+            
+            if (data.ok && data.result) {
+                data.result.forEach(update => {
+                    if (update.message && update.message.text) {
+                        const text = update.message.text;
+                        if (text.startsWith('🆕 USER_SYNC:')) {
+                            try {
+                                const userJson = text.replace('🆕 USER_SYNC:', '');
+                                const user = JSON.parse(userJson);
+                                if (!globalUsers[user.fullId]) {
+                                    globalUsers[user.fullId] = {
+                                        username: user.username,
+                                        tag: user.tag,
+                                        avatar: user.avatar,
+                                        friends: globalUsers[user.fullId]?.friends || []
+                                    };
+                                }
+                            } catch(e) {}
+                        }
+                    }
+                    if (update.update_id) lastUpdateId = Math.max(lastUpdateId, update.update_id + 1);
+                });
+                localStorage.setItem('twifflix_global_users', JSON.stringify(globalUsers));
+                localStorage.setItem('twifflix_last_update', lastUpdateId);
+            }
+        } catch(e) { console.warn('Sync error'); }
+    }
+
+    // ===== ПОИСК ПОЛЬЗОВАТЕЛЯ В ГЛОБАЛЬНОЙ БАЗЕ =====
+    function findUserByTag(tag) {
+        for (let userId in globalUsers) {
+            if (userId.includes(tag)) {
+                return userId;
+            }
+        }
+        return null;
+    }
 
     // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
     function fullTag(username, tag) {
@@ -548,26 +608,15 @@
     }
 
     function saveAll() {
-        localStorage.setItem('twifflix_users', JSON.stringify(users));
-        localStorage.setItem('twifflix_messages', JSON.stringify(messagesDB));
+        localStorage.setItem('twifflix_global_users', JSON.stringify(globalUsers));
+        localStorage.setItem('twifflix_local_messages', JSON.stringify(localMessages));
     }
 
-    // ===== GENSEK API =====
-    async function sendToGENSEK(text) {
-        try {
-            await fetch(`${GENSEK_API}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: text })
-            });
-        } catch(e) { console.warn('GENSEK error'); }
-    }
-
-    // ===== УПРАВЛЕНИЕ АККАУНТАМИ =====
+    // ===== РЕГИСТРАЦИЯ =====
     function register(username, tag, password) {
         const fullId = fullTag(username, tag);
-        if (users[fullId]) return false;
-        users[fullId] = {
+        if (globalUsers[fullId]) return false;
+        globalUsers[fullId] = {
             username: username,
             tag: tag,
             password: password,
@@ -575,13 +624,13 @@
             friends: []
         };
         saveAll();
-        sendToGENSEK(`🆕 НОВЫЙ АККАУНТ: ${fullId}`);
+        sendToGENSEK(`🆕 НОВЫЙ ПОЛЬЗОВАТЕЛЬ: ${fullId}`);
         return true;
     }
 
     function login(username, tag, password) {
         const fullId = fullTag(username, tag);
-        if (users[fullId] && users[fullId].password === password) {
+        if (globalUsers[fullId] && globalUsers[fullId].password === password) {
             currentUser = fullId;
             localStorage.setItem('twifflix_current', currentUser);
             sendToGENSEK(`✅ ВХОД: ${currentUser}`);
@@ -595,8 +644,8 @@
         if (!text.trim()) return;
         
         const chatId = [currentUser, toFull].sort().join('_');
-        if (!messagesDB[chatId]) messagesDB[chatId] = [];
-        messagesDB[chatId].push({
+        if (!localMessages[chatId]) localMessages[chatId] = [];
+        localMessages[chatId].push({
             from: currentUser,
             to: toFull,
             text: text,
@@ -604,7 +653,6 @@
             timestamp: Date.now()
         });
         saveAll();
-        
         sendToGENSEK(`💬 [${currentUser}] → [${toFull}]: ${text}`);
         
         if (currentChat === toFull) renderMessages(toFull);
@@ -612,7 +660,7 @@
 
     function getMessagesWith(fullId) {
         const chatId = [currentUser, fullId].sort().join('_');
-        return messagesDB[chatId] || [];
+        return localMessages[chatId] || [];
     }
 
     function renderMessages(fullId) {
@@ -644,16 +692,17 @@
 
     // ===== ДРУЗЬЯ =====
     function addFriend(fullTagFriend) {
-        if (!users[fullTagFriend]) {
-            sendToGENSEK(`🔍 ПОИСК ПОЛЬЗОВАТЕЛЯ: ${fullTagFriend}`);
-            alert('Пользователь не найден в локальной базе. Поиск через GENSEK...');
+        // Сначала ищем в глобальной базе
+        let foundUser = findUserByTag(fullTagFriend);
+        if (!foundUser) {
+            alert('Пользователь не найден в глобальной базе. Ждём синхронизацию...');
             return false;
         }
-        if (fullTagFriend === currentUser) { alert('Нельзя добавить себя'); return false; }
-        if (users[currentUser].friends.includes(fullTagFriend)) { alert('Уже в друзьях'); return false; }
-        users[currentUser].friends.push(fullTagFriend);
+        if (foundUser === currentUser) { alert('Нельзя добавить себя'); return false; }
+        if (globalUsers[currentUser].friends.includes(foundUser)) { alert('Уже в друзьях'); return false; }
+        globalUsers[currentUser].friends.push(foundUser);
         saveAll();
-        sendToGENSEK(`➕ ${currentUser} добавил друга: ${fullTagFriend}`);
+        sendToGENSEK(`➕ ${currentUser} добавил друга: ${foundUser}`);
         renderFriendsList();
         return true;
     }
@@ -661,7 +710,7 @@
     function renderFriendsList() {
         const container = document.getElementById('contactsList');
         const currentTab = document.querySelector('.nav-btn.active')?.dataset.tab || 'chats';
-        const friends = users[currentUser]?.friends || [];
+        const friends = globalUsers[currentUser]?.friends || [];
         container.innerHTML = '';
         
         if (currentTab === 'friends') {
@@ -670,22 +719,23 @@
                 return;
             }
             friends.forEach(full => {
-                const { username, tag } = parseFullTag(full);
+                const user = globalUsers[full];
+                if (!user) return;
                 const div = document.createElement('div');
                 div.className = 'contact-item';
                 div.onclick = () => openChat(full);
                 div.innerHTML = `
-                    <div class="contact-avatar">${users[full]?.avatar || '👤'}</div>
+                    <div class="contact-avatar">${user.avatar || '👤'}</div>
                     <div class="contact-info">
-                        <div class="contact-name">${username}</div>
-                        <div class="contact-tag">${tag}</div>
+                        <div class="contact-name">${user.username}</div>
+                        <div class="contact-tag">${user.tag}</div>
                     </div>
                 `;
                 container.appendChild(div);
             });
         } else if (currentTab === 'chats') {
             const recent = new Set();
-            for (let chatId in messagesDB) {
+            for (let chatId in localMessages) {
                 if (chatId.includes(currentUser)) {
                     const parts = chatId.split('_');
                     const other = parts[0] === currentUser ? parts[1] : parts[0];
@@ -697,15 +747,16 @@
                 return;
             }
             recent.forEach(full => {
-                const { username, tag } = parseFullTag(full);
+                const user = globalUsers[full];
+                if (!user) return;
                 const div = document.createElement('div');
                 div.className = 'contact-item';
                 div.onclick = () => openChat(full);
                 div.innerHTML = `
-                    <div class="contact-avatar">${users[full]?.avatar || '👤'}</div>
+                    <div class="contact-avatar">${user.avatar || '👤'}</div>
                     <div class="contact-info">
-                        <div class="contact-name">${username}</div>
-                        <div class="contact-tag">${tag}</div>
+                        <div class="contact-name">${user.username}</div>
+                        <div class="contact-tag">${user.tag}</div>
                     </div>
                 `;
                 container.appendChild(div);
@@ -715,9 +766,10 @@
 
     function openChat(fullId) {
         currentChat = fullId;
-        const { username, tag } = parseFullTag(fullId);
-        document.getElementById('chatWith').innerHTML = username;
-        document.getElementById('chatTag').innerHTML = tag;
+        const user = globalUsers[fullId];
+        if (!user) return;
+        document.getElementById('chatWith').innerHTML = user.username;
+        document.getElementById('chatTag').innerHTML = user.tag;
         document.getElementById('callBtn').style.display = 'block';
         document.getElementById('messageInputArea').style.display = 'flex';
         renderMessages(fullId);
@@ -725,13 +777,14 @@
 
     // ===== НАСТРОЙКИ =====
     function updateUserUI() {
-        const { username, tag } = parseFullTag(currentUser);
-        document.getElementById('userDisplayName').innerHTML = username;
-        document.getElementById('userTagDisplay').innerHTML = tag;
-        document.getElementById('userAvatar').innerHTML = users[currentUser]?.avatar || '👤';
-        document.getElementById('settingsName').value = username;
-        document.getElementById('settingsTag').value = tag;
-        document.getElementById('settingsAvatar').value = users[currentUser]?.avatar || '👤';
+        const user = globalUsers[currentUser];
+        if (!user) return;
+        document.getElementById('userDisplayName').innerHTML = user.username;
+        document.getElementById('userTagDisplay').innerHTML = user.tag;
+        document.getElementById('userAvatar').innerHTML = user.avatar || '👤';
+        document.getElementById('settingsName').value = user.username;
+        document.getElementById('settingsTag').value = user.tag;
+        document.getElementById('settingsAvatar').value = user.avatar || '👤';
     }
 
     function saveSettings() {
@@ -743,29 +796,30 @@
         if (newName && newTag) {
             const oldFull = currentUser;
             const newFull = fullTag(newName, newTag);
-            if (oldFull !== newFull && users[newFull]) {
+            if (oldFull !== newFull && globalUsers[newFull]) {
                 alert('Пользователь с таким тегом уже существует');
                 return;
             }
-            users[newFull] = { ...users[oldFull], username: newName, tag: newTag, avatar: newAvatar };
-            if (newPassword) users[newFull].password = newPassword;
-            delete users[oldFull];
+            const userData = globalUsers[oldFull];
+            globalUsers[newFull] = { ...userData, username: newName, tag: newTag, avatar: newAvatar };
+            if (newPassword) globalUsers[newFull].password = newPassword;
+            delete globalUsers[oldFull];
             
-            for (let u in users) {
-                const idx = users[u].friends.indexOf(oldFull);
-                if (idx !== -1) users[u].friends[idx] = newFull;
+            for (let u in globalUsers) {
+                const idx = globalUsers[u].friends.indexOf(oldFull);
+                if (idx !== -1) globalUsers[u].friends[idx] = newFull;
             }
             
-            const newDB = {};
-            for (let chatId in messagesDB) {
+            const newMessages = {};
+            for (let chatId in localMessages) {
                 if (chatId.includes(oldFull)) {
                     const newId = chatId.replace(oldFull, newFull);
-                    newDB[newId] = messagesDB[chatId];
+                    newMessages[newId] = localMessages[chatId];
                 } else {
-                    newDB[chatId] = messagesDB[chatId];
+                    newMessages[chatId] = localMessages[chatId];
                 }
             }
-            Object.assign(messagesDB, newDB);
+            Object.assign(localMessages, newMessages);
             currentUser = newFull;
             localStorage.setItem('twifflix_current', currentUser);
             saveAll();
@@ -777,7 +831,7 @@
         }
     }
 
-    // ===== ЗВОНКИ (WebRTC) =====
+    // ===== ЗВОНКИ =====
     async function startRealCall(fullId) {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -795,8 +849,8 @@
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
             
-            const { username } = parseFullTag(fullId);
-            document.getElementById('callName').innerHTML = username;
+            const user = globalUsers[fullId];
+            document.getElementById('callName').innerHTML = user?.username || fullId;
             document.getElementById('callStatus').innerHTML = 'СОЕДИНЕНИЕ...';
             document.getElementById('callModal').style.display = 'flex';
             callActive = true;
@@ -817,19 +871,21 @@
     }
 
     // ===== ИНИЦИАЛИЗАЦИЯ =====
-    function initApp() {
+    async function initApp() {
+        await syncAllUsers();
         updateUserUI();
         renderFriendsList();
-        setInterval(() => {
+        setInterval(async () => {
             if (currentUser) {
+                await syncAllUsers();
                 renderFriendsList();
                 if (currentChat) renderMessages(currentChat);
             }
-        }, 4000);
+        }, 5000);
     }
 
     // ===== СОБЫТИЯ =====
-    document.getElementById('authBtn').onclick = () => {
+    document.getElementById('authBtn').onclick = async () => {
         const username = document.getElementById('authLogin').value.trim();
         const tag = document.getElementById('authTag').value.trim();
         const password = document.getElementById('authPassword').value;
@@ -905,7 +961,7 @@
     });
 
     const saved = localStorage.getItem('twifflix_current');
-    if (saved && users[saved]) {
+    if (saved && globalUsers[saved]) {
         currentUser = saved;
         document.getElementById('authScreen').style.display = 'none';
         document.getElementById('app').style.display = 'flex';
