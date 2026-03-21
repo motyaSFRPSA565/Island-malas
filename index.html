@@ -2,806 +2,802 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TWIFLIX MAX — пиксельный мессенджер</title>
-    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TWIFLIX</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            image-rendering: crisp-edges;
-            image-rendering: pixelated;
-            font-family: 'Courier New', 'VT323', 'Monaco', monospace;
+            user-select: none;
         }
-        
+
         body {
-            background: #0a0a0f;
+            background: #0a0a1a;
+            font-family: 'Courier New', 'Segoe UI', monospace;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            padding: 8px;
+            padding: 20px;
         }
-        
-        .pixel-container {
-            max-width: 1400px;
-            width: 100%;
+
+        .app {
+            width: 1200px;
+            max-width: 100%;
+            height: 800px;
+            max-height: 90vh;
             background: #1a1a2e;
-            border: 3px solid #ff3333;
-            box-shadow: 6px 6px 0 #5a1e1e;
-            position: relative;
-        }
-        
-        .pixel-header {
-            background: #0f0f1a;
-            padding: 10px 12px;
-            border-bottom: 2px solid #ff3333;
+            border: 4px solid #ff3333;
+            border-radius: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 50px rgba(255, 51, 51, 0.2);
         }
-        
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            letter-spacing: 1px;
-            color: #ff3333;
-            text-shadow: 2px 2px 0 #4a0000;
-        }
-        
-        .pixel-btn {
-            background: #2a2a3a;
-            border: 2px solid #ff3333;
-            color: #ffddbb;
-            padding: 6px 10px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.05s linear;
-            box-shadow: 2px 2px 0 #5a1e1e;
-            font-family: monospace;
-        }
-        
-        .pixel-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: none;
-        }
-        
-        .app-layout {
-            display: flex;
-            flex-direction: row;
-            height: calc(100vh - 70px);
-            min-height: 400px;
-        }
-        
-        /* Мобильная адаптация */
-        @media (max-width: 768px) {
-            .app-layout {
-                flex-direction: column;
-                height: auto;
-            }
-            .sidebar {
-                width: 100%;
-                max-height: 40%;
-                border-right: none;
-                border-bottom: 2px solid #ff3333;
-                flex-direction: row;
-                overflow-x: auto;
-                overflow-y: hidden;
-            }
-            .sidebar-section {
-                min-width: 250px;
-                max-height: 100%;
-                overflow-y: auto;
-            }
-            .chat-area {
-                height: 60%;
-            }
-            .pixel-btn {
-                padding: 8px 12px;
-                font-size: 14px;
-            }
-        }
-        
+
+        /* ЛЕВАЯ ПАНЕЛЬ (ДРУЗЬЯ И ЧАТЫ) */
         .sidebar {
-            width: 280px;
-            background: #11111f;
+            width: 300px;
+            background: #0f0f1a;
             border-right: 2px solid #ff3333;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
         }
-        
-        .sidebar-section {
-            padding: 10px;
-            border-bottom: 1px solid #ff333355;
+
+        .user-info {
+            padding: 20px;
+            background: #1a1a2e;
+            border-bottom: 2px solid #ff3333;
+            text-align: center;
         }
-        
-        .section-title {
-            color: #ff6666;
-            font-size: 14px;
-            margin-bottom: 8px;
+
+        .avatar {
+            width: 80px;
+            height: 80px;
+            background: #ff3333;
+            border-radius: 50%;
             display: flex;
-            gap: 6px;
             align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            margin: 0 auto 10px;
+            border: 3px solid #fff;
         }
-        
-        .friend-list, .chat-list, .group-users-list {
-            list-style: none;
-            max-height: 180px;
-            overflow-y: auto;
+
+        .username {
+            font-size: 20px;
+            color: #ff3333;
+            font-weight: bold;
         }
-        
-        .friend-item, .chat-item, .group-user-item {
-            background: #1e1e2c;
-            margin: 4px 0;
-            padding: 6px 8px;
-            border-left: 3px solid #ff3333;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+
+        .status {
             font-size: 12px;
-            word-break: break-word;
+            color: #888;
+            margin-top: 5px;
         }
-        
-        .friend-item.online {
-            border-left-color: #33ff33;
-            background: #1e2a1e;
+
+        .nav-buttons {
+            display: flex;
+            padding: 15px;
+            gap: 10px;
+            border-bottom: 1px solid #ff3333;
         }
-        
-        .chat-active {
-            background: #ff333322;
-            border-left-color: #ff8888;
+
+        .nav-btn {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #ff3333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 14px;
         }
-        
+
+        .nav-btn.active {
+            background: #ff3333;
+            color: #0a0a1a;
+        }
+
+        .contacts-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            margin-bottom: 5px;
+            background: #1a1a2e;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            border-left: 3px solid #ff3333;
+        }
+
+        .contact-item:hover {
+            background: #2a2a3e;
+        }
+
+        .contact-item.active {
+            background: #2a2a3e;
+            border-left: 3px solid #ff3333;
+        }
+
+        .contact-avatar {
+            width: 40px;
+            height: 40px;
+            background: #2a2a3e;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .contact-status {
+            font-size: 10px;
+            color: #888;
+        }
+
+        .contact-status.online {
+            color: #4aff4a;
+        }
+
+        .add-friend {
+            padding: 15px;
+            border-top: 1px solid #ff3333;
+            display: flex;
+            gap: 10px;
+        }
+
+        .add-friend input {
+            flex: 1;
+            background: #1a1a2e;
+            border: 1px solid #ff3333;
+            padding: 10px;
+            color: #fff;
+            font-family: monospace;
+        }
+
+        .add-friend button {
+            background: #ff3333;
+            border: none;
+            padding: 10px 15px;
+            color: #0a0a1a;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* ПРАВАЯ ПАНЕЛЬ (ЧАТ) */
         .chat-area {
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #12121c;
-            overflow: hidden;
+            background: #0f0f1a;
         }
-        
+
         .chat-header {
-            background: #0b0b12;
-            padding: 8px 12px;
+            padding: 20px;
+            background: #1a1a2e;
             border-bottom: 2px solid #ff3333;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
         }
-        
-        .chat-messages {
+
+        .chat-with {
+            font-size: 18px;
+            color: #ff3333;
+        }
+
+        .call-btn {
+            background: #1a1a2e;
+            border: 1px solid #ff3333;
+            padding: 8px 20px;
+            color: #ff3333;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .call-btn:hover {
+            background: #ff3333;
+            color: #0a0a1a;
+        }
+
+        .messages-area {
             flex: 1;
             overflow-y: auto;
-            padding: 12px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 15px;
         }
-        
-        .message-bubble {
-            max-width: 85%;
-            padding: 6px 10px;
-            background: #22223b;
+
+        .message {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .message.outgoing {
+            background: #ff3333;
+            color: #0a0a1a;
+            align-self: flex-end;
+            border-radius: 15px 15px 0 15px;
+        }
+
+        .message.incoming {
+            background: #1a1a2e;
+            color: #fff;
+            align-self: flex-start;
+            border-radius: 15px 15px 15px 0;
             border: 1px solid #ff3333;
-            color: #f0f0f0;
+        }
+
+        .message-name {
             font-size: 12px;
+            margin-bottom: 5px;
+            color: #ff3333;
+        }
+
+        .message-text {
+            font-size: 14px;
             word-break: break-word;
         }
-        
-        .my-message {
-            align-self: flex-end;
-            background: #3a1a2a;
-            border-color: #ff7777;
+
+        .message-time {
+            font-size: 10px;
+            margin-top: 5px;
+            opacity: 0.6;
+            text-align: right;
         }
-        
-        .input-area {
-            display: flex;
-            padding: 8px;
-            gap: 6px;
-            background: #0f0f17;
+
+        .message-input-area {
+            padding: 20px;
+            background: #1a1a2e;
             border-top: 2px solid #ff3333;
-            flex-wrap: wrap;
-        }
-        
-        .input-area input {
-            flex: 1;
-            background: #000000aa;
-            border: 2px solid #ff3333;
-            padding: 8px;
-            color: white;
-            font-size: 12px;
-            min-width: 120px;
-        }
-        
-        .modal {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: #000000dd;
-            backdrop-filter: blur(4px);
             display: flex;
-            align-items: center;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            background: #0f0f1a;
+            border: 1px solid #ff3333;
+            padding: 12px;
+            color: #fff;
+            font-family: monospace;
+            resize: none;
+            font-size: 14px;
+        }
+
+        .send-btn {
+            background: #ff3333;
+            border: none;
+            padding: 12px 25px;
+            color: #0a0a1a;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* МОДАЛЬНОЕ ОКНО ЗВОНКА */
+        .call-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
             justify-content: center;
+            align-items: center;
             z-index: 1000;
         }
-        
-        .modal-content {
+
+        .call-modal-content {
             background: #1a1a2e;
-            border: 3px solid #ff3333;
-            width: 90%;
-            max-width: 350px;
-            padding: 16px;
+            border: 4px solid #ff3333;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            width: 400px;
+        }
+
+        .call-avatar {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .call-name {
+            font-size: 28px;
+            color: #ff3333;
+            margin-bottom: 10px;
+        }
+
+        .call-status {
+            font-size: 16px;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+
+        .call-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .call-btn-end {
+            background: #ff3333;
+            border: none;
+            padding: 15px 40px;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        /* РЕГИСТРАЦИЯ */
+        .auth-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0a0a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .auth-box {
+            background: #1a1a2e;
+            border: 4px solid #ff3333;
+            border-radius: 30px;
+            padding: 40px;
+            width: 400px;
             text-align: center;
         }
-        
-        .profile-avatar {
-            width: 70px;
-            height: 70px;
-            border: 2px solid #ff3333;
-            margin: 10px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 40px;
-            background: #2a2a3a;
-            overflow: hidden;
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ff3333;
         }
-        
-        .hidden {
-            display: none;
+
+        .auth-title {
+            font-size: 28px;
+            color: #fff;
+            margin-bottom: 30px;
         }
-        
-        .bear-mascot {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            font-size: 40px;
-            cursor: pointer;
-            filter: drop-shadow(2px 2px 0 #ff3333);
-            z-index: 99;
-            background: rgba(0,0,0,0.5);
-            border-radius: 50%;
-            padding: 5px;
-        }
-        
-        .search-result {
-            background: #2a2a3a;
-            margin: 5px 0;
-            padding: 6px;
-            cursor: pointer;
-            border-left: 2px solid #ff3333;
-        }
-        
-        .search-result:hover {
-            background: #ff333344;
-        }
-        
-        input, textarea {
+
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            background: #0f0f1a;
+            border: 1px solid #ff3333;
+            color: #fff;
             font-family: monospace;
         }
-        
-        .status-online {
-            color: #33ff33;
-            font-size: 10px;
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: #ff3333;
+            border: none;
+            color: #0a0a1a;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
         }
-        
-        @media (max-width: 480px) {
-            .logo { font-size: 16px; }
-            .pixel-btn { font-size: 10px; padding: 4px 8px; }
-            .message-bubble { max-width: 95%; font-size: 11px; }
+
+        .auth-switch {
+            margin-top: 20px;
+            color: #888;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
         }
     </style>
 </head>
 <body>
-<div class="pixel-container" id="appRoot">
-    <div class="pixel-header">
-        <div class="logo">📼 TWIFLIX MAX</div>
-        <div id="authStatusPanel"></div>
+    <div class="auth-screen" id="authScreen">
+        <div class="auth-box">
+            <div class="auth-logo">💬 TWIFLIX MAX</div>
+            <div class="auth-title" id="authTitle">Вход</div>
+            <input type="text" class="auth-input" id="authUsername" placeholder="Имя пользователя">
+            <input type="password" class="auth-input" id="authPassword" placeholder="Пароль">
+            <button class="auth-btn" id="authBtn">Войти</button>
+            <div class="auth-switch" id="authSwitch">Нет аккаунта? Зарегистрироваться</div>
+        </div>
     </div>
-    
-    <div id="mainAppContent" style="display: none;">
-        <div class="app-layout">
-            <div class="sidebar">
-                <div class="sidebar-section">
-                    <div class="section-title"><i class="fas fa-user-circle"></i> ПРОФИЛЬ</div>
-                    <button class="pixel-btn" id="viewProfileBtn" style="width:100%; margin-bottom:5px;">👤 МОЙ ПРОФИЛЬ</button>
-                    <button class="pixel-btn" id="logoutBtn" style="width:100%; background:#4a0000;">🚪 ВЫЙТИ</button>
-                </div>
-                
-                <div class="sidebar-section">
-                    <div class="section-title"><i class="fas fa-user-plus"></i> ПОИСК & ДРУЗЬЯ</div>
-                    <input type="text" id="searchUserInput" placeholder="🔍 имя пользователя" style="width:100%; margin-bottom:5px; padding:6px; background:#000; border:1px solid #ff3333; color:white;">
-                    <button class="pixel-btn" id="searchUserBtn" style="width:100%; margin-bottom:8px;">НАЙТИ ПОЛЬЗОВАТЕЛЯ</button>
-                    <div id="searchResults" style="max-height:120px; overflow-y:auto; margin-bottom:8px;"></div>
-                    <div class="section-title"><i class="fas fa-user-friends"></i> МОИ ДРУЗЬЯ</div>
-                    <ul id="friendsListUI" class="friend-list"></ul>
-                </div>
-                
-                <div class="sidebar-section">
-                    <div class="section-title"><i class="fas fa-comments"></i> ЧАТЫ</div>
-                    <button class="pixel-btn" id="createGroupBtn" style="width:100%; margin-bottom:5px;">+ СОЗДАТЬ ГРУППУ</button>
-                    <ul id="chatsListUI" class="chat-list"></ul>
-                </div>
+
+    <div class="app" id="app" style="display: none;">
+        <!-- ЛЕВАЯ ПАНЕЛЬ -->
+        <div class="sidebar">
+            <div class="user-info">
+                <div class="avatar" id="userAvatar">👤</div>
+                <div class="username" id="userName">Загрузка...</div>
+                <div class="status">🟢 онлайн</div>
             </div>
-            
-            <div class="chat-area">
-                <div class="chat-header">
-                    <span id="currentChatName">💬 ВЫБЕРИТЕ ЧАТ</span>
-                    <div style="display: flex; gap: 5px;">
-                        <button class="pixel-btn" id="manageGroupBtn" style="display:none; background:#3a2a1a;"><i class="fas fa-users"></i></button>
-                        <button class="pixel-btn" id="callBtn" style="background:#4a0000;"><i class="fas fa-phone-alt"></i></button>
-                    </div>
-                </div>
-                <div id="chatMessagesContainer" class="chat-messages"></div>
-                <div class="input-area">
-                    <input type="text" id="messageInput" placeholder="сообщение или [img]url[/img]">
-                    <button class="pixel-btn" id="sendMsgBtn">📨</button>
-                    <button class="pixel-btn" id="emojiBtn">😀</button>
-                </div>
+            <div class="nav-buttons">
+                <div class="nav-btn active" data-tab="chats">💬 Чаты</div>
+                <div class="nav-btn" data-tab="friends">👥 Друзья</div>
+            </div>
+            <div class="contacts-list" id="contactsList">
+                <!-- Список контактов -->
+            </div>
+            <div class="add-friend">
+                <input type="text" id="friendName" placeholder="Имя друга @cente.com">
+                <button id="addFriendBtn">➕</button>
             </div>
         </div>
-    </div>
-    
-    <div id="authScreen" style="padding: 20px; text-align: center;">
-        <div class="logo" style="margin-bottom: 20px; font-size: 24px;">⚡ TWIFLIX MAX ⚡</div>
-        <div id="authTabs" style="margin-bottom: 15px;">
-            <button class="pixel-btn" id="showLoginTab">ВХОД</button>
-            <button class="pixel-btn" id="showRegisterTab">РЕГИСТРАЦИЯ</button>
-        </div>
-        <div id="loginForm">
-            <input type="text" id="loginUsername" placeholder="имя пользователя" style="display:block; margin:10px auto; padding:8px; width:90%; max-width:250px;"><br>
-            <input type="password" id="loginPassword" placeholder="пароль" style="display:block; margin:10px auto; padding:8px; width:90%; max-width:250px;"><br>
-            <button class="pixel-btn" id="doLoginBtn">ВОЙТИ</button>
-        </div>
-        <div id="registerForm" style="display:none;">
-            <input type="text" id="regUsername" placeholder="уникальное имя" style="display:block; margin:10px auto; padding:8px; width:90%; max-width:250px;"><br>
-            <input type="password" id="regPassword" placeholder="пароль" style="display:block; margin:10px auto; padding:8px; width:90%; max-width:250px;"><br>
-            <div style="margin:10px;">Аватар: 
-                <input type="color" id="avatarColor" value="#ff3333">
-                <input id="avatarEmoji" placeholder="🐱" maxlength="2" style="width:50px;">
+
+        <!-- ПРАВАЯ ПАНЕЛЬ (ЧАТ) -->
+        <div class="chat-area" id="chatArea">
+            <div class="chat-header">
+                <div class="chat-with" id="chatWith">Выберите чат</div>
+                <button class="call-btn" id="callBtn" style="display: none;">📞 Звонок</button>
             </div>
-            <button class="pixel-btn" id="doRegisterBtn">СОЗДАТЬ</button>
+            <div class="messages-area" id="messagesArea">
+                <div style="text-align: center; color: #888; padding: 50px;">
+                    Выберите друга чтобы начать общение
+                </div>
+            </div>
+            <div class="message-input-area" id="messageInputArea" style="display: none;">
+                <textarea class="message-input" id="messageInput" rows="2" placeholder="Введите сообщение..."></textarea>
+                <button class="send-btn" id="sendBtn">📤</button>
+            </div>
         </div>
-        <div id="authError" style="color:#ff8888; margin-top:12px;"></div>
     </div>
-</div>
-<div class="bear-mascot" id="bearMascot">🧸🍵</div>
 
-<!-- Модальные окна -->
-<div id="profileModal" class="modal hidden">
-    <div class="modal-content">
-        <h3><i class="fas fa-user"></i> ПРОФИЛЬ</h3>
-        <div class="profile-avatar" id="profileAvatarDisplay"></div>
-        <p><strong id="profileUsername"></strong></p>
-        <button class="pixel-btn" id="closeProfileBtn">ЗАКРЫТЬ</button>
+    <!-- МОДАЛ ЗВОНКА -->
+    <div class="call-modal" id="callModal">
+        <div class="call-modal-content">
+            <div class="call-avatar" id="callAvatar">👤</div>
+            <div class="call-name" id="callName">Имя</div>
+            <div class="call-status" id="callStatus">Вызов...</div>
+            <div class="call-buttons">
+                <button class="call-btn-end" id="endCallBtn">📞 Завершить</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<div id="groupManageModal" class="modal hidden">
-    <div class="modal-content" style="max-width:400px;">
-        <h3>👥 УПРАВЛЕНИЕ</h3>
-        <p id="groupNameDisplay"></p>
-        <div class="section-title">УЧАСТНИКИ</div>
-        <ul id="groupUsersList" style="max-height:200px; overflow-y:auto;"></ul>
-        <input type="text" id="addUserToGroupInput" placeholder="имя пользователя" style="width:100%; margin:8px 0; padding:6px;">
-        <button class="pixel-btn" id="confirmAddUserBtn">➕ ДОБАВИТЬ</button>
-        <button class="pixel-btn" id="closeGroupModalBtn" style="margin-top:8px;">ЗАКРЫТЬ</button>
-    </div>
-</div>
+    <script>
+        // ===== ДАННЫЕ ПОЛЬЗОВАТЕЛЕЙ =====
+        let currentUser = null;
+        let users = JSON.parse(localStorage.getItem('twifflix_users')) || {};
+        let messages = JSON.parse(localStorage.getItem('twifflix_messages')) || {};
+        let friends = JSON.parse(localStorage.getItem('twifflix_friends')) || {};
+        let currentChat = null;
+        let callActive = false;
+        let callTimer = null;
 
-<script>
-    // Глобальные переменные
-    let CURRENT_USER = null;
-    let ACTIVE_CHAT = null;
-    let FRIENDS = [];
-    let CHATS = [];
-    let messagesCache = {};
-    
-    // Инициализация
-    function init() {
-        loadFromStorage();
-        setupEventListeners();
-        
-        let savedUser = localStorage.getItem("tw_current_user");
-        if(savedUser) {
-            let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
-            if(users[savedUser]) {
-                CURRENT_USER = { username: savedUser, password: users[savedUser].password, avatar: users[savedUser].avatar };
-                loadUserData();
-                document.getElementById("authScreen").style.display = "none";
-                document.getElementById("mainAppContent").style.display = "block";
-                updateOnlineStatus();
-                renderAll();
-                setInterval(() => { refreshOnlineUsers(); }, 3000);
+        // ===== СОХРАНЕНИЕ =====
+        function saveData() {
+            localStorage.setItem('twifflix_users', JSON.stringify(users));
+            localStorage.setItem('twifflix_messages', JSON.stringify(messages));
+            localStorage.setItem('twifflix_friends', JSON.stringify(friends));
+        }
+
+        // ===== АВТОРИЗАЦИЯ =====
+        function register(username, password) {
+            if (users[username]) {
+                alert('Пользователь уже существует!');
+                return false;
+            }
+            users[username] = { password, avatar: getRandomAvatar() };
+            friends[username] = [];
+            saveData();
+            alert('Регистрация успешна!');
+            return true;
+        }
+
+        function login(username, password) {
+            if (users[username] && users[username].password === password) {
+                currentUser = username;
+                localStorage.setItem('twifflix_current', username);
+                return true;
+            }
+            alert('Неверное имя или пароль!');
+            return false;
+        }
+
+        function getRandomAvatar() {
+            const avatars = ['👤', '😎', '🔥', '🎮', '🐻', '🏃', '🛡️', '⚡'];
+            return avatars[Math.floor(Math.random() * avatars.length)];
+        }
+
+        // ===== ДРУЗЬЯ =====
+        function addFriend(username) {
+            if (!username) return;
+            if (username === currentUser) {
+                alert('Нельзя добавить себя в друзья!');
                 return;
             }
-        }
-        document.getElementById("authScreen").style.display = "block";
-        document.getElementById("mainAppContent").style.display = "none";
-    }
-    
-    function loadFromStorage() {
-        // Инициализация тестовыми пользователями если пусто
-        let users = JSON.parse(localStorage.getItem("tw_users") || "{}");
-        if(Object.keys(users).length === 0) {
-            users["admin"] = { password: "123", avatar: "👑" };
-            users["testuser"] = { password: "123", avatar: "🐱" };
-            users["drago"] = { password: "123", avatar: "🐉" };
-            localStorage.setItem("tw_users", JSON.stringify(users));
-        }
-    }
-    
-    function loadUserData() {
-        if(!CURRENT_USER) return;
-        let friendsDB = JSON.parse(localStorage.getItem(`tw_friends_${CURRENT_USER.username}`) || "[]");
-        let chatsDB = JSON.parse(localStorage.getItem(`tw_chats_${CURRENT_USER.username}`) || "[]");
-        FRIENDS = friendsDB;
-        CHATS = chatsDB;
-    }
-    
-    function saveAll() {
-        if(CURRENT_USER) {
-            localStorage.setItem(`tw_friends_${CURRENT_USER.username}`, JSON.stringify(FRIENDS));
-            localStorage.setItem(`tw_chats_${CURRENT_USER.username}`, JSON.stringify(CHATS));
-        }
-    }
-    
-    function getAllUsers() {
-        return JSON.parse(localStorage.getItem("tw_users") || "{}");
-    }
-    
-    function searchUsers(query) {
-        if(!query.trim()) return [];
-        let users = getAllUsers();
-        let results = [];
-        for(let name in users) {
-            if(name !== CURRENT_USER?.username && name.toLowerCase().includes(query.toLowerCase())) {
-                results.push({ username: name, avatar: users[name].avatar });
+            if (!users[username]) {
+                alert('Пользователь не найден!');
+                return;
             }
+            if (friends[currentUser].includes(username)) {
+                alert('Уже в друзьях!');
+                return;
+            }
+            friends[currentUser].push(username);
+            saveData();
+            loadContacts();
+            alert(`${username} добавлен в друзья!`);
         }
-        return results;
-    }
-    
-    function addFriend(username) {
-        if(username === CURRENT_USER?.username) {
-            alert("❌ Нельзя добавить себя в друзья");
-            return false;
+
+        // ===== СООБЩЕНИЯ =====
+        function sendMessage(to, text) {
+            if (!text.trim()) return;
+            const chatId = getChatId(currentUser, to);
+            if (!messages[chatId]) messages[chatId] = [];
+            messages[chatId].push({
+                from: currentUser,
+                to: to,
+                text: text,
+                time: new Date().toLocaleTimeString(),
+                date: new Date().toISOString()
+            });
+            saveData();
+            if (currentChat === to) loadMessages(to);
+            
+            // Отправляем уведомление в Telegram (опционально)
+            sendToTelegram(to, text);
         }
-        if(FRIENDS.some(f => f.username === username)) {
-            alert("❌ Этот пользователь уже в друзьях");
-            return false;
+
+        function getChatId(user1, user2) {
+            return [user1, user2].sort().join('_');
         }
-        let users = getAllUsers();
-        if(!users[username]) {
-            alert("❌ Пользователь не найден");
-            return false;
+
+        function loadMessages(withUser) {
+            const chatId = getChatId(currentUser, withUser);
+            const msgs = messages[chatId] || [];
+            const area = document.getElementById('messagesArea');
+            area.innerHTML = '';
+            
+            msgs.forEach(msg => {
+                const div = document.createElement('div');
+                div.className = `message ${msg.from === currentUser ? 'outgoing' : 'incoming'}`;
+                div.innerHTML = `
+                    <div class="message-name">${msg.from === currentUser ? 'Вы' : msg.from}</div>
+                    <div class="message-text">${escapeHtml(msg.text)}</div>
+                    <div class="message-time">${msg.time}</div>
+                `;
+                area.appendChild(div);
+            });
+            area.scrollTop = area.scrollHeight;
         }
-        FRIENDS.push({ username: username, avatar: users[username].avatar, online: false });
-        saveAll();
-        renderFriendsList();
-        alert(`✅ ${username} добавлен в друзья!`);
-        return true;
-    }
-    
-    function openPrivateChat(username) {
-        let existing = CHATS.find(c => c.type === 'private' && c.participants.includes(username) && c.participants.includes(CURRENT_USER.username));
-        if(existing) {
-            setActiveChat(existing);
-        } else {
-            let newChat = { 
-                id: `priv_${Date.now()}_${Math.random()}`, 
-                type: "private", 
-                name: username, 
-                participants: [CURRENT_USER.username, username] 
-            };
-            CHATS.push(newChat);
-            saveAll();
-            setActiveChat(newChat);
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
-        renderChatsList();
-    }
-    
-    function createGroup() {
-        let name = prompt("Название группы:");
-        if(!name) return;
-        let newGroup = { 
-            id: `grp_${Date.now()}_${Math.random()}`, 
-            type: "group", 
-            name: name, 
-            participants: [CURRENT_USER.username] 
-        };
-        CHATS.push(newGroup);
-        saveAll();
-        renderChatsList();
-    }
-    
-    function addUserToGroup(username) {
-        if(!ACTIVE_CHAT || ACTIVE_CHAT.type !== 'group') return false;
-        if(ACTIVE_CHAT.participants.includes(username)) {
-            alert("❌ Пользователь уже в группе");
-            return false;
-        }
-        let users = getAllUsers();
-        if(!users[username]) {
-            alert("❌ Пользователь не найден");
-            return false;
-        }
-        ACTIVE_CHAT.participants.push(username);
-        saveAll();
-        renderChatsList();
-        alert(`✅ ${username} добавлен в группу`);
-        return true;
-    }
-    
-    function sendMessage(text) {
-        if(!ACTIVE_CHAT || !text.trim()) return;
-        let msg = { 
-            sender: CURRENT_USER.username, 
-            text: text, 
-            timestamp: Date.now() 
-        };
-        
-        let msgs = messagesCache[ACTIVE_CHAT.id] || [];
-        msgs.push(msg);
-        messagesCache[ACTIVE_CHAT.id] = msgs;
-        
-        // Сохраняем в localStorage
-        localStorage.setItem(`msgs_${ACTIVE_CHAT.id}_${CURRENT_USER.username}`, JSON.stringify(msgs));
-        
-        if(ACTIVE_CHAT.id === ACTIVE_CHAT.id) renderMessages();
-        
-        // Пасхалка с Драго
-        if(text.toLowerCase().includes("драго")) {
+
+        // ===== ЗВОНКИ (симуляция) =====
+        function startCall(withUser) {
+            const modal = document.getElementById('callModal');
+            document.getElementById('callName').innerText = withUser;
+            document.getElementById('callAvatar').innerHTML = users[withUser]?.avatar || '👤';
+            document.getElementById('callStatus').innerHTML = '📞 Вызов...';
+            modal.style.display = 'flex';
+            callActive = true;
+            
+            // Симуляция ответа через 3 секунды
             setTimeout(() => {
-                let msgs2 = messagesCache[ACTIVE_CHAT.id] || [];
-                msgs2.push({ sender: "🐉 ДРАГО", text: "Я должен!", timestamp: Date.now() });
-                messagesCache[ACTIVE_CHAT.id] = msgs2;
-                if(ACTIVE_CHAT.id === ACTIVE_CHAT.id) renderMessages();
-            }, 100);
+                if (callActive) {
+                    document.getElementById('callStatus').innerHTML = '🔴 В разговоре...';
+                    // Добавляем звук звонка (симуляция)
+                }
+            }, 3000);
         }
-    }
-    
-    function loadMessages(chat) {
-        let stored = localStorage.getItem(`msgs_${chat.id}_${CURRENT_USER.username}`);
-        if(stored) {
-            messagesCache[chat.id] = JSON.parse(stored);
-        } else {
-            messagesCache[chat.id] = [];
+
+        function endCall() {
+            callActive = false;
+            document.getElementById('callModal').style.display = 'none';
+            if (callTimer) clearTimeout(callTimer);
         }
-        if(ACTIVE_CHAT && ACTIVE_CHAT.id === chat.id) renderMessages();
-    }
-    
-    function setActiveChat(chat) {
-        ACTIVE_CHAT = chat;
-        document.getElementById("currentChatName").innerHTML = `${chat.type === 'group' ? '👥' : '💬'} ${chat.name}`;
-        let manageBtn = document.getElementById("manageGroupBtn");
-        if(chat.type === 'group') manageBtn.style.display = "inline-block";
-        else manageBtn.style.display = "none";
-        loadMessages(chat);
-        renderChatsList();
-    }
-    
-    function renderAll() {
-        renderFriendsList();
-        renderChatsList();
-        if(ACTIVE_CHAT) renderMessages();
-    }
-    
-    function renderFriendsList() {
-        let container = document.getElementById("friendsListUI");
-        if(!container) return;
-        if(FRIENDS.length === 0) {
-            container.innerHTML = '<li style="color:#888; padding:5px;">Нет друзей. Добавьте через поиск!</li>';
-            return;
+
+        // ===== ТЕЛЕГРАМ ИНТЕГРАЦИЯ =====
+        function sendToTelegram(to, text) {
+            // Отправляем уведомление в Telegram (опционально)
+            // fetch(`https://api.telegram.org/bot8655630023:AAHx11sDOmY7JemehAcaLfEyP907qRgzOKM/sendMessage`, {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         chat_id: '6763299388',
+            //         text: `💬 ${currentUser} -> ${to}: ${text}`
+            //     })
+            // });
         }
-        container.innerHTML = FRIENDS.map(f => {
-            let avatar = f.avatar || "👤";
-            return `<li class="friend-item ${f.online ? 'online' : ''}" data-user="${f.username}">
-                        <span>${avatar} ${f.username}</span>
-                        <span class="status-online">${f.online ? '🟢' : '⚫'}</span>
-                    </li>`;
-        }).join("");
-        document.querySelectorAll(".friend-item").forEach(el => {
-            el.addEventListener("click", () => openPrivateChat(el.dataset.user));
-        });
-    }
-    
-    function renderChatsList() {
-        let container = document.getElementById("chatsListUI");
-        if(!container) return;
-        if(CHATS.length === 0) {
-            container.innerHTML = '<li style="color:#888; padding:5px;">Нет чатов. Создайте группу или начните диалог с другом!</li>';
-            return;
+
+        // ===== ИНТЕРФЕЙС =====
+        function loadContacts() {
+            const list = document.getElementById('contactsList');
+            const friendList = friends[currentUser] || [];
+            const currentTab = document.querySelector('.nav-btn.active').dataset.tab;
+            
+            list.innerHTML = '';
+            
+            if (currentTab === 'friends') {
+                friendList.forEach(friend => {
+                    const div = document.createElement('div');
+                    div.className = 'contact-item';
+                    div.onclick = () => selectChat(friend);
+                    div.innerHTML = `
+                        <div class="contact-avatar">${users[friend]?.avatar || '👤'}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${friend}</div>
+                            <div class="contact-status online">🟢 онлайн</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                if (friendList.length === 0) {
+                    list.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет друзей. Добавьте кого-нибудь!</div>';
+                }
+            } else {
+                // Чаты (недавние диалоги)
+                const recentChats = new Set();
+                for (let chatId in messages) {
+                    if (chatId.includes(currentUser)) {
+                        const other = chatId.replace(currentUser, '').replace('_', '').replace(currentUser, '');
+                        if (other && friendList.includes(other)) {
+                            recentChats.add(other);
+                        }
+                    }
+                }
+                recentChats.forEach(chat => {
+                    const div = document.createElement('div');
+                    div.className = 'contact-item';
+                    div.onclick = () => selectChat(chat);
+                    div.innerHTML = `
+                        <div class="contact-avatar">${users[chat]?.avatar || '👤'}</div>
+                        <div class="contact-info">
+                            <div class="contact-name">${chat}</div>
+                            <div class="contact-status">💬 есть сообщения</div>
+                        </div>
+                    `;
+                    list.appendChild(div);
+                });
+                if (recentChats.size === 0) {
+                    list.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">Нет активных чатов</div>';
+                }
+            }
         }
-        container.innerHTML = CHATS.map(ch => `<li class="chat-item ${ACTIVE_CHAT?.id === ch.id ? 'chat-active' : ''}" data-chatid="${ch.id}">
-                                                    ${ch.type === 'group' ? '👥' : '💬'} ${ch.name}
-                                                </li>`).join("");
-        document.querySelectorAll(".chat-item").forEach(el => {
-            el.addEventListener("click", () => {
-                let chat = CHATS.find(c => c.id === el.dataset.chatid);
-                if(chat) setActiveChat(chat);
-            });
-        });
-    }
-    
-    function renderMessages() {
-        let container = document.getElementById("chatMessagesContainer");
-        if(!container || !ACTIVE_CHAT) return;
-        let msgs = messagesCache[ACTIVE_CHAT.id] || [];
-        if(msgs.length === 0) {
-            container.innerHTML = '<div style="color:#888; text-align:center;">Нет сообщений. Напишите что-нибудь!</div>';
-            return;
+
+        function selectChat(username) {
+            currentChat = username;
+            document.getElementById('chatWith').innerHTML = username;
+            document.getElementById('chatWith').style.color = '#ff3333';
+            document.getElementById('callBtn').style.display = 'block';
+            document.getElementById('messageInputArea').style.display = 'flex';
+            loadMessages(username);
         }
-        container.innerHTML = msgs.map(m => `<div class="message-bubble ${m.sender === CURRENT_USER.username ? 'my-message' : ''}">
-                                                <b>${m.sender}</b><br>${m.text}<br>
-                                                <span style="font-size:9px;">${new Date(m.timestamp).toLocaleTimeString()}</span>
-                                            </div>`).join("");
-        container.scrollTop = container.scrollHeight;
-    }
-    
-    function updateOnlineStatus() {
-        if(!CURRENT_USER) return;
-        let online = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
-        online[CURRENT_USER.username] = true;
-        localStorage.setItem("tw_online_users", JSON.stringify(online));
-    }
-    
-    function refreshOnlineUsers() {
-        let online = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
-        for(let f of FRIENDS) {
-            f.online = !!online[f.username];
+
+        // ===== ОБНОВЛЕНИЕ ИНТЕРФЕЙСА ПОЛЬЗОВАТЕЛЯ =====
+        function updateUserUI() {
+            document.getElementById('userName').innerHTML = currentUser;
+            document.getElementById('userAvatar').innerHTML = users[currentUser]?.avatar || '👤';
         }
-        renderFriendsList();
-    }
-    
-    function logout() {
-        if(CURRENT_USER) {
-            let online = JSON.parse(localStorage.getItem("tw_online_users") || "{}");
-            delete online[CURRENT_USER.username];
-            localStorage.setItem("tw_online_users", JSON.stringify(online));
-            localStorage.removeItem("tw_current_user");
+
+        // ===== ИНИЦИАЛИЗАЦИЯ =====
+        function initApp() {
+            updateUserUI();
+            loadContacts();
+            
+            // Проверяем, есть ли сохранённый чат
+            const savedChat = localStorage.getItem('twifflix_last_chat');
+            if (savedChat && friends[currentUser].includes(savedChat)) {
+                selectChat(savedChat);
+            }
         }
-        CURRENT_USER = null;
-        ACTIVE_CHAT = null;
-        location.reload();
-    }
-    
-    function register(username, password, avatar) {
-        let users = getAllUsers();
-        if(users[username]) return "Имя уже занято";
-        if(username.length < 2) return "Имя слишком короткое";
-        users[username] = { password: password, avatar: avatar };
-        localStorage.setItem("tw_users", JSON.stringify(users));
-        CURRENT_USER = { username, password, avatar };
-        localStorage.setItem("tw_current_user", username);
-        FRIENDS = [];
-        CHATS = [];
-        saveAll();
-        return "ok";
-    }
-    
-    function login(username, password) {
-        let users = getAllUsers();
-        if(!users[username]) return "Пользователь не найден";
-        if(users[username].password !== password) return "Неверный пароль";
-        CURRENT_USER = { username, password, avatar: users[username].avatar };
-        localStorage.setItem("tw_current_user", username);
-        loadUserData();
-        return "ok";
-    }
-    
-    function showSearchResults() {
-        let query = document.getElementById("searchUserInput").value.trim();
-        let resultsDiv = document.getElementById("searchResults");
-        if(!query) {
-            resultsDiv.innerHTML = "";
-            return;
-        }
-        let results = searchUsers(query);
-        if(results.length === 0) {
-            resultsDiv.innerHTML = '<div style="color:#888; padding:5px;">❌ Пользователи не найдены</div>';
-            return;
-        }
-        resultsDiv.innerHTML = results.map(r => `
-            <div class="search-result" data-user="${r.username}">
-                ${r.avatar} ${r.username}
-                <button class="pixel-btn" style="float:right; padding:2px 6px;" data-add="${r.username}">➕</button>
-            </div>
-        `).join("");
-        
-        document.querySelectorAll("[data-add]").forEach(btn => {
-            btn.addEventListener("click", (e) => {
-                e.stopPropagation();
-                addFriend(btn.dataset.add);
-                document.getElementById("searchUserInput").value = "";
-                resultsDiv.innerHTML = "";
-            });
+
+        // ===== СОБЫТИЯ =====
+        document.getElementById('authBtn').onclick = () => {
+            const username = document.getElementById('authUsername').value.trim();
+            const password = document.getElementById('authPassword').value;
+            const isLogin = document.getElementById('authTitle').innerText === 'Вход';
+            
+            if (isLogin) {
+                if (login(username, password)) {
+                    document.getElementById('authScreen').style.display = 'none';
+                    document.getElementById('app').style.display = 'flex';
+                    initApp();
+                }
+            } else {
+                if (register(username, password)) {
+                    document.getElementById('authTitle').innerText = 'Вход';
+                    document.getElementById('authBtn').innerText = 'Войти';
+                    document.getElementById('authSwitch').innerHTML = 'Нет аккаунта? Зарегистрироваться';
+                }
+            }
+        };
+
+        document.getElementById('authSwitch').onclick = () => {
+            const isLogin = document.getElementById('authTitle').innerText === 'Вход';
+            if (isLogin) {
+                document.getElementById('authTitle').innerText = 'Регистрация';
+                document.getElementById('authBtn').innerText = 'Зарегистрироваться';
+                document.getElementById('authSwitch').innerHTML = 'Уже есть аккаунт? Войти';
+            } else {
+                document.getElementById('authTitle').innerText = 'Вход';
+                document.getElementById('authBtn').innerText = 'Войти';
+                document.getElementById('authSwitch').innerHTML = 'Нет аккаунта? Зарегистрироваться';
+            }
+        };
+
+        document.getElementById('addFriendBtn').onclick = () => {
+            const name = document.getElementById('friendName').value.trim();
+            if (name) {
+                addFriend(name);
+                document.getElementById('friendName').value = '';
+            }
+        };
+
+        document.getElementById('sendBtn').onclick = () => {
+            if (currentChat) {
+                const text = document.getElementById('messageInput').value;
+                sendMessage(currentChat, text);
+                document.getElementById('messageInput').value = '';
+            }
+        };
+
+        document.getElementById('callBtn').onclick = () => {
+            if (currentChat) {
+                startCall(currentChat);
+            }
+        };
+
+        document.getElementById('endCallBtn').onclick = () => {
+            endCall();
+        };
+
+        document.querySelectorAll('.nav-btn').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                loadContacts();
+            };
         });
-    }
-    
-    function setupEventListeners() {
-        document.getElementById("showLoginTab")?.addEventListener("click", () => {
-            document.getElementById("loginForm").style.display = "block";
-            document.getElementById("registerForm").style.display = "none";
-        });
-        document.getElementById("showRegisterTab")?.addEventListener("click", () => {
-            document.getElementById("loginForm").style.display = "none";
-            document.getElementById("registerForm").style.display = "block";
-        });
-        document.getElementById("doLoginBtn")?.addEventListener("click", () => {
-            let res = login(document.getElementById("loginUsername").value, document.getElementById("loginPassword").value);
-            if(res === "ok") location.reload();
-            else document.getElementById("authError").innerText = res;
-        });
-        document.getElementById("doRegisterBtn")?.addEventListener("click", () => {
-            let avatar = document.getElementById("avatarEmoji").value || document.getElementById("avatarColor").value;
-            let res = register(document.getElementById("regUsername").value, document.getElementById("regPassword").value, avatar);
-            if(res === "ok") location.reload();
-            else document.getElementById("authError").innerText = res;
-        });
-        document.getElementById("searchUserBtn")?.addEventListener("click", showSearchResults);
-        document.getElementById("sendMsgBtn")?.addEventListener("click", () => {
-            let inp = document.getElementById("messageInput");
-            let txt = inp.value;
-            if(txt.startsWith("[img]") && txt.endsWith("[/img]")) txt = `📷 ФОТО: ${txt.slice(5, -6)}`;
-            sendMessage(txt);
-            inp.value = "";
-        });
-        document.getElementById("createGroupBtn")?.addEventListener("click", createGroup);
-        document.getElementById("viewProfileBtn")?.addEventListener("click", () => {
-            let avatarDisplay = document.getElementById("profileAvatarDisplay");
-            let avatar = CURRENT_USER?.avatar || "🐱";
-            if(avatar.startsWith("#")) avatarDisplay.innerHTML = `<div style="background:${avatar};width:100%;height:100%;"></div>`;
-            else avatarDisplay.innerHTML = `<span style="font-size:40px;">${avatar}</span>`;
-            document.getElementById("profileUsername").innerText = CURRENT_USER.username;
-            document.getElementById("profileModal").classList.remove("hidden");
-        });
-        document.getElementById("closeProfileBtn")?.addEventListener("click", () => {
-            document.getElementById("profileModal").classList.add("hidden");
-        });
-        document.getElementById("logoutBtn")?.addEventListener("click", logout);
-        document.getElementById("manageGroupBtn")?.addEventListener("click", () => {
-            if(ACTIVE_CHAT?.type === 'group') {
-                document.getElementById("groupNameDisplay").innerText = ACTIVE_CHAT.name;
-                let listEl = document.getElementById("groupUsersList");
-                listEl.innerHTML = ACTIVE_CHAT.participants.map(p => `<li class="group-user-item">${p} ${p === CURRENT_USER.username ? '(вы)' : ''}</li>`).join("");
-                document.getElementById("groupManageModal").classList.remove("hidden");
+
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                document.getElementById('sendBtn').click();
             }
         });
-        document.getElementById("confirmAddUserBtn")?.addEventListener("click", () => {
-            let username = document.getElementById("addUserToGroupInput").value.trim();
-            if(username) addUserToGroup(username);
-            document.getElementById("addUserToGroupInput").value = "";
-        });
-        document.getElementById("closeGroupModalBtn")?.addEventListener("click", () => {
-            document.getElementById("groupManageModal").classList.add("hidden");
-        });
-        document.getElementById("emojiBtn")?.addEventListener("click", () => {
-            let em = prompt("Эмодзи или стикер:", "😎");
-            if(em) document.getElementById("messageInput").value += em;
-        });
-        document.getElementById("callBtn")?.addEventListener("click", () => {
-            if(ACTIVE_CHAT?.type === 'private') {
-                alert("📞 Функция звонка (WebRTC готов к интеграции)");
-            } else alert("Звонки доступны в личных чатах");
-        });
-        document.getElementById("bearMascot")?.addEventListener("click", () => alert("🧸 Чай будешь? 🍵"));
-        window.addEventListener("keydown", (e) => {
-            if(e.keyCode === 67) alert("СЕКРЕТНАЯ ТЕМА: ПИКСЕЛЬНЫЙ МИР! 🎮");
-        });
-    }
-    
-    // Запуск
-    init();
-</script>
+
+        // Восстанавливаем сессию
+        const savedUser = localStorage.getItem('twifflix_current');
+        if (savedUser && users[savedUser]) {
+            currentUser = savedUser;
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('app').style.display = 'flex';
+            initApp();
+        }
+    </script>
 </body>
 </html>
